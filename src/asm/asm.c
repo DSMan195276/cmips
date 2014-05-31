@@ -127,7 +127,9 @@ static const char *parse_immediate(const char *line, struct reg *reg)
 
 static const char *parse_address(const char *line, struct reg *reg)
 {
-
+    char *end_ptr = NULL;
+    reg->val = strtol(line, &end_ptr, 0);
+    return end_ptr;
 }
 
 static void parse_args(const char *line, struct reg *regs, int reg_count)
