@@ -7,6 +7,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cmips.h"
 #include "mips_emu.h"
@@ -52,21 +53,27 @@ static void run_code(int argc, char **argv)
 
 static void help(int argc, char **argv)
 {
+    char buf[50];
     struct cmips_cmd *cmd;
-    printf("cmips help:\n");
-    for (cmd = cmips_cmds; cmd->cmd_id != NULL; cmd++)
-        printf("%-15s - %s - %s\n", cmd->cmd_id, cmd->args, cmd->help);
+    for (cmd = cmips_cmds; cmd->cmd_id != NULL; cmd++) {
+        memset(buf, 0, sizeof(buf));
+        strcpy(buf, cmd->cmd_id);
+        strcat(buf, " ");
+        strcat(buf + strlen(cmd->cmd_id) + 1, cmd->args);
+        printf("%-30s - %s\n", buf, cmd->help);
+    }
 }
 
 struct cmips_cmd cmips_cmds[] = {
     { "fake-cmd", fake_cmd, "Fake test cmd.", "[arg1] [arg2] ..." },
     { "dump-regs", dump_regs, "Dump current contents of cpu registers.", "" },
-    { "load-asm-file", load_file, "Load an assembly file, takes a filename as an argument.", "filename" },
+    { "load-asm-file", load_file, "Load an assembly file, takes a filename as an argument.", "[filename]" },
     { "run", run_code, "Run currently loaded code.", "" },
-    { "run-inst", run_inst, "Run a single instruction given as an argument.", "32-bit instruction code" },
+    { "run-inst", run_inst, "Run a single instruction given as an argument.", "[instruction]" },
 
     { "help", help, "Display help information.", "" },
     { "quit", NULL, "Exit the program.", "" },
+    { "exit", NULL, "Exit the program.", "" },
     { NULL, NULL, NULL, NULL},
 };
 

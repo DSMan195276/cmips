@@ -8,10 +8,10 @@ OBJS := $(SRCS:.c=.o)
 
 CLEAN_OBJS :=
 
-DIRS := $(filter-out ./src/,$(sort $(dir $(wildcard ./src/*/))))
+DIRS := $(filter-out src/,$(sort $(dir $(wildcard src/*/))))
 
 define compile-dir
-dir_name_$(1) := $$(patsubst ./%/,%,$(1))
+dir_name_$(1) := $$(patsubst %/,%,$(1))
 dir_name_obj_$(1) := $$(dir_name_$(1)).o
 OBJS += $$(dir_name_obj_$(1))
 
@@ -53,10 +53,10 @@ dist: clean
 	@echo " Created $(EXE)-$(VERSION_N).tar.gz"
 
 clean:
-	@echo " RM      $(OBJS) $(CLEAN_OBJS) $(DEPFILES)"
-	$(Q)rm -f $(OBJS) $(CLEAN_OBJS) $(DEPFILES)
-	@echo " RM      $(EXE)"
-	$(Q)rm -f $(EXE)
+	$(Q)for file in $(OBJS) $(CLEAN_OBJS) $(DEPFILES) $(EXE); do \
+		echo " RM      $$file"; \
+		rm -f $$file; \
+	done
 
 $(EXE): $(OBJS)
 	@echo " CCLD    $@"

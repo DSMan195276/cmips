@@ -15,6 +15,8 @@
 #include "mips_emu.h"
 #include "asm.h"
 #include "cmds.h"
+#include "args.h"
+#include "termcols.h"
 
 struct mips_emu cmips_emu;
 struct asm_gen  cmips_asm_gen;
@@ -95,7 +97,9 @@ int main(int argc, char **argv)
 
     rl_attempted_completion_function = complete_line;
 
-    printf("cmips - %s - command-line MIPS emulator written in C\n", QQ(CMIPS_VERSION_N));
+    parse_args(argc, argv);
+
+    printf("%s", version_text);
 
     do {
         if (line)
