@@ -76,8 +76,6 @@ static char **complete_line(const char *line, int start, int end)
 
     if (start == 0)
         matches = rl_completion_matches((char *)line, match_func);
-    /* else
-        rl_bind_key('\t', rl_abort); */
 
     return matches;
 }
@@ -88,8 +86,6 @@ int main(int argc, char **argv)
     char *line = NULL;
     char **lines = NULL;
     int args = 0, end_flag = 0, i;
-
-    /* uint32_t inst = mips_create_i_format(OP_ADDI, REG_T1, REG_T1, 20); */
 
     mips_emu_init(&cmips_emu);
     asm_init(&cmips_asm_gen);
@@ -129,19 +125,6 @@ int main(int argc, char **argv)
     asm_clear(&cmips_asm_gen);
     mips_emu_clear(&cmips_emu);
 
-/*
-    asm_gen_from_file(&gen, "./test.asm");
-
-    mips_dump_regs(&emu.r);
-
-    for (i = 0; i < gen.text_size / 4; i++) {
-        mips_disp_inst(((uint32_t *)gen.text)[i]);
-        mips_run_inst(&emu, ((uint32_t *)gen.text)[i]);
-    }
-
-    mips_dump_regs(&emu.r);
-
-*/
     return 0;
 }
 
