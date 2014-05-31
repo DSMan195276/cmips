@@ -80,6 +80,9 @@ static char **complete_line(const char *line, int start, int end)
     return matches;
 }
 
+#define Q(x) #x
+#define QQ(x) Q(x)
+
 int main(int argc, char **argv)
 {
     struct cmips_cmd *cmd;
@@ -91,6 +94,8 @@ int main(int argc, char **argv)
     asm_init(&cmips_asm_gen);
 
     rl_attempted_completion_function = complete_line;
+
+    printf("cmips - %s - command-line MIPS emulator written in C\n", QQ(CMIPS_VERSION_N));
 
     do {
         if (line)

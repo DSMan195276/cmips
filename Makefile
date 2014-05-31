@@ -27,6 +27,10 @@ endef
 
 $(foreach dir,$(DIRS),$(eval $(call compile-dir,$(dir))))
 
+DEPFILES := $(OBJS:.o=.d) $(CLEAN_OBJS:.o=.d)
+
+-include $(DEPFILES)
+
 # Set configuration options
 ifdef VERBOSE
 	Q :=
@@ -49,8 +53,8 @@ dist: clean
 	@echo " Created $(EXE)-$(VERSION_N).tar.gz"
 
 clean:
-	@echo " RM      $(OBJS) $(CLEAN_OBJS)"
-	$(Q)rm -f $(OBJS) $(CLEAN_OBJS)
+	@echo " RM      $(OBJS) $(CLEAN_OBJS) $(DEPFILES)"
+	$(Q)rm -f $(OBJS) $(CLEAN_OBJS) $(DEPFILES)
 	@echo " RM      $(EXE)"
 	$(Q)rm -f $(EXE)
 
@@ -65,6 +69,10 @@ $(EXE): $(OBJS)
 %.c: %.l
 	@echo " LEX     $@"
 	$(Q)$(LEX) $(LFLAGS) -o $@ $<
+
+%.d: %.c
+	@echo " CCDEP   $@"
+	$(Q)$(CC) -MM -MP -MF $@ $(CFLAGS) $(LDFLAGS) $< -MT $*.o -MT $@
 
 doc:
 

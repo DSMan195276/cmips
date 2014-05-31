@@ -13,6 +13,7 @@ struct cmips_cmd {
     void (*cmd)(int argc, char **argv);
 
     const char *help;
+    const char *args;
 };
 
 extern struct cmips_cmd cmips_cmds[];

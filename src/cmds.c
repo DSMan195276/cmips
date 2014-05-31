@@ -53,20 +53,20 @@ static void run_code(int argc, char **argv)
 static void help(int argc, char **argv)
 {
     struct cmips_cmd *cmd;
-    printf("Cmips help:\n");
+    printf("cmips help:\n");
     for (cmd = cmips_cmds; cmd->cmd_id != NULL; cmd++)
-        printf("%-15s - %s\n", cmd->cmd_id, cmd->help);
+        printf("%-15s - %s - %s\n", cmd->cmd_id, cmd->args, cmd->help);
 }
 
 struct cmips_cmd cmips_cmds[] = {
-    { "fake-cmd", fake_cmd, "Fake test cmd." },
-    { "dump-regs", dump_regs, "Dump current contents of cpu registers." },
-    { "load-asm-file", load_file, "Load an assembly file, takes a filename as an argument." },
-    { "run", run_code, "Run currently loaded code." },
-    { "run-inst", run_inst, "Run a single instruction given as an argument." },
+    { "fake-cmd", fake_cmd, "Fake test cmd.", "[arg1] [arg2] ..." },
+    { "dump-regs", dump_regs, "Dump current contents of cpu registers.", "" },
+    { "load-asm-file", load_file, "Load an assembly file, takes a filename as an argument.", "filename" },
+    { "run", run_code, "Run currently loaded code.", "" },
+    { "run-inst", run_inst, "Run a single instruction given as an argument.", "32-bit instruction code" },
 
-    { "help", help, "Display help information." },
-    { "quit", NULL, "Exit the program." },
-    { NULL, NULL, NULL },
+    { "help", help, "Display help information.", "" },
+    { "quit", NULL, "Exit the program.", "" },
+    { NULL, NULL, NULL, NULL},
 };
 
