@@ -56,7 +56,7 @@ clean:
 
 $(EXE): $(OBJS)
 	@echo " CCLD    $@"
-	$(Q)$(CC) $(LDFLAGS) $(OBJS) -o $@
+	$(Q)$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LIBFLAGS)
 
 %.o: %.c
 	@echo " CC      $@"

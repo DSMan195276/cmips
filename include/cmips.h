@@ -5,13 +5,12 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
-#ifndef SRC_MIPS_EMU_SPECIAL_H
-#define SRC_MIPS_EMU_SPECIAL_H
-
-#include <stdint.h>
+#ifndef INCLUDE_CMIPS_H
+#define INCLUDE_CMIPS_H
 
 #include "mips_emu.h"
 
-void op_special(struct mips_emu *emu, uint32_t inst);
+extern struct mips_emu cmips_emu;
+extern struct asm_gen  cmips_asm_gen;
 
 #endif

@@ -6,6 +6,7 @@
  * Free Software Foundation.
  */
 #include <stdio.h>
+#include <string.h>
 
 #include "mips_emu.h"
 #include "special.h"
@@ -51,13 +52,13 @@ enum inst_type mips_opcode_to_type[64] = {
 };
 
 const char *mips_opcode_names[64] = {
-#define X(op, val) [op] = #op,
+#define X(op, val) [OP_##op] = #op,
 # include "mips_emu_opcode.h"
 #undef X
 };
 
 const char *mips_function_names[64] = {
-#define X(op, val) [op] = #op,
+#define X(op, val) [OP_FUNC_##op] = #op,
 # include "mips_emu_function.h"
 #undef X
 };
@@ -106,10 +107,18 @@ void mips_run_inst(struct mips_emu *emu, uint32_t inst)
 {
     int op = INST_OPCODE(inst);
     void (*f)(struct mips_emu *, uint32_t) = op_jmp_table[op];
-    printf("Op: %d\n", op);
 
     if (f)
         f(emu, inst);
 }
 
+void mips_emu_init(struct mips_emu *emu)
+{
+    memset(emu, 0, sizeof(struct mips_emu));
+}
+
+void mips_emu_clear(struct mips_emu *emu)
+{
+
+}
 

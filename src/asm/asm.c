@@ -120,8 +120,9 @@ static const char *parse_register(const char *line, struct reg *reg)
 
 static const char *parse_immediate(const char *line, struct reg *reg)
 {
-    reg->val = atoi(line);
-    return line;
+    char *end_ptr = NULL;
+    reg->val = strtol(line, &end_ptr, 0);
+    return end_ptr;
 }
 
 static const char *parse_address(const char *line, struct reg *reg)

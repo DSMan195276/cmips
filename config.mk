@@ -14,6 +14,7 @@ CFLAGS  := -Wall -I'./include' -O2 -std=c99           \
            -DCMIPS_VERSION_N="$(VERSION_N)"           \
 		   -D_GNU_SOURCE
 LDFLAGS ?=
+LIBFLAGS := -lreadline
 LEX     := flex
 LFLAGS  := -Pcfg_yy
 LD      := ld
