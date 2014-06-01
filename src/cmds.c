@@ -14,14 +14,6 @@
 #include "asm.h"
 #include "cmds.h"
 
-static void fake_cmd(int argc, char **argv)
-{
-    int i = 0;
-    printf("Fake Cmd:\n");
-    for (; i < argc; i++)
-        printf("Arg: %s\n", argv[i]);
-}
-
 static void dump_regs(int argc, char **argv)
 {
     mips_dump_regs(&cmips_emu.r);
@@ -65,11 +57,10 @@ static void help(int argc, char **argv)
 }
 
 struct cmips_cmd cmips_cmds[] = {
-    { "fake-cmd", fake_cmd, "Fake test cmd.", "[arg1] [arg2] ..." },
     { "dump-regs", dump_regs, "Dump current contents of cpu registers.", "" },
-    { "load-asm-file", load_file, "Load an assembly file, takes a filename as an argument.", "[filename]" },
+    { "load-asm-file", load_file, "Load an assembly file, takes a filename as an argument.", "<filename>" },
     { "run", run_code, "Run currently loaded code.", "" },
-    { "run-inst", run_inst, "Run a single instruction given as an argument.", "[instruction]" },
+    { "run-inst", run_inst, "Run a single instruction given as an argument.", "<instruction>" },
 
     { "help", help, "Display help information.", "" },
     { "quit", NULL, "Exit the program.", "" },
