@@ -16,13 +16,15 @@ CFLAGS  := -Wall -I'./include' -O2 -std=c99           \
 LDFLAGS ?=
 LIBFLAGS := -lreadline
 LEX     := flex
-LFLAGS  := -Pcfg_yy
+LFLAGS  :=
 LD      := ld
-
 
 # Install Paths
 PREFIX  := /usr
 BINDIR  := $(PREFIX)/bin
+MANDIR  := $(PREFIX)/share/man
+MAN1DIR := $(MANDIR)/man1
+DOCDIR  := $(PREFIX)/share/doc/$(EXE)
 
 # Configuration -- Uncomment lines to enable option
 

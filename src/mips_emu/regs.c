@@ -5,12 +5,13 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
+#include "common.h"
 
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
 
-#include "mips_emu.h"
+#include "mips_emu/mips_emu.h"
 
 const char *mips_reg_names_strs[32] = {
     "zero", "at", "v0", "v1", "a0",

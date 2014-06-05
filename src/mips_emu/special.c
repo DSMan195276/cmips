@@ -5,8 +5,9 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
+#include "common.h"
 
-#include "mips_emu.h"
+#include "mips_emu/mips_emu.h"
 #include "special.h"
 
 static void op_func_add(struct mips_emu *emu, int rs, int rt, int rd, int sa)
@@ -29,21 +30,19 @@ static void op_func_subu(struct mips_emu *emu, int rs, int rt, int rd, int sa)
     emu->r.regs[rd] = (uint32_t)(emu->r.regs[rs]) - (uint32_t)(emu->r.regs[rt]);
 }
 
+static void op_func_nop(struct mips_emu *emu, int rs, int rt, int rd, int sa)
+{
+
+}
+
 static void (*op_special_func_jmp_table[64])(struct mips_emu *emu, int rs, int rt, int rd, int sa) = {
-    [OP_FUNC_ADD] = op_func_add,
-    [OP_FUNC_ADDU] = op_func_addu,
-    [OP_FUNC_SUB] = op_func_sub,
-    [OP_FUNC_SUBU] = op_func_subu,
+#define X(op, code, func) [OP_FUNC_##op] = func,
+# include "mips_emu/mips_emu_function.h"
+#undef X
 };
 
-void op_special(struct mips_emu *emu, uint32_t inst)
+void op_special(struct mips_emu *emu, int rs, int rt, int rd, int sa, int func)
 {
-    int func = INST_R_FUNC(inst);
-    int rs = INST_R_RS(inst);
-    int rt = INST_R_RT(inst);
-    int rd = INST_R_RD(inst);
-    int sa = INST_R_SA(inst);
-
     void (*f)(struct mips_emu *, int, int, int, int) = op_special_func_jmp_table[func];
 
     if (f)

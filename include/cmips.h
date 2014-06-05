@@ -7,8 +7,9 @@
  */
 #ifndef INCLUDE_CMIPS_H
 #define INCLUDE_CMIPS_H
+#include "common.h"
 
-#include "mips_emu.h"
+#include "mips_emu/mips_emu.h"
 
 extern struct mips_emu cmips_emu;
 extern struct asm_gen  cmips_asm_gen;

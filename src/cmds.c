@@ -5,13 +5,15 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
+#include "common.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "cmips.h"
-#include "mips_emu.h"
-#include "asm.h"
+#include "mips_emu/mips_emu.h"
+#include "asm/asm.h"
 #include "cmds.h"
 
 static void dump_regs(int argc, char **argv)
@@ -37,10 +39,8 @@ static void load_file(int argc, char **argv)
 static void run_code(int argc, char **argv)
 {
     int i;
-    for (i = 0; i < cmips_asm_gen.text_size / 4; i++) {
-        /* mips_disp_inst(((uint32_t *)cmips_asm_gen.text)[i]); */
+    for (i = 0; i < cmips_asm_gen.text_size / 4; i++)
         mips_run_inst(&cmips_emu, ((uint32_t *)cmips_asm_gen.text)[i]);
-    }
 }
 
 static void help(int argc, char **argv)

@@ -7,6 +7,7 @@
  */
 #ifndef INCLUDE_TERMCOLS_H
 #define INCLUDE_TERMCOLS_H
+#include "common.h"
 
 /* Color macros pulled from git source code
  * https://github.com/git/git */

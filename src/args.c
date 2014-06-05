@@ -5,13 +5,16 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
+#include "common.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <getopt.h>
 
-#define QQ(x) #x
-#define Q(x) QQ(x)
+#include "cmips.h"
+#include "asm/asm.h"
+#include "args.h"
 
 const char *version_text =
     "cmips-" Q(CMIPS_VERSION_N) " - A command-line MIPS emulator written in C\n"
@@ -19,28 +22,31 @@ const char *version_text =
     "Licensed under the GNU GPL, version 2\n"
     "This is free software; you are free to change and redistribute it.\n"
     "There is NO WARRENTY, to the extent permitted by law\n"
+    "\n"
 ;
 
 /*
  * help (noarg)
- * config-file (arg)
  * version (noarg)
- * forground (noarg)
- * network (arg)
- * dont-auto-login (noarg)
+ * quiet (noarg)
+ * run (noarg)
+ * load (arg)
  */
-static const char *shortopts = "hv";
+static const char *shortopts = "hvqrl:";
 
 /* These are the getopt return values for various long-options. They match the
  * short-option if there is one, else they are simply a unique number greater
  * then 255 (Greater then any char value) */
 #define OPT_HELP     'h'
 #define OPT_VERSION  'v'
+#define OPT_QUIET    'q'
+#define OPT_RUN      'r'
+#define OPT_LOAD     'l'
 
 /* The definition of the long-options. Every option has a long-option, not all
  * long-options have a short-option. */
 static const struct option longopts[] = {
-#define X(id, arg, op, help_text) { id, arg, NULL, op },
+#define X(id, arg, shrt, op, help_text) { id, arg, NULL, op },
 # include "args_x.h"
 #undef X
     {0}
@@ -51,13 +57,13 @@ static const char *help_text =
     "Usage: %s [Flags] \n"
     "\n"
     "Flags:\n"
-#define X(id, arg, op, help_text) help_text "\n"
+#define X(id, arg, shrt, op, help_text) "  " shrt " --" id " - " help_text "\n"
 # include "args_x.h"
 #undef X
     "See the manpage for more information\n"
 ;
 
-void parse_args(int argc, char **argv)
+void parse_args(int argc, char **argv, struct arg_state *s)
 {
     int opt;
     int long_index = 0;
@@ -71,6 +77,15 @@ void parse_args(int argc, char **argv)
         case OPT_VERSION:
             printf(version_text);
             exit(0);
+            break;
+        case OPT_QUIET:
+            s->quiet = 1;
+            break;
+        case OPT_RUN:
+            s->run = 1;
+            break;
+        case OPT_LOAD:
+            asm_gen_from_file(&cmips_asm_gen, optarg);
             break;
         default:
         case '?':

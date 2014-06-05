@@ -5,6 +5,8 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
+#include "common.h"
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -12,8 +14,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 
-#include "mips_emu.h"
-#include "asm.h"
+#include "mips_emu/mips_emu.h"
+#include "asm/asm.h"
 #include "cmds.h"
 #include "args.h"
 #include "termcols.h"
@@ -82,12 +84,10 @@ static char **complete_line(const char *line, int start, int end)
     return matches;
 }
 
-#define Q(x) #x
-#define QQ(x) Q(x)
-
 int main(int argc, char **argv)
 {
     struct cmips_cmd *cmd;
+    struct arg_state arg_state = { 0 };
     char *line = NULL;
     char **lines = NULL;
     int args = 0, end_flag = 0, i;
@@ -97,9 +97,13 @@ int main(int argc, char **argv)
 
     rl_attempted_completion_function = complete_line;
 
-    parse_args(argc, argv);
+    parse_args(argc, argv, &arg_state);
 
-    printf("%s", version_text);
+    if (!arg_state.quiet)
+        printf("%s", version_text);
+
+    if (arg_state.run)
+        exit(0);
 
     do {
         if (line)

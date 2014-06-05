@@ -10,8 +10,8 @@
 
 #include <stdint.h>
 
-#include "mips_emu.h"
+#include "mips_emu/mips_emu.h"
 
-void op_special(struct mips_emu *emu, uint32_t inst);
+void op_special(struct mips_emu *emu, int rs, int rt, int rd, int sa, int func);
 
 #endif

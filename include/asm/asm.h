@@ -7,6 +7,7 @@
  */
 #ifndef INCLUDE_ASM_H
 #define INCLUDE_ASM_H
+#include "common.h"
 
 #include <stdint.h>
 

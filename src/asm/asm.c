@@ -5,12 +5,16 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
+#include "common.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <search.h>
 
-#include "mips_emu.h"
-#include "asm.h"
+#include "mips_emu/mips_emu.h"
+#include "asm/tokenizer.h"
+#include "asm/asm.h"
 
 enum reg_type {
     REG_REGISTER,
@@ -49,19 +53,25 @@ struct inst_desc {
 #define ID_J(str, op) { str, J_FORMAT, op, 0, 1, { REG_ADDRESS }, { REG_ADDR } }
 
 static struct inst_desc ids[32] = {
-    ID_3_OPER_I("addiu", OP_ADDIU),
-    ID_3_OPER_I("addi", OP_ADDI),
-
-    ID_3_OPER_SPEC("addu", OP_FUNC_ADDU),
     ID_3_OPER_SPEC("add", OP_FUNC_ADD),
-    ID_3_OPER_SPEC("subu", OP_FUNC_SUBU),
+    ID_3_OPER_SPEC("addu", OP_FUNC_ADDU),
     ID_3_OPER_SPEC("sub", OP_FUNC_SUB),
+    ID_3_OPER_SPEC("subu", OP_FUNC_SUBU),
 
-    ID_J("jal", OP_JAL),
+    ID_3_OPER_I("addi", OP_ADDI),
+    ID_3_OPER_I("addiu", OP_ADDIU),
+
     ID_J("j", OP_J),
+    ID_J("jal", OP_JAL),
 
     { "nop", R_FORMAT, 0, 0, 0, { 0 }, { 0 } },
     { NULL }
+};
+
+struct key_list {
+    struct key_list *next;
+    uint32_t addr;
+    char id[];
 };
 
 void asm_init(struct asm_gen *gen)
@@ -72,100 +82,6 @@ void asm_init(struct asm_gen *gen)
 void asm_clear(struct asm_gen *gen)
 {
 
-}
-
-static int startswith(const char *restrict prepend, const char *restrict line)
-{
-    int l1 = strlen(prepend);
-    int l2 = strlen(line);
-
-    return strncmp(line, prepend, (l1 > l2) ? l2 : l1);
-}
-
-static const char *get_reg_n(const char *reg, int *ret)
-{
-    int i = 0;
-
-    for (; i < 32; i++) {
-        if (startswith(reg, mips_reg_names_strs[i]) == 0) {
-            *ret = i;
-            return reg + strlen(mips_reg_names_strs[i]);
-        }
-    }
-
-    return NULL;
-}
-
-static const char *parse_register(const char *line, struct reg *reg)
-{
-    const char *p = line;
-    int n;
-
-    if (*p != '$') {
-        printf("ISSUE: %s\n", p);
-        reg->correct = 0;
-        return NULL;
-    }
-    p++;
-    p = get_reg_n(p, &n);
-
-    if (p == NULL) {
-        reg->correct = 0;
-        return NULL;
-    }
-
-    reg->val = n;
-    return p;
-}
-
-static const char *parse_immediate(const char *line, struct reg *reg)
-{
-    char *end_ptr = NULL;
-    reg->val = strtol(line, &end_ptr, 0);
-    return end_ptr;
-}
-
-static const char *parse_address(const char *line, struct reg *reg)
-{
-    char *end_ptr = NULL;
-    reg->val = strtol(line, &end_ptr, 0);
-    return end_ptr;
-}
-
-static void parse_args(const char *line, struct reg *regs, int reg_count)
-{
-    const char *p = line;
-    int i = 0;
-
-    for (i = 0; i < reg_count; i++) {
-        while (*p && (*p == '\t' || *p == ' '))
-            p++;
-
-        if (!*p)
-            return;
-
-        if (regs[i].t == REG_REGISTER)
-            p = parse_register(p, regs + i);
-        else if (regs[i].t == REG_IMMEDIATE)
-            p = parse_immediate(p, regs + i);
-        else if (regs[i].t == REG_ADDRESS)
-            p = parse_address(p, regs + i);
-
-        if (p == NULL) {
-            regs[i].correct = 0;
-            return ;
-        }
-
-        if (i < reg_count - 1) {
-            while (*p && *p != ',')
-                p++;
-            if (!*p) {
-                regs[i].correct = 0;
-                return ;
-            }
-            p++;
-        }
-    }
 }
 
 static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
@@ -203,55 +119,27 @@ static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
     return 0;
 }
 
-static void process_line(const char *line, uint32_t **buf, int *len)
-{
-    const char *p;
-    int i;
-    uint32_t op_code;
-    struct inst_desc *id = ids;
-
-    p = line;
-    while ((*p == '\t' || *p == ' ') && *p)
-        p++;
-
-    for (; id->ident != NULL; id++) {
-        if (startswith(id->ident, p) == 0) {
-            struct reg rs[id->reg_count];
-            for (i = 0; i < id->reg_count; i++)
-                rs[i].t = id->rs[i];
-            parse_args(p + strlen(id->ident), rs, id->reg_count);
-            op_code = gen_op(id, rs);
-            (*len)++;
-            *buf = realloc(*buf, 4 * *len);
-            (*buf)[*len - 1] = op_code;
-            return ;
-        }
-    }
-
-    return ;
-}
-
 int asm_gen_from_file(struct asm_gen *gen, const char *filename)
 {
-    uint32_t *c = NULL;
-    char *line = NULL;
+    struct token_list *list, *l;
+
     FILE *file;
-    int i = 0;
-    size_t len = 0;
 
     file = fopen(filename, "r");
     if (file == NULL)
         return 1;
 
-    while ((len = getline(&line, &len, file)) != -1)
-        process_line(line, &c, &i);
-
-    free(line);
-
-    gen->text = (char *)c;
-    gen->text_size = i * 4;
-
+    list = tokenizer_run(file);
     fclose(file);
+
+    for (l = list; l != NULL; l = l->next)
+        if (l->tok == TOK_LABEL)
+            printf("Label: %d - %s\n", l->line, l->ident);
+        else if (l->tok == TOK_DIRECTIVE)
+            printf("Dir: %d - .%s\n", l->line, l->ident);
+
+    tokenizer_free_tokens(list);
+
     return 0;
 }
 

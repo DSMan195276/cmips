@@ -8,7 +8,12 @@
 #ifndef SRC_ARGS_H
 #define SRC_ARGS_H
 
-void parse_args(int argc, char **argv);
+struct arg_state {
+    int quiet :1;
+    int run :1;
+};
+
+void parse_args(int argc, char **argv, struct arg_state *);
 
 extern const char *version_text;
 

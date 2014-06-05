@@ -7,8 +7,11 @@
  */
 #ifndef INCLUDE_MIPSEMU
 #define INCLUDE_MIPSEMU
+#include "common.h"
 
 #include <stdint.h>
+
+#include "mips_emu/mem.h"
 
 /* Structure holds all of the registers in the MIPS machine */
 struct mips_regs {
@@ -35,6 +38,7 @@ void mips_dump_regs(struct mips_regs *);
  * call mips_emu_clear to toss out any memory it may be holding on to. */
 struct mips_emu {
     struct mips_regs r;
+    struct mem_prog  mem;
 };
 
 void mips_emu_init(struct mips_emu *);
@@ -52,7 +56,7 @@ enum inst_type {
 };
 
 enum inst_opcode {
-#define X(op, val) OP_##op = val,
+#define X(op, val, fmt, func) OP_##op = val,
 # include "mips_emu_opcode.h"
 #undef X
 };
@@ -62,7 +66,7 @@ extern const char *mips_opcode_names[64];
 extern enum inst_type mips_opcode_to_type[64];
 
 enum inst_function {
-#define X(op, val) OP_FUNC_##op = val,
+#define X(op, val, func) OP_FUNC_##op = val,
 # include "mips_emu_function.h"
 #undef X
 };
