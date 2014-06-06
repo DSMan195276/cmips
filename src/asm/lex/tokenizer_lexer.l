@@ -20,7 +20,6 @@
 #define YY_DECL enum asm_token yylex (struct tokenizer *state)
 
 static void append_c(struct tokenizer *t, char ch);
-static int stringcasecmp(const char *s1, const char *s2);
 %}
 
 %option noyywrap
