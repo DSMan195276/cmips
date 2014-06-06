@@ -17,7 +17,7 @@
 #include "mips_emu/mips_emu.h"
 #include "asm/asm.h"
 #include "cmds.h"
-#include "args.h"
+#include "args/args.h"
 #include "termcols.h"
 
 struct mips_emu cmips_emu;

@@ -14,7 +14,7 @@
 
 #include "cmips.h"
 #include "asm/asm.h"
-#include "args.h"
+#include "args/args.h"
 
 const char *version_text =
     "cmips-" Q(CMIPS_VERSION_N) " - A command-line MIPS emulator written in C\n"
