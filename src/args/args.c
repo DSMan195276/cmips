@@ -52,16 +52,31 @@ static const struct option longopts[] = {
     {0}
 };
 
-/* help-text to display when using '-h' or '--help' */
-static const char *help_text =
-    "Usage: %s [Flags] \n"
-    "\n"
-    "Flags:\n"
-#define X(id, arg, shrt, op, help_text) "  " shrt " --" id " - " help_text "\n"
+static const char *help_text[] = {
+#define X(id, arg, shrt, op, help_text) help_text,
 # include "args_x.h"
 #undef X
-    "See the manpage for more information\n"
-;
+};
+
+static void display_help_text(const char *prog)
+{
+    int i;
+    printf("Usage: %s [Flags] \n"
+           "\n"
+           "Flags:\n", prog);
+
+    for (i = 0; longopts[i].name != NULL; i++) {
+        printf("  ");
+        if (longopts[i].val < 256)
+            printf("-%c, ", longopts[i].val);
+        else
+            printf("     ");
+
+        printf("--%-15s %s\n", longopts[i].name, help_text[i]);
+    }
+
+    printf("See the manpage for more information\n");
+}
 
 void parse_args(int argc, char **argv, struct arg_state *s)
 {
@@ -71,7 +86,7 @@ void parse_args(int argc, char **argv, struct arg_state *s)
     while ((opt = getopt_long(argc, argv, shortopts, longopts, &long_index)) != -1) {
         switch (opt) {
         case OPT_HELP:
-            printf(help_text, argv[0]);
+            display_help_text(argv[0]);
             exit(0);
             break;
         case OPT_VERSION:
