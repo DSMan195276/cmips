@@ -51,16 +51,44 @@ static int stringcasecmp(const char *s1, const char *s2);
     return TOK_LABEL;
 }
 
-\$((zero|ZERO)|(at|AT)|[vV][01]|[aA][0-3]|[tT][0-9]|[sS][0-7]|[kK][01]|(gp|GP)|(sp|SP)|(fp|FP)|(ra|RA)) {
-    int i;
-    for (i = 0; i < 32; i++) {
-        if (stringcasecmp(mips_reg_names_strs[i], yytext + 1) == 0) {
-            state->val = i;
-            break;
-        }
-    }
-    return TOK_REGISTER;
-}
+\$(zero|ZERO) { state->val = REG_ZERO; return TOK_REGISTER; }
+
+\$(at|AT) { state->val = REG_AT; return TOK_REGISTER; }
+\$(gp|GP) { state->val = REG_GP; return TOK_REGISTER; }
+\$(sp|SP) { state->val = REG_SP; return TOK_REGISTER; }
+\$(fp|FP) { state->val = REG_FP; return TOK_REGISTER; }
+\$(ra|RA) { state->val = REG_RA; return TOK_REGISTER; }
+
+\$[vV]0 { state->val = REG_V0; return TOK_REGISTER; }
+\$[vV]1 { state->val = REG_V1; return TOK_REGISTER; }
+
+\$[aA]0 { state->val = REG_A0; return TOK_REGISTER; }
+\$[aA]1 { state->val = REG_A1; return TOK_REGISTER; }
+\$[aA]2 { state->val = REG_A2; return TOK_REGISTER; }
+\$[aA]3 { state->val = REG_A3; return TOK_REGISTER; }
+
+\$[tT]0 { state->val = REG_T0; return TOK_REGISTER; }
+\$[tT]1 { state->val = REG_T1; return TOK_REGISTER; }
+\$[tT]2 { state->val = REG_T2; return TOK_REGISTER; }
+\$[tT]3 { state->val = REG_T3; return TOK_REGISTER; }
+\$[tT]4 { state->val = REG_T4; return TOK_REGISTER; }
+\$[tT]5 { state->val = REG_T5; return TOK_REGISTER; }
+\$[tT]6 { state->val = REG_T6; return TOK_REGISTER; }
+\$[tT]7 { state->val = REG_T7; return TOK_REGISTER; }
+\$[tT]8 { state->val = REG_T8; return TOK_REGISTER; }
+\$[tT]9 { state->val = REG_T9; return TOK_REGISTER; }
+
+\$[sS]0 { state->val = REG_S0; return TOK_REGISTER; }
+\$[sS]1 { state->val = REG_S1; return TOK_REGISTER; }
+\$[sS]2 { state->val = REG_S2; return TOK_REGISTER; }
+\$[sS]3 { state->val = REG_S3; return TOK_REGISTER; }
+\$[sS]4 { state->val = REG_S4; return TOK_REGISTER; }
+\$[sS]5 { state->val = REG_S5; return TOK_REGISTER; }
+\$[sS]6 { state->val = REG_S6; return TOK_REGISTER; }
+\$[sS]7 { state->val = REG_S7; return TOK_REGISTER; }
+
+\$[kK]0 { state->val = REG_K0; return TOK_REGISTER; }
+\$[kK]1 { state->val = REG_K1; return TOK_REGISTER; }
 
 \$([0-9]|[12][0-9]|3[0-1]) {
     state->val = strtol(yytext + 1, NULL, 10);
@@ -155,18 +183,4 @@ void fake_func(void)
 {
     yyunput(0, 0);
 }
-
-static int stringcasecmp(const char *s1, const char *s2)
-{
-    for (; *s1 && *s2; s1++, s2++)
-        if ((*s1 | 32) != (*s2 | 32))
-            return 1;
-
-    if (*s1 || *s2)
-        return 1;
-
-    return 0;
-}
-
-
 
