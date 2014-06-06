@@ -46,14 +46,14 @@ static const char *shortopts = "hvqrl:";
 /* The definition of the long-options. Every option has a long-option, not all
  * long-options have a short-option. */
 static const struct option longopts[] = {
-#define X(id, arg, shrt, op, help_text) { id, arg, NULL, op },
+#define X(id, arg, op, help_text) { id, arg, NULL, op },
 # include "args_x.h"
 #undef X
     {0}
 };
 
 static const char *help_text[] = {
-#define X(id, arg, shrt, op, help_text) help_text,
+#define X(id, arg, op, help_text) help_text,
 # include "args_x.h"
 #undef X
 };
