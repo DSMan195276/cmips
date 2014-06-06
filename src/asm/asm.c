@@ -137,6 +137,12 @@ int asm_gen_from_file(struct asm_gen *gen, const char *filename)
             printf("Label: %d - %s\n", l->line, l->ident);
         else if (l->tok == TOK_DIRECTIVE)
             printf("Dir: %d - .%s\n", l->line, l->ident);
+        else if (l->tok == TOK_REGISTER)
+            printf("Register: %d - %d (%s)\n", l->line, l->val, mips_reg_names_strs[l->val]);
+        else if (l->tok == TOK_IDENT)
+            printf("Ident: %d - %s\n", l->line, l->ident);
+        else if (l->tok == TOK_INTEGER)
+            printf("Integer: %d - %d\n", l->line, l->val);
 
     tokenizer_free_tokens(list);
 
