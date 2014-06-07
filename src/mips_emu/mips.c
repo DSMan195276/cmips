@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "mips_emu/mips_emu.h"
+#include "mips_emu.h"
 #include "special.h"
 
 static void op_jmp(struct mips_emu *emu, int addr)

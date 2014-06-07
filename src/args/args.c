@@ -13,8 +13,8 @@
 #include <getopt.h>
 
 #include "cmips.h"
-#include "asm/asm.h"
-#include "args/args.h"
+#include "asm.h"
+#include "args.h"
 
 const char *version_text =
     "cmips-" Q(CMIPS_VERSION_N) " - A command-line MIPS emulator written in C\n"
@@ -25,54 +25,112 @@ const char *version_text =
     "\n"
 ;
 
-/*
- * help (noarg)
- * version (noarg)
- * quiet (noarg)
- * run (noarg)
- * load (arg)
- */
-static const char *shortopts = "hvqrl:";
+struct arg {
+    const char *lng;
+    char shrt;
+    const char *help_txt;
 
-/* These are the getopt return values for various long-options. They match the
- * short-option if there is one, else they are simply a unique number greater
- * then 255 (Greater then any char value) */
-#define OPT_HELP     'h'
-#define OPT_VERSION  'v'
-#define OPT_QUIET    'q'
-#define OPT_RUN      'r'
-#define OPT_LOAD     'l'
-
-/* The definition of the long-options. Every option has a long-option, not all
- * long-options have a short-option. */
-static const struct option longopts[] = {
-#define X(id, arg, op, help_text) { id, arg, NULL, op },
-# include "args_x.h"
-#undef X
-    {0}
+    int has_arg :1;
 };
 
-static const char *help_text[] = {
-#define X(id, arg, op, help_text) help_text,
+enum arg_list {
+    ARG_EXTRA = -4,
+    ARG_LNG = -3,
+    ARG_ERR = -2,
+    ARG_DONE = -1,
+#define X(id, arg, op, help_text) ARG_##id,
+# include "args_x.h"
+#undef X
+    ARG_LAST
+};
+
+static const struct arg cmips_args[] = {
+#define X(id, arg, op, help_text) [ARG_##id] = { .lng = #id, .shrt = op, .help_txt = help_text, .has_arg = arg },
 # include "args_x.h"
 #undef X
 };
+
+static char *argarg;
+
+static int parser_argc, current_arg = 1;
+static char **parser_argv;
+static const char *shrt;
+static int parsing_done;
+
+enum arg_list arg_parser(void)
+{
+    const char *cur;
+    if (current_arg == parser_argc)
+        return ARG_DONE;
+
+    cur = parser_argv[current_arg];
+
+    if (parsing_done)
+        goto parsing_done;
+
+    if (cur[0] == '-' && !shrt) {
+        if (*(cur + 1) && cur[1] == '-') {
+            int i;
+
+            if (!cur[2]) {
+                parsing_done = 1;
+                current_arg++;
+                goto parsing_done;
+            }
+
+
+            for (i = 0; i < ARG_LAST; i++)
+                if (strcmp(cmips_args[i].lng, cur + 2) == 0)
+                    return i;
+
+            printf("%s: unreconized argument '%s'\n", parser_argv[0], cur);
+            current_arg++;
+            return ARG_ERR;
+        }
+
+        shrt = cur + 1;
+    }
+
+    if (shrt) {
+        int i;
+        for (i = 0; i < ARG_LAST; i++) {
+            if (cmips_args[i].shrt == *shrt) {
+                shrt++;
+                if (!*shrt) {
+                    shrt = NULL;
+                    current_arg++;
+                }
+                return i;
+            }
+        }
+
+        printf("%s: unreconized argument '-%c'\n", parser_argv[0], *shrt);
+        return ARG_ERR;
+    }
+
+parsing_done:
+
+    argarg = parser_argv[current_arg];
+    current_arg++;
+    return ARG_EXTRA;
+}
 
 static void display_help_text(const char *prog)
 {
-    int i;
-    printf("Usage: %s [Flags] \n"
+    const struct arg *a;
+    printf("Usage: %s [Flags] [Files] \n"
            "\n"
+           "Files: Assembly source files to load on startup\n"
            "Flags:\n", prog);
 
-    for (i = 0; longopts[i].name != NULL; i++) {
+    for (a = cmips_args; a->lng != NULL; a++) {
         printf("  ");
-        if (longopts[i].val < 256)
-            printf("-%c, ", longopts[i].val);
+        if (a->shrt< 256)
+            printf("-%c, ", a->shrt);
         else
             printf("     ");
 
-        printf("--%-15s %s\n", longopts[i].name, help_text[i]);
+        printf("--%-15s %s\n", a->lng, a->help_txt);
     }
 
     printf("See the manpage for more information\n");
@@ -80,30 +138,32 @@ static void display_help_text(const char *prog)
 
 void parse_args(int argc, char **argv, struct arg_state *s)
 {
-    int opt;
-    int long_index = 0;
+    enum arg_list ret;
 
-    while ((opt = getopt_long(argc, argv, shortopts, longopts, &long_index)) != -1) {
-        switch (opt) {
-        case OPT_HELP:
+    parser_argc = argc;
+    parser_argv = argv;
+
+    while ((ret = arg_parser()) != ARG_DONE) {
+        switch (ret) {
+        case ARG_help:
             display_help_text(argv[0]);
             exit(0);
             break;
-        case OPT_VERSION:
+        case ARG_version:
             printf(version_text);
             exit(0);
             break;
-        case OPT_QUIET:
+        case ARG_quiet:
             s->quiet = 1;
             break;
-        case OPT_RUN:
+        case ARG_run:
             s->run = 1;
             break;
-        case OPT_LOAD:
-            asm_gen_from_file(&cmips_asm_gen, optarg);
+        case ARG_EXTRA:
+            asm_gen_from_file(&cmips_asm_gen, argarg);
             break;
         default:
-        case '?':
+        case ARG_ERR:
             /* Error message already printed by getopt_long() */
             exit(0);
             break;

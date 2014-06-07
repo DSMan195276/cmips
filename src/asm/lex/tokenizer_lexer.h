@@ -11,7 +11,17 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "asm/tokenizer.h"
+enum asm_token {
+#define X(id) id,
+# include "tokenizer_lexer_x.h"
+#undef X
+};
+
+enum asm_dir_types {
+#define X(dir) DIR_##dir,
+# include "tokenizer_lexer_dir.h"
+#undef X
+};
 
 struct tokenizer {
     int line;
@@ -22,5 +32,7 @@ struct tokenizer {
 
 enum asm_token yylex(struct tokenizer *);
 extern FILE *yyin;
+
+extern const char *asm_dir_types_str[];
 
 #endif

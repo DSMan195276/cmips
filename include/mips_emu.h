@@ -57,7 +57,7 @@ enum inst_type {
 
 enum inst_opcode {
 #define X(op, val, fmt, func) OP_##op = val,
-# include "mips_emu_opcode.h"
+# include "mips_emu/mips_emu_opcode.h"
 #undef X
 };
 
@@ -67,7 +67,7 @@ extern enum inst_type mips_opcode_to_type[64];
 
 enum inst_function {
 #define X(op, val, func) OP_FUNC_##op = val,
-# include "mips_emu_function.h"
+# include "mips_emu/mips_emu_function.h"
 #undef X
 };
 

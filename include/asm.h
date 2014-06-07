@@ -30,4 +30,7 @@ void asm_clear(struct asm_gen *);
 
 int asm_gen_from_file(struct asm_gen *, const char *filename);
 
+/* Must free result */
+char *asm_escape_string(char *str);
+
 #endif

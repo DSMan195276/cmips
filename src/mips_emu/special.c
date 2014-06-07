@@ -7,7 +7,7 @@
  */
 #include "common.h"
 
-#include "mips_emu/mips_emu.h"
+#include "mips_emu.h"
 #include "special.h"
 
 static void op_func_add(struct mips_emu *emu, int rs, int rt, int rd, int sa)

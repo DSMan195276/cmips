@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "asm/tokenizer.h"
-#include "asm/tokenizer_lexer.h"
+#include "tokenizer.h"
+#include "lex/tokenizer_lexer.h"
 
 struct token_list *tokenizer_run(FILE *file)
 {

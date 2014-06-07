@@ -10,11 +10,7 @@
 
 #include <stdio.h>
 
-enum asm_token {
-#define X(id) id,
-# include "asm/tokenizer_lexer_x.h"
-#undef X
-};
+#include "lex/tokenizer_lexer.h"
 
 struct token_list {
     struct token_list *next;

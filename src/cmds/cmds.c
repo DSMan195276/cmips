@@ -12,8 +12,8 @@
 #include <string.h>
 
 #include "cmips.h"
-#include "mips_emu/mips_emu.h"
-#include "asm/asm.h"
+#include "mips_emu.h"
+#include "asm.h"
 #include "cmds.h"
 
 static void dump_regs(int argc, char **argv)

@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mips_emu/mips_emu.h"
+#include "mips_emu.h"
 #include "mips_emu/mem.h"
 
 void mem_prog_init(struct mem_prog *prog)

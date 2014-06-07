@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "mips_emu/mips_emu.h"
+#include "mips_emu.h"
 
 const char *mips_reg_names_strs[32] = {
     "zero", "at", "v0", "v1", "a0",

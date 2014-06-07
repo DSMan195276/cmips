@@ -12,9 +12,46 @@
 #include <string.h>
 #include <search.h>
 
-#include "mips_emu/mips_emu.h"
-#include "asm/tokenizer.h"
-#include "asm/asm.h"
+#include "mips_emu.h"
+#include "tokenizer.h"
+#include "asm.h"
+
+char *asm_escape_string(char *str)
+{
+    char *res;
+    int cur = 0;
+    int alloced = strlen(str) + 20;
+    res = malloc(alloced);
+
+    for (; *str; str++) {
+        if (cur + 4 >= alloced) {
+            alloced += 20;
+            res = realloc(res, alloced);
+        }
+
+        switch (*str) {
+        case '\t':
+        case '\r':
+        case '\n':
+            res[cur++] = '\\';
+            res[cur++] = 'x';
+            sprintf(res + cur, "%02x", *str);
+            cur += 2;
+            break;
+        default:
+            res[cur++] = *str;
+            break;
+        }
+    }
+
+    if (cur + 1 >= alloced) {
+        alloced += 1;
+        res = realloc(res, alloced);
+    }
+    res[cur] = '\0';
+
+    return res;
+}
 
 enum reg_type {
     REG_REGISTER,
@@ -122,7 +159,7 @@ static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
 int asm_gen_from_file(struct asm_gen *gen, const char *filename)
 {
     struct token_list *list, *l;
-
+    char *aline;
     FILE *file;
 
     file = fopen(filename, "r");
@@ -132,7 +169,58 @@ int asm_gen_from_file(struct asm_gen *gen, const char *filename)
     list = tokenizer_run(file);
     fclose(file);
 
-    for (l = list; l != NULL; l = l->next)
+    file = fopen("output.s", "w");
+
+    int line = 1, sline;
+
+    for (l = list; l != NULL; l = l->next) {
+        sline = 0;
+        if (l->line > line) {
+            sline = 1;
+            do {
+                fprintf(file, "\n");
+                line++;
+            } while (l->line > line);
+        }
+
+        switch (l->tok) {
+        case TOK_LABEL:
+            fprintf(file, "%s: ", l->ident);
+            break;
+        case TOK_DIRECTIVE:
+            fprintf(file, ".%s ", asm_dir_types_str[l->val]);
+            break;
+        case TOK_REGISTER:
+            fprintf(file, "$%s ", mips_reg_names_strs[l->val]);
+            break;
+        case TOK_IDENT:
+            if (sline)
+                fprintf(file, "\t");
+            fprintf(file, "%s ", l->ident);
+            break;
+        case TOK_INTEGER:
+            fprintf(file, "0x%hx ", l->val);
+            break;
+        case TOK_COMMA:
+            fprintf(file, ", ");
+            break;
+        case TOK_LPAREN:
+            fprintf(file, "( ");
+            break;
+        case TOK_RPAREN:
+            fprintf(file, ") ");
+            break;
+        case TOK_SEMICOLON:
+            fprintf(file, "; ");
+            break;
+        case TOK_QUOTE_STRING:
+            aline = asm_escape_string(l->ident);
+            fprintf(file, "\"%s\"", aline);
+            free(aline);
+            break;
+        case TOK_EOF:
+            break;
+        }
         if (l->tok == TOK_LABEL)
             printf("Label: %d - %s\n", l->line, l->ident);
         else if (l->tok == TOK_DIRECTIVE)
@@ -143,6 +231,8 @@ int asm_gen_from_file(struct asm_gen *gen, const char *filename)
             printf("Ident: %d - %s\n", l->line, l->ident);
         else if (l->tok == TOK_INTEGER)
             printf("Integer: %d - %d\n", l->line, l->val);
+    }
+    fclose(file);
 
     tokenizer_free_tokens(list);
 
