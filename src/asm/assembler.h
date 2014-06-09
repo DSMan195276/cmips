@@ -5,17 +5,11 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
-#include "common.h"
+#ifndef SRC_ASM_ASSEMBLER_H
+#define SRC_ASM_ASSEMBLER_H
 
-const char *asm_tok_types_str[] = {
-#define X(id) #id,
-# include "lex/tokenizer_lexer_x.h"
-#undef X
-};
+#include "asm.h"
 
-const char *asm_dir_types_str[] = {
-#define X(id) #id,
-# include "lex/tokenizer_lexer_dir.h"
-#undef X
-};
+void assemble_prog(struct asm_gen *gen, const char *filename);
 
+#endif

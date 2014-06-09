@@ -32,7 +32,9 @@ struct tokenizer {
 
 enum asm_token yylex(struct tokenizer *);
 extern FILE *yyin;
+extern char *yytext;
 
+extern const char *asm_tok_types_str[];
 extern const char *asm_dir_types_str[];
 
 #endif
