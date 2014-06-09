@@ -24,7 +24,7 @@
     .func = (funcn), \
     .reg_count = 3, \
     .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
-    .place = { REG_RD, REG_RS, REG_RT } \
+    .place = { REGP_RD, REGP_RS, REGP_RT } \
 }
 
 #define ID_3_OPER_SPEC_NONE(str, funcn) { \
@@ -44,7 +44,7 @@
     .func = (funcn), \
     .reg_count = 1, \
     .rs = { REG_REGISTER }, \
-    .place = { REG_RS } \
+    .place = { REGP_RS } \
 }
 
 #define ID_3_OPER_I(str, op) { \
@@ -54,7 +54,7 @@
     .func = 0, \
     .reg_count = 3, \
     .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
-    .place = { REG_RT, REG_RS, REG_IMM } \
+    .place = { REGP_RT, REGP_RS, REGP_IMMEDIATE } \
 }
 
 #define ID_SHIFT(str, funcn) { \
@@ -64,7 +64,7 @@
     .func = funcn, \
     .reg_count = 3, \
     .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
-    .place = { REG_RD, REG_RT, REG_SA } \
+    .place = { REGP_RD, REGP_RT, REGP_SA } \
 }
 
 #define ID_SHIFT_VAR(str, funcn) { \
@@ -74,7 +74,7 @@
     .func = funcn, \
     .reg_count = 3, \
     .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
-    .place = { REG_RD, REG_RT, REG_SA } \
+    .place = { REGP_RD, REGP_RT, REGP_SA } \
 }
 
 #define ID_LUI(str, op) { \
@@ -84,7 +84,7 @@
     .func = 0, \
     .reg_count = 2, \
     .rs = { REG_REGISTER, REG_IMMEDIATE }, \
-    .place = { REG_RT, REG_IMM } \
+    .place = { REGP_RT, REGP_IMMEDIATE } \
 }
 
 #define ID_BRANCH(str, op) { \
@@ -94,7 +94,7 @@
     .func = 0, \
     .reg_count = 3, \
     .rs = { REG_REGISTER, REG_REGISTER, REG_ADDRESS}, \
-    .place = { REG_RS, REG_RT, REG_ADDR } \
+    .place = { REGP_RS, REGP_RT, REGP_ADDRRESS } \
 }
 
 #define ID_J(str, op) { \
@@ -104,7 +104,7 @@
     .func = 0, \
     .reg_count = 1, \
     .rs = { REG_ADDRESS }, \
-    .place = { REG_ADDR } \
+    .place = { REGP_ADDRRESS } \
 }
 
 #define ID_MEM(str, op) { \
@@ -114,7 +114,7 @@
     .func = 0, \
     .reg_count = 3, \
     .rs = { REG_REGISTER, REG_DEREF_REG, REG_DEREF_REG }, \
-    .place = { REG_RT, REG_IMM, REG_RS } \
+    .place = { REGP_RT, REGP_IMMEDIATE, REGP_RS } \
 }
 
 static struct inst_desc ids[] = {
@@ -213,17 +213,17 @@ static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
     int i = 0;
 
     for (; i < id->reg_count; i++)
-        if (id->place[i] == REG_RT)
+        if (id->place[i] == REGP_RT)
             rt = regs + i;
-        else if (id->place[i] == REG_RS)
+        else if (id->place[i] == REGP_RS)
             rs = regs + i;
-        else if (id->place[i] == REG_RD)
+        else if (id->place[i] == REGP_RD)
             rd = regs + i;
-        else if (id->place[i] == REG_SA)
+        else if (id->place[i] == REGP_SA)
             sa = regs + i;
-        else if (id->place[i] == REG_IMM)
+        else if (id->place[i] == REGP_IMMEDIATE)
             imm = regs + i;
-        else if (id->place[i] == REG_ADDR)
+        else if (id->place[i] == REGP_ADDRRESS)
             addr = regs + i;
 
     if (id->format == I_FORMAT)

@@ -22,12 +22,12 @@ enum reg_type {
 };
 
 enum reg_place {
-    REG_RT,
-    REG_RD,
-    REG_RS,
-    REG_SA,
-    REG_IMM,
-    REG_ADDR
+    REGP_RT,
+    REGP_RD,
+    REGP_RS,
+    REGP_SA,
+    REGP_IMMEDIATE,
+    REGP_ADDRRESS
 };
 
 struct reg {
