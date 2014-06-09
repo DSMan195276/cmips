@@ -76,11 +76,11 @@ void mips_disp_inst(uint32_t inst)
         int sa = INST_R_SA(inst);
         int func = INST_R_FUNC(inst);
 
-        printf("R_FMT: rs: 0x%02x($%s), rt: 0x%02x($%s)\n         rd: 0x%02x($%s), sa: 0x%02x, func: 0x%02x(%s)\n"
+        printf("R_FMT: rs: 0x%02x($%s), rt: 0x%02x($%s)\n         rd: 0x%02x($%s), sa: 0x%02x($%s), func: 0x%02x(%s)\n"
                 , rs, mips_reg_names_strs[rs]
                 , rt, mips_reg_names_strs[rt]
                 , rd, mips_reg_names_strs[rd]
-                , sa
+                , sa, mips_reg_names_strs[sa]
                 , func, mips_function_names[func]);
     } else if (t == I_FORMAT) {
         int rs = INST_I_RS(inst);
