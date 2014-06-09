@@ -57,6 +57,26 @@
     .place = { REG_RT, REG_RS, REG_IMM } \
 }
 
+#define ID_SHIFT(str, funcn) { \
+    .ident = str, \
+    .format = R_FORMAT, \
+    .opcode = OP_SPECIAL, \
+    .func = funcn, \
+    .reg_count = 3, \
+    .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
+    .place = { REG_RD, REG_RT, REG_SA } \
+}
+
+#define ID_SHIFT_VAR(str, funcn) { \
+    .ident = str, \
+    .format = R_FORMAT, \
+    .opcode = OP_SPECIAL, \
+    .func = funcn, \
+    .reg_count = 3, \
+    .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
+    .place = { REG_RD, REG_RT, REG_SA } \
+}
+
 #define ID_LUI(str, op) { \
     .ident = str, \
     .format = I_FORMAT, \
@@ -98,60 +118,62 @@
 }
 
 static struct inst_desc ids[] = {
-    ID_3_OPER_SPEC("sll", OP_FUNC_SLL),
-    ID_3_OPER_SPEC("srl", OP_FUNC_SRL),
-    ID_3_OPER_SPEC("sra", OP_FUNC_SRA),
-    ID_3_OPER_SPEC("sllv", OP_FUNC_SLLV),
-    ID_3_OPER_SPEC("srlv", OP_FUNC_SRLV),
-    ID_3_OPER_SPEC("srav", OP_FUNC_SRAV),
+    ID_SHIFT("sll", OP_FUNC_SLL),
+    ID_SHIFT("srl", OP_FUNC_SRL),
+    ID_SHIFT("sra", OP_FUNC_SRA),
 
-    ID_3_OPER_JR("jr", OP_FUNC_JR),
+    ID_SHIFT_VAR("sllv", OP_FUNC_SLLV),
+    ID_SHIFT_VAR("srlv", OP_FUNC_SRLV),
+    ID_SHIFT_VAR("srav", OP_FUNC_SRAV),
+
+    ID_3_OPER_JR("jr",   OP_FUNC_JR),
     ID_3_OPER_JR("jalr", OP_FUNC_JALR),
 
-    ID_3_OPER_SPEC("add", OP_FUNC_ADD),
+    ID_3_OPER_SPEC("add",  OP_FUNC_ADD),
     ID_3_OPER_SPEC("addu", OP_FUNC_ADDU),
-    ID_3_OPER_SPEC("sub", OP_FUNC_SUB),
+    ID_3_OPER_SPEC("sub",  OP_FUNC_SUB),
     ID_3_OPER_SPEC("subu", OP_FUNC_SUBU),
-    ID_3_OPER_SPEC("and", OP_FUNC_AND),
-    ID_3_OPER_SPEC("or", OP_FUNC_OR),
-    ID_3_OPER_SPEC("xor", OP_FUNC_XOR),
-    ID_3_OPER_SPEC("nor", OP_FUNC_NOR),
-    ID_3_OPER_SPEC("slt", OP_FUNC_SLT),
+    ID_3_OPER_SPEC("and",  OP_FUNC_AND),
+    ID_3_OPER_SPEC("or",   OP_FUNC_OR),
+    ID_3_OPER_SPEC("xor",  OP_FUNC_XOR),
+    ID_3_OPER_SPEC("nor",  OP_FUNC_NOR),
+    ID_3_OPER_SPEC("slt",  OP_FUNC_SLT),
     ID_3_OPER_SPEC("sltu", OP_FUNC_SLTU),
 
     ID_3_OPER_SPEC_NONE("syscall", OP_FUNC_SYSCALL),
-    ID_3_OPER_SPEC_NONE("break", OP_FUNC_BREAK),
+    ID_3_OPER_SPEC_NONE("break",   OP_FUNC_BREAK),
 
-    ID_J("j", OP_J),
+    ID_J("j",   OP_J),
     ID_J("jal", OP_JAL),
 
     ID_BRANCH("beq", OP_BEQ),
     ID_BRANCH("bne", OP_BNE),
 
-    ID_3_OPER_I("addi", OP_ADDI),
+    ID_3_OPER_I("addi",  OP_ADDI),
     ID_3_OPER_I("addiu", OP_ADDIU),
-    ID_3_OPER_I("slti", OP_SLTI),
+    ID_3_OPER_I("slti",  OP_SLTI),
     ID_3_OPER_I("sltiu", OP_SLTIU),
-    ID_3_OPER_I("andi", OP_ANDI),
-    ID_3_OPER_I("ori", OP_ORI),
-    ID_3_OPER_I("xori", OP_XORI),
+    ID_3_OPER_I("andi",  OP_ANDI),
+    ID_3_OPER_I("ori",   OP_ORI),
+    ID_3_OPER_I("xori",  OP_XORI),
 
     ID_LUI("lui", OP_LUI),
 
-    ID_MEM("lb", OP_LB),
-    ID_MEM("lh", OP_LH),
+    ID_MEM("lb",  OP_LB),
+    ID_MEM("lh",  OP_LH),
     ID_MEM("lwl", OP_LWL),
-    ID_MEM("lw", OP_LW),
+    ID_MEM("lw",  OP_LW),
     ID_MEM("lbu", OP_LBU),
     ID_MEM("lhu", OP_LHU),
     ID_MEM("lwr", OP_LWR),
-    ID_MEM("sb", OP_SB),
-    ID_MEM("sh", OP_SH),
+    ID_MEM("sb",  OP_SB),
+    ID_MEM("sh",  OP_SH),
     ID_MEM("swl", OP_SWL),
-    ID_MEM("sw", OP_SW),
+    ID_MEM("sw",  OP_SW),
     ID_MEM("swr", OP_SWR),
 
-    { "nop", R_FORMAT, 0, 0, 0, { 0 }, { 0 } },
+    { "nop",  R_FORMAT, 0, 0, 0, { 0 }, { 0 } },
+    { "noop", R_FORMAT, 0, 0, 0, { 0 }, { 0 } },
     { NULL }
 };
 
@@ -262,7 +284,7 @@ enum internal_ret parse_instruction(struct assembler *a, struct inst_desc *inst)
         case REG_IMMEDIATE:
             expect_token(a->tok, TOK_INTEGER);
 
-            r[i].offset = a->tokenizer.val;
+            r[i].val = a->tokenizer.val;
             break;
         case REG_ADDRESS:
             if (a->tok == TOK_INTEGER) {
