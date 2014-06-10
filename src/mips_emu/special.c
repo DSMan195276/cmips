@@ -37,7 +37,7 @@ static void op_func_nop(struct mips_emu *emu, int rs, int rt, int rd, int sa)
 
 static void (*op_special_func_jmp_table[64])(struct mips_emu *emu, int rs, int rt, int rd, int sa) = {
 #define X(op, code, func) [OP_FUNC_##op] = func,
-# include "mips_emu/mips_emu_function.h"
+# include "mips_emu/mips_emu_function.x"
 #undef X
 };
 

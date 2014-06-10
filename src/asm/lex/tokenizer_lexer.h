@@ -13,13 +13,13 @@
 
 enum asm_token {
 #define X(id) id,
-# include "tokenizer_lexer_x.h"
+# include "tokenizer_lexer.x"
 #undef X
 };
 
 enum asm_dir_types {
 #define X(dir) DIR_##dir,
-# include "tokenizer_lexer_dir.h"
+# include "tokenizer_lexer_dir.x"
 #undef X
 };
 
@@ -33,7 +33,7 @@ struct tokenizer {
 enum asm_token yylex(struct tokenizer *);
 extern FILE *yyin;
 extern char *yytext;
-extern void yylex_destroy(void);
+extern int yylex_destroy(void);
 
 extern const char *asm_tok_types_str[];
 extern const char *asm_dir_types_str[];
