@@ -20,9 +20,7 @@ struct asm_gen {
     uint32_t gp_addr;
 
     /* text segment address */
-    uint32_t text_addr;
-    /* data segment address */
-    uint32_t data_addr;
+    uint32_t lowest_addr;
 };
 
 void asm_init(struct asm_gen *);

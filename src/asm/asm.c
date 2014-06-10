@@ -65,23 +65,7 @@ char *asm_escape_string(char *str)
 
 int asm_gen_from_file(struct asm_gen *gen, const char *filename)
 {
-    /*
-    struct token_list *list;
-    FILE *file;
-
-    file = fopen(filename, "r");
-    if (file == NULL)
-        return 1;
-
-    list = tokenizer_run(file);
-    fclose(file);
-    */
-
     assemble_prog(gen, filename);
-
-    /*
-    tokenizer_free_tokens(list);
-    */
 
     return 0;
 }

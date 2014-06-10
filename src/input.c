@@ -7,9 +7,6 @@
  */
 #include "common.h"
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <readline/history.h>

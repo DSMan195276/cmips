@@ -17,104 +17,104 @@
 #include "asm.h"
 #include "assembler_internal.h"
 
-#define ID_3_OPER_SPEC(str, funcn) { \
-    .ident = str, \
-    .format = R_FORMAT, \
-    .opcode = OP_SPECIAL, \
-    .func = (funcn), \
-    .reg_count = 3, \
+#define ID_3_OPER_SPEC(str, funcn) {                    \
+    .ident = str,                                       \
+    .format = R_FORMAT,                                 \
+    .opcode = OP_SPECIAL,                               \
+    .func = (funcn),                                    \
+    .reg_count = 3,                                     \
     .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
-    .place = { REGP_RD, REGP_RS, REGP_RT } \
+    .place = { REGP_RD, REGP_RS, REGP_RT }              \
 }
 
 #define ID_3_OPER_SPEC_NONE(str, funcn) { \
-    .ident = str, \
-    .format = R_FORMAT, \
-    .opcode = OP_SPECIAL, \
-    .func = (funcn), \
-    .reg_count = 0, \
-    .rs = { 0 }, \
-    .place = { 0 } \
+    .ident = str,                         \
+    .format = R_FORMAT,                   \
+    .opcode = OP_SPECIAL,                 \
+    .func = (funcn),                      \
+    .reg_count = 0,                       \
+    .rs = { 0 },                          \
+    .place = { 0 }                        \
 }
 
 #define ID_3_OPER_JR(str, funcn) { \
-    .ident = str, \
-    .format = R_FORMAT, \
-    .opcode = OP_SPECIAL, \
-    .func = (funcn), \
-    .reg_count = 1, \
-    .rs = { REG_REGISTER }, \
-    .place = { REGP_RS } \
+    .ident = str,                  \
+    .format = R_FORMAT,            \
+    .opcode = OP_SPECIAL,          \
+    .func = (funcn),               \
+    .reg_count = 1,                \
+    .rs = { REG_REGISTER },        \
+    .place = { REGP_RS }           \
 }
 
-#define ID_3_OPER_I(str, op) { \
-    .ident = str, \
-    .format = I_FORMAT, \
-    .opcode = op, \
-    .func = 0, \
-    .reg_count = 3, \
+#define ID_3_OPER_I(str, op) {                           \
+    .ident = str,                                        \
+    .format = I_FORMAT,                                  \
+    .opcode = op,                                        \
+    .func = 0,                                           \
+    .reg_count = 3,                                      \
     .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
-    .place = { REGP_RT, REGP_RS, REGP_IMMEDIATE } \
+    .place = { REGP_RT, REGP_RS, REGP_IMMEDIATE }        \
 }
 
-#define ID_SHIFT(str, funcn) { \
-    .ident = str, \
-    .format = R_FORMAT, \
-    .opcode = OP_SPECIAL, \
-    .func = funcn, \
-    .reg_count = 3, \
+#define ID_SHIFT(str, funcn) {                           \
+    .ident = str,                                        \
+    .format = R_FORMAT,                                  \
+    .opcode = OP_SPECIAL,                                \
+    .func = funcn,                                       \
+    .reg_count = 3,                                      \
     .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
-    .place = { REGP_RD, REGP_RT, REGP_SA } \
+    .place = { REGP_RD, REGP_RT, REGP_SA }               \
 }
 
-#define ID_SHIFT_VAR(str, funcn) { \
-    .ident = str, \
-    .format = R_FORMAT, \
-    .opcode = OP_SPECIAL, \
-    .func = funcn, \
-    .reg_count = 3, \
+#define ID_SHIFT_VAR(str, funcn) {                      \
+    .ident = str,                                       \
+    .format = R_FORMAT,                                 \
+    .opcode = OP_SPECIAL,                               \
+    .func = funcn,                                      \
+    .reg_count = 3,                                     \
     .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
-    .place = { REGP_RD, REGP_RT, REGP_SA } \
+    .place = { REGP_RD, REGP_RT, REGP_SA }              \
 }
 
-#define ID_LUI(str, op) { \
-    .ident = str, \
-    .format = I_FORMAT, \
-    .opcode = op, \
-    .func = 0, \
-    .reg_count = 2, \
+#define ID_LUI(str, op) {                  \
+    .ident = str,                          \
+    .format = I_FORMAT,                    \
+    .opcode = op,                          \
+    .func = 0,                             \
+    .reg_count = 2,                        \
     .rs = { REG_REGISTER, REG_IMMEDIATE }, \
-    .place = { REGP_RT, REGP_IMMEDIATE } \
+    .place = { REGP_RT, REGP_IMMEDIATE }   \
 }
 
-#define ID_BRANCH(str, op) { \
-    .ident = str, \
-    .format = I_FORMAT, \
-    .opcode = op, \
-    .func = 0, \
-    .reg_count = 3, \
+#define ID_BRANCH(str, op) {                          \
+    .ident = str,                                     \
+    .format = I_FORMAT,                               \
+    .opcode = op,                                     \
+    .func = 0,                                        \
+    .reg_count = 3,                                   \
     .rs = { REG_REGISTER, REG_REGISTER, REG_ADDRESS}, \
-    .place = { REGP_RS, REGP_RT, REGP_ADDRRESS } \
+    .place = { REGP_RS, REGP_RT, REGP_ADDRRESS }      \
 }
 
-#define ID_J(str, op) { \
-    .ident = str, \
-    .format = J_FORMAT, \
-    .opcode = op, \
-    .func = 0, \
-    .reg_count = 1, \
-    .rs = { REG_ADDRESS }, \
+#define ID_J(str, op) {        \
+    .ident = str,              \
+    .format = J_FORMAT,        \
+    .opcode = op,              \
+    .func = 0,                 \
+    .reg_count = 1,            \
+    .rs = { REG_ADDRESS },     \
     .place = { REGP_ADDRRESS } \
 }
 
-#define ID_MEM(str, op) { \
-    .ident = str, \
-    .format = I_FORMAT, \
-    .opcode = op, \
-    .func = 0, \
-    .reg_count = 3, \
+#define ID_MEM(str, op) {                                 \
+    .ident = str,                                         \
+    .format = I_FORMAT,                                   \
+    .opcode = op,                                         \
+    .func = 0,                                            \
+    .reg_count = 3,                                       \
     .rs = { REG_REGISTER, REG_DEREF_REG, REG_DEREF_REG }, \
-    .place = { REGP_RT, REGP_IMMEDIATE, REGP_RS } \
+    .place = { REGP_RT, REGP_IMMEDIATE, REGP_RS }         \
 }
 
 static struct inst_desc ids[] = {
@@ -199,6 +199,7 @@ static void add_to_seg(struct segment *seg, void *data, size_t len)
 
     memcpy(seg->data + seg->len, data, len);
     seg->len += len;
+    seg->last_addr = seg->addr + seg->len;
 }
 
 static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
@@ -249,10 +250,10 @@ static enum internal_ret parse_label(struct assembler *a)
     label = malloc(sizeof(struct label_list) + strlen(a->tokenizer.ident) + 1);
 
     if (a->cur_section == SECT_TEXT)
-        label->addr = a->text.addr;
+        label->addr = a->text.last_addr;
     else
-        label->addr = a->data.addr;
-    strcpy(label->id, a->tokenizer.ident);
+        label->addr = a->data.last_addr;
+    strcpy(label->ident, a->tokenizer.ident);
 
     label->next = a->labels;
     a->labels = label;
@@ -272,8 +273,6 @@ enum internal_ret parse_instruction(struct assembler *a, struct inst_desc *inst)
 
     for (i = 0; i < inst->reg_count; i++) {
         a->tok = yylex(&a->tokenizer);
-
-        printf("Read token: %s, %s\n", asm_tok_types_str[a->tok], yytext);
 
         switch (inst->rs[i]) {
         case REG_REGISTER:
@@ -298,7 +297,7 @@ enum internal_ret parse_instruction(struct assembler *a, struct inst_desc *inst)
         case REG_DEREF_REG:
             expect_token(a->tok, TOK_INTEGER);
 
-            r[i].offset = a->tokenizer.val;
+            r[i].val = a->tokenizer.val;
 
             a->tok = yylex(&a->tokenizer);
             expect_token(a->tok, TOK_LPAREN);
@@ -307,6 +306,7 @@ enum internal_ret parse_instruction(struct assembler *a, struct inst_desc *inst)
             expect_token(a->tok, TOK_REGISTER);
 
             r[i + 1].val = a->tokenizer.val;
+            i++;
 
             a->tok = yylex(&a->tokenizer);
             expect_token(a->tok, TOK_RPAREN);
@@ -353,6 +353,7 @@ static void assembler_free(struct assembler *a)
 
     for (l = a->labels; l != NULL; l = ltmp) {
         ltmp = l->next;
+        printf("Read Label: %s, 0x%08x\n", l->ident, l->addr);
         free(l);
     }
 
@@ -372,24 +373,22 @@ int assemble_prog(struct asm_gen *gen, const char *filename)
     memset(&a, 0, sizeof(struct assembler));
 
     a.gen = gen;
-    a.text.addr = gen->text_addr;
-    a.data.addr = gen->data_addr;
+    a.text.addr = gen->lowest_addr;
+    a.data.addr = 0;
     a.cur_section = SECT_TEXT;
-
-    printf("Size: %d, %d\n", sizeof(ids), sizeof(ids)/sizeof(ids[0]));
 
     file = fopen(filename, "r");
     yyin = file;
 
-#define call_parser(c) \
-    switch (c(&a)) { \
-    case RET_AGAIN: \
-        goto again; \
+#define call_parser(c)   \
+    switch (c(&a)) {     \
+    case RET_AGAIN:      \
+        goto again;      \
     case RET_UNEXPECTED: \
-        ret = 1; \
-        goto exit; \
-    default: \
-        break; \
+        ret = 1;         \
+        goto exit;       \
+    default:             \
+        break;           \
     }
 
     while ((a.tok = yylex(&a.tokenizer)) != TOK_EOF) {
@@ -398,11 +397,8 @@ int assemble_prog(struct asm_gen *gen, const char *filename)
          * internal function wants to pass off to the main parser. This label
          * jumps to the top of the loop and skips the yylex() read */
 again:
-        printf("Token: %s, %s\n", asm_tok_types_str[a.tok], yytext);
-
         switch (a.tok) {
         case TOK_LABEL:
-            printf("Label: %s, 0x%08x\n", a.tokenizer.ident, a.text.addr);
             call_parser(parse_label);
             break;
         case TOK_DIRECTIVE:
@@ -423,9 +419,16 @@ again:
 
 exit:
     if (ret == 1)
-        printf("Unexpected token on line %d: '%s'\n", a.tokenizer.line, yytext);
+        printf("Unexpected characters on line %d: '%s'\n", a.tokenizer.line, yytext);
+
+    gen->text = a.text.data;
+    gen->text_size = a.text.len;
+
+    gen->data = a.data.data;
+    gen->data_size = a.data.len;
 
     assembler_free(&a);
+    yylex_destroy();
 
     yyin = NULL;
     fclose(file);

@@ -7,12 +7,7 @@
  */
 #include "common.h"
 
-#include <stdio.h>
-#include <stdint.h>
-#include <string.h>
 #include <stdlib.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 
 #include "mips_emu.h"
 #include "asm.h"
@@ -22,13 +17,14 @@
 struct mips_emu cmips_emu;
 struct asm_gen  cmips_asm_gen;
 
-
 int main(int argc, char **argv)
 {
     struct arg_state arg_state = { 0 };
 
     mips_emu_init(&cmips_emu);
     asm_init(&cmips_asm_gen);
+
+    cmips_asm_gen.lowest_addr = 0x00100000;
 
     parse_args(argc, argv, &arg_state);
 

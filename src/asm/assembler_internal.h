@@ -32,7 +32,6 @@ enum reg_place {
 
 struct reg {
     int val;
-    int offset;
 };
 
 struct inst_desc {
@@ -48,7 +47,7 @@ struct inst_desc {
 struct label_list {
     struct label_list *next;
     uint32_t addr;
-    char id[];
+    char ident[];
 };
 
 struct label_marker {
@@ -72,6 +71,7 @@ struct segment {
     size_t alloced;
     size_t len;
     uint32_t addr;
+    uint32_t last_addr;
 };
 
 struct assembler {

@@ -58,6 +58,8 @@ static void append_c(struct tokenizer *t, char ch);
 
 
 \.?[a-zA-Z][a-zA-Z0-9]*: {
+    if (state->ident)
+        free(state->ident);
     state->ident = strndup(yytext, strlen(yytext) - 1);
     return TOK_LABEL;
 }
