@@ -10,7 +10,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <setjmp.h>
 
 #include "rbtree.h"
 #include "mips_emu.h"
@@ -18,6 +17,8 @@
 #include "asm.h"
 #include "assembler_internal.h"
 #include "inst_parse.h"
+#include "dir_parse.h"
+#include "label_parse.h"
 
 void add_to_seg(struct segment *seg, void *data, size_t len)
 {
@@ -30,30 +31,6 @@ void add_to_seg(struct segment *seg, void *data, size_t len)
     memcpy(seg->data + seg->len, data, len);
     seg->len += len;
     seg->last_addr = seg->addr + seg->len;
-}
-
-static enum internal_ret parse_label(struct assembler *a)
-{
-    struct label_list *label;
-
-    label = malloc(sizeof(struct label_list) + strlen(a->tokenizer.ident) + 1);
-
-    if (a->cur_section == SECT_TEXT)
-        label->addr = a->text.last_addr;
-    else
-        label->addr = a->data.last_addr;
-    strcpy(label->ident, a->tokenizer.ident);
-
-    printf("Adding label: %s\n", label->ident);
-    rb_insert(&a->labels, &label->node);
-
-    return RET_CONTINUE;
-}
-
-static enum internal_ret parse_directive(struct assembler *a)
-{
-
-    return RET_CONTINUE;
 }
 
 static enum rbcomp label_cmp(const struct rbnode *c1, const struct rbnode *c2)
