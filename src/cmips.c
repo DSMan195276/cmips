@@ -31,10 +31,8 @@ int main(int argc, char **argv)
     if (!arg_state.quiet)
         printf("%s", version_text);
 
-    if (arg_state.run)
-        exit(0);
-
-    run_input_loop();
+    if (!arg_state.noinput && !arg_state.run)
+        run_input_loop();
 
     asm_clear(&cmips_asm_gen);
     mips_emu_clear(&cmips_emu);

@@ -16,6 +16,14 @@
 /* Structure holds all of the registers in the MIPS machine */
 struct mips_regs {
     uint32_t regs[32];
+    union {
+        struct {
+            uint32_t hi;
+            uint32_t lo;
+        };
+        uint64_t hilo;
+        float hilofloat;
+    };
     uint32_t pc;
 };
 

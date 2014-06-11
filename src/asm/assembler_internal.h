@@ -13,6 +13,7 @@
 #include "mips_emu.h"
 #include "lex/tokenizer_lexer.h"
 #include "asm.h"
+#include "rbtree.h"
 
 enum reg_type {
     REG_REGISTER,
@@ -45,18 +46,20 @@ struct inst_desc {
 };
 
 struct label_list {
-    struct label_list *next;
+    struct rbnode node;
+
     uint32_t addr;
     char ident[];
 };
 
 struct label_marker {
-    struct label_marker *next;
-    uint32_t addr;
-    char *label;
+    struct rbnode node;
 
+    uint32_t addr;
     unsigned int is_branch :1;
     unsigned int is_jmp    :1;
+
+    char label[];
 };
 
 enum internal_ret {
@@ -83,13 +86,21 @@ struct assembler {
     struct segment text;
     struct segment data;
 
-    struct label_list *labels;
-    struct label_marker *markers;
+    struct rbtree labels;
+    struct rbtree markers;
 
     enum {
         SECT_TEXT,
         SECT_DATA
     } cur_section;
 };
+
+#define expect_token(tok, val) \
+    do { \
+        if ((tok) != (val)) \
+            return RET_UNEXPECTED; \
+    } while (0)
+
+void add_to_seg(struct segment *seg, void *data, size_t len);
 
 #endif

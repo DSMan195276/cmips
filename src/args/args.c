@@ -159,6 +159,9 @@ void parse_args(int argc, char **argv, struct arg_state *s)
         case ARG_run:
             s->run = 1;
             break;
+        case ARG_noinput:
+            s->noinput = 1;
+            break;
         case ARG_EXTRA:
             asm_gen_from_file(&cmips_asm_gen, argarg);
             break;

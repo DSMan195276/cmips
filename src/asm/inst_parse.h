@@ -5,17 +5,11 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
-#ifndef SRC_ARGS_H
-#define SRC_ARGS_H
+#ifndef SRC_ASM_INST_PARSE_H
+#define SRC_ASM_INST_PARSE_H
 
-struct arg_state {
-    int quiet :1;
-    int run :1;
-    int noinput :1;
-};
+#include "assembler_internal.h"
 
-void parse_args(int argc, char **argv, struct arg_state *);
-
-extern const char *version_text;
+enum internal_ret parse_command(struct assembler *a);
 
 #endif

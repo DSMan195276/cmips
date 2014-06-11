@@ -22,7 +22,12 @@
 #define QQ(x) #x
 #define Q(x) QQ(x)
 
+#define TP2(x, y) x ## y
+#define TP(x, y) TP2(x, y)
+
 extern int a_sprintf(char **buf, const char *format, ...);
 extern int a_sprintfv(char **buf, const char *format, va_list list);
+
+int stringcasecmp(const char *s1, const char *s2);
 
 #endif
