@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "assembler_internal.h"
-#include "lex/tokenizer_lexer.h"
+#include "tokenizer_lexer.h"
 #include "dir_parse.h"
 
 struct dir {
@@ -132,7 +132,7 @@ static enum internal_ret dir_word(struct assembler *a)
 
 static struct dir directives[] = {
 #define X(enu, func, sect) { DIR_##enu, func, sect },
-# include "lex/tokenizer_lexer_dir.x"
+# include "tokenizer_lexer_dir.x"
 #undef X
     { 0 }
 };

@@ -1,116 +1,134 @@
 
 include ./config.mk
 
-EXEN := $(EXE)
+srctree := .
+objtree := .
 
-all: $(EXEN) doc
+EXE_OBJ := $(EXE).o
+EXECUTABLE := $(EXE)
 
-SRCS := $(wildcard src/*.c)
-OBJS := $(SRCS:.c=.o)
+# This is our default target - The default is the first target in the file so
+# we need to define this fairly high-up.
+all: real-all
 
-CLEAN_OBJS :=
+PHONY += all install clean dist real-all
 
-DIRS := $(filter-out src/,$(sort $(dir $(wildcard src/*/))))
+# This variable defines any extra targets that should be build by 'all'
+EXTRA_TARGETS :=
 
-EXTRA_DEPS :=
+# This is the internal list of objects to compile into the file .o
+REAL_OBJS_y :=
 
-define compile-dir
-dir_name_$(1) := $$(patsubst %/,%,$(1))
-dir_name_obj_$(1) := $$(dir_name_$(1)).o
-OBJS += $$(dir_name_obj_$(1))
-
-dir_name_srcs_$(1) := $$(wildcard $(1)*.c)
-dir_name_lex_$(1) := $$(wildcard $(1)lex/*.l)
-
-dir_name_objs_$(1) := $$(dir_name_srcs_$(1):.c=.o)
-EXTRA_DEPS += $$(dir_name_objs_$(1):.o=.d)
-
-dir_name_objs_$(1) += $$(dir_name_lex_$(1):.l=.o)
-
-$$(dir_name_lex_$(1):.l=.c):
-
-CLEAN_OBJS += $$(dir_name_objs_$(1)) $$(dir_name_lex_$(1):.l=.c)
-
-$$(dir_name_obj_$(1)): $$(dir_name_objs_$(1))
-	@echo " LD      $$@"
-	$$(Q)$$(LD) -r $$(dir_name_objs_$(1)) -o $$@
-
-endef
-
-$(foreach dir,$(DIRS),$(eval $(call compile-dir,$(dir))))
-
-DEPFILES := $(OBJS:.o=.d) $(EXTRA_DEPS)
-
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),dist)
--include $(DEPFILES)
-endif
-endif
+# Predefine this variable. It contains a list of extra files to clean. Ex.
+CLEAN_LIST :=
 
 # Set configuration options
-ifdef VERBOSE
+ifdef V
 	Q :=
 else
 	Q := @
 endif
 
-ifdef CMIPS_DEBUG
-	CFLAGS += -DCMIPS_DEBUG -g
+ifdef $(EXEC)_DEBUG
+	CPPFLAGS += -D$(EXEC)_DEBUG
+	CFLAGS += -g
+	ASFLAGS += -g
+	LDFLAGS += -g
 endif
 
-.PHONY: all install clean dist doc install_$(EXE)
+# This includes everything in the 'include' folder of the $(objtree)
+# This is so that the code can reference generated include files
+CPPFLAGS += -I'$(objtree)/include/'
+
+# Traverse into tree
+define subdir_inc
+objtree := $$(objtree)/$(1)
+srctree := $$(srctree)/$(1)
+
+pfix := $$(subst /,_,$$(objtree))_
+DIRINC_y :=
+OBJS_y :=
+CLEAN_LIST_y :=
+
+_tmp := $$(shell mkdir -p $$(objtree))
+include $$(srctree)/Makefile
+
+REAL_OBJS_y += $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
+CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y))
+
+$$(foreach subdir,$$(DIRINC_y),$$(eval $$(call subdir_inc,$$(subdir))))
+
+srctree := $$(patsubst %/$(1),%,$$(srctree))
+objtree := $$(patsubst %/$(1),%,$$(objtree))
+pfix := $$(subst /,_,$$(objtree))_
+endef
+
+
+# Include the base directories for source files - That is, the generic 'src'
+$(eval $(call subdir_inc,src))
+
+define compile_file
+
+_tmp := $$(subst /,_,$$(basename $(1)))_y
+ifdef $$(_tmp)
+
+CLEAN_LIST += $$($$(_tmp))
+
+$(1)_t := $$($$(_tmp))
+
+$(1): $(1)_t
+	@echo " LD      $$@"
+	$$(Q)$$(LD) -r -o $$@ $(1)_t
+
+endif
+
+endef
+
+$(foreach file,$(REAL_OBJS_y),$(eval $(call compile_file,$(file))))
+
+
+ifneq ($(MAKECMDGOALS),clean)
+ifneq ($(MAKECMDGOALS),dist)
+-include $(REAL_OBJS_y:.o=.d)
+endif
+endif
+
+CLEAN_LIST += $(REAL_OBJS_y:.o=.d)
+
+
+# Actual entry
+real-all: $(EXECUTABLE)
 
 dist: clean
 	$(Q)mkdir -p $(EXE)-$(VERSION_N)
-	$(Q)cp -R Makefile README.md config.mk LICENSE ./doc ./include ./src $(EXE)-$(VERSION_N)
-	@echo " TAR     $(EXE)-$(VERSION_N).tar"
+	$(Q)cp -R Makefile README.md config.mk LICENSE ./doc ./include ./src ./test $(EXE)-$(VERSION_N)
 	$(Q)tar -cf $(EXE)-$(VERSION_N).tar $(EXE)-$(VERSION_N)
-	@echo " GZIP    $(EXE)-$(VERSION_N).tar.gz"
-	$(Q)gzip -f $(EXE)-$(VERSION_N).tar
-	@echo " RM      $(EXE)-$(VERSION_N).tar"
-	$(Q)rm -fr $(EXE)-$(VERSION_N).tar
-	@echo " RM      $(EXE)-$(VERSION_N)"
+	$(Q)gzip $(EXE)-$(VERSION_N).tar
 	$(Q)rm -fr $(EXE)-$(VERSION_N)
+	@echo " Created $(EXE)-$(VERSION_N).tar.gz"
 
 clean:
-	$(Q)for file in $(OBJS) $(CLEAN_OBJS) $(DEPFILES) $(EXEN); do \
-		if [ -f "$$file" ]; then \
-			echo " RM      $$file"; \
-			rm -f $$file; \
-		fi \
+	$(Q)for file in $(REAL_OBJS_y) $(CLEAN_LIST) $(EXE_OBJ) $(EXECUTABLE); do \
+		echo " RM      $$file"; \
+		rm -f $$file; \
 	done
 
-install: install_$(EXE) install_doc
-
-install_$(EXE): $(EXEN)
-	$(Q)mkdir -p $(BINDIR)
-	$(Q)mkdir -p $(DOCDIR)
-	$(Q)install -d $(BINDIR) $(DOCDIR)
-	@echo " INSTALL README.md LICENSE"
-	$(Q)install -m 644 README.md LICENSE $(DOCDIR)
-	@echo " INSTALL $(EXEN)"
-	$(Q)install -m 775 $(EXEN) $(BINDIR)
-
-install_doc: doc doc/$(EXE).1
-	$(Q)mkdir -p $(MAN1DIR)
-	@echo " INSTALL doc/$(EXE).1"
-	$(Q)install -m 444 doc/$(EXE).1 $(MAN1DIR)
-
-$(EXEN): $(OBJS)
+$(EXECUTABLE): $(EXE_OBJ)
 	@echo " CCLD    $@"
-	$(Q)$(CC) $(LDFLAGS) $(OBJS) -o $@ $(LIBFLAGS)
+	$(Q)$(CC) $(LDFLAGS) -o $@ $< $(LIBFLAGS)
 
-%.c: %.l
-	@echo " LEX     $@"
-	$(Q)$(LEX) $(LFLAGS) -o $@ $<
+$(EXE_OBJ): $(REAL_OBJS_y)
+	@echo " LD      $@"
+	$(Q)$(LD) -r $(REAL_OBJS_y) -o $@
 
-%.o: %.c
+$(objtree)/%.o: $(srctree)/%.c
 	@echo " CC      $@"
-	$(Q)$(CC) $(CFLAGS) -c $< -o $@
+	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_$@) -c $< -o $@
 
-%.d: %.c
+$(objtree)/%.d: $(srctree)/%.c
 	@echo " CCDEP   $@"
-	$(Q)$(CC) -MM -MP -MF $@ $(CFLAGS) $(LDFLAGS) $< -MT $*.o -MT $@
+	$(Q)$(CC) -MM -MP -MF $@ $(CPPFLAGS) $< -MT $(objtree)/$*.o -MT $@
 
-doc:
+
+.PHONY: $(PHONY)
 

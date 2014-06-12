@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include "mips_emu.h"
-#include "lex/tokenizer_lexer.h"
+#include "tokenizer_lexer.h"
 #include "asm.h"
 #include "rbtree.h"
 
