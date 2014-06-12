@@ -51,3 +51,29 @@ int stringcasecmp(const char *s1, const char *s2)
     return 0;
 }
 
+void dump_mem(void *buf, size_t len, uint32_t base_addr)
+{
+    char *b = buf;
+    int i = 0, j;
+    printf("Address     00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F  |     ASCII      |\n");
+    for (; i < len; i += 16) {
+        printf("0x%08x  ", (i << 4) + base_addr);
+        for (j = i; j < i + 16; j++) {
+            if (j < len)
+                printf("%02x ", (unsigned char)b[j]);
+            else
+                printf("   ");
+            if (j - i == 7)
+                putchar(' ');
+        }
+
+        printf(" |");
+        for (j = i; j < i + 16 && j < len; j++)
+            if (b[j] > 31 && b[j] < 128)
+                printf("%c", b[j]);
+            else
+                putchar('.');
+        printf("|\n");
+    }
+}
+

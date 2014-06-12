@@ -17,8 +17,9 @@ enum asm_token {
 #undef X
 };
 
-enum asm_dir_types {
-#define X(dir) DIR_##dir,
+enum asm_dir {
+    DIR_NONE = -1,
+#define X(dir, func, sect) DIR_##dir,
 # include "tokenizer_lexer_dir.x"
 #undef X
 };

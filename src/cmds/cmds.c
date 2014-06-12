@@ -39,8 +39,8 @@ static void load_file(int argc, char **argv)
 static void run_code(int argc, char **argv)
 {
     int i;
-    for (i = 0; i < cmips_asm_gen.text_size / 4; i++)
-        mips_run_inst(&cmips_emu, ((uint32_t *)cmips_asm_gen.text)[i]);
+    for (i = 0; i < cmips_asm_gen.text.len/ 4; i++)
+        mips_run_inst(&cmips_emu, ((uint32_t *)cmips_asm_gen.text.data)[i]);
 }
 
 static void help(int argc, char **argv)

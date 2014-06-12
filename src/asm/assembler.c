@@ -20,17 +20,32 @@
 #include "dir_parse.h"
 #include "label_parse.h"
 
-void add_to_seg(struct segment *seg, void *data, size_t len)
+void add_to_seg(struct asm_segment *seg, void *data, size_t len)
 {
-    if (seg->alloced - seg->len <= len) {
-        size_t l = seg->len + len + 20;
-        seg->data = realloc(seg->data, l);
-        seg->alloced = l;
+    if (seg->s.alloced - seg->s.len <= len) {
+        size_t l = seg->s.len + len + 20;
+        seg->s.data = realloc(seg->s.data, l);
+        seg->s.alloced = l;
     }
 
-    memcpy(seg->data + seg->len, data, len);
-    seg->len += len;
-    seg->last_addr = seg->addr + seg->len;
+    if (data != NULL)
+        memcpy(seg->s.data + seg->s.len, data, len);
+    else
+        memset(seg->s.data + seg->s.len, 0, len);
+    seg->s.len += len;
+    seg->last_addr = seg->s.addr + seg->s.len;
+}
+
+const char *sect_to_str(enum section s)
+{
+    switch (s){
+    case SECT_TEXT:
+        return "text";
+    case SECT_DATA:
+        return "data";
+    default:
+        return NULL;
+    }
 }
 
 static enum rbcomp label_cmp(const struct rbnode *c1, const struct rbnode *c2)
@@ -96,8 +111,8 @@ int assemble_prog(struct asm_gen *gen, const char *filename)
     assembler_init(&a);
 
     a.gen = gen;
-    a.text.addr = gen->lowest_addr;
-    a.data.addr = 0;
+    a.text.s.addr = gen->lowest_addr;
+    a.data.s.addr = 0x10000000;
     a.cur_section = SECT_TEXT;
 
     file = fopen(filename, "r");
@@ -109,6 +124,9 @@ int assemble_prog(struct asm_gen *gen, const char *filename)
         goto again;      \
     case RET_UNEXPECTED: \
         ret = 1;         \
+        goto exit;       \
+    case RET_ERR:        \
+        ret = 2;         \
         goto exit;       \
     default:             \
         break;           \
@@ -144,11 +162,15 @@ exit:
     if (ret == 1)
         printf("Unexpected characters on line %d: '%s'\n", a.tokenizer.line, yytext);
 
-    gen->text = a.text.data;
-    gen->text_size = a.text.len;
+    gen->text.data = a.text.s.data;
+    gen->text.len= a.text.s.len;;
+    printf("Text segment (%d):\n", gen->text.len);
+    dump_mem(gen->text.data, gen->text.len, a.text.s.addr);
 
-    gen->data = a.data.data;
-    gen->data_size = a.data.len;
+    gen->data.data = a.data.s.data;
+    gen->data.len = a.data.s.len;
+    printf("Data segment (%d):\n", gen->data.len);
+    dump_mem(gen->data.data, gen->data.len, a.data.s.addr);
 
     assembler_free(&a);
     yylex_destroy();

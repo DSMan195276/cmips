@@ -22,8 +22,8 @@ void asm_init(struct asm_gen *gen)
 
 void asm_clear(struct asm_gen *gen)
 {
-    free(gen->text);
-    free(gen->data);
+    free(gen->text.data);
+    free(gen->data.data);
 }
 
 char *asm_escape_string(char *str)

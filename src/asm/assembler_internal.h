@@ -69,12 +69,15 @@ enum internal_ret {
     RET_ERR
 };
 
-struct segment {
-    char *data;
-    size_t alloced;
-    size_t len;
-    uint32_t addr;
+struct asm_segment {
+    struct segment s;
     uint32_t last_addr;
+    uint32_t align_next;
+};
+
+enum section {
+    SECT_TEXT = 1<<0,
+    SECT_DATA = 1<<1,
 };
 
 struct assembler {
@@ -83,16 +86,13 @@ struct assembler {
 
     enum asm_token tok;
 
-    struct segment text;
-    struct segment data;
+    struct asm_segment text;
+    struct asm_segment data;
 
     struct rbtree labels;
     struct rbtree markers;
 
-    enum {
-        SECT_TEXT,
-        SECT_DATA
-    } cur_section;
+    enum section cur_section;
 };
 
 #define expect_token(tok, val) \
@@ -101,6 +101,7 @@ struct assembler {
             return RET_UNEXPECTED; \
     } while (0)
 
-void add_to_seg(struct segment *seg, void *data, size_t len);
+void add_to_seg(struct asm_segment *seg, void *data, size_t len);
+const char *sect_to_str(enum section s);
 
 #endif

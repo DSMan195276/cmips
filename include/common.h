@@ -13,6 +13,7 @@
 
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 
 /* Inspired via the Linux-kernel macro 'container_of' */
@@ -29,5 +30,7 @@ extern int a_sprintf(char **buf, const char *format, ...);
 extern int a_sprintfv(char **buf, const char *format, va_list list);
 
 int stringcasecmp(const char *s1, const char *s2);
+
+void dump_mem(void *buf, size_t len, uint32_t base_addr);
 
 #endif

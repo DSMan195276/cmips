@@ -38,14 +38,14 @@ enum arg_list {
     ARG_LNG = -3,
     ARG_ERR = -2,
     ARG_DONE = -1,
-#define X(id, arg, op, help_text) ARG_##id,
+#define X(enu, id, arg, op, help_text) ARG_##enu,
 # include "args.x"
 #undef X
     ARG_LAST
 };
 
 static const struct arg cmips_args[] = {
-#define X(id, arg, op, help_text) [ARG_##id] = { .lng = #id, .shrt = op, .help_txt = help_text, .has_arg = arg },
+#define X(enu, id, arg, op, help_text) [ARG_##enu] = { .lng = id, .shrt = op, .help_txt = help_text, .has_arg = arg },
 # include "args.x"
 #undef X
 };

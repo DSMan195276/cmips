@@ -11,12 +11,17 @@
 
 #include <stdint.h>
 
-struct asm_gen {
-    char *text;
-    uint32_t text_size;
-
+struct segment {
     char *data;
-    uint32_t data_size;
+    size_t alloced;
+    size_t len;
+    uint32_t addr;
+};
+
+struct asm_gen {
+    struct segment text;
+    struct segment data;
+
     uint32_t gp_addr;
 
     /* text segment address */

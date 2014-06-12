@@ -14,7 +14,7 @@ const char *asm_tok_types_str[] = {
 };
 
 const char *asm_dir_types_str[] = {
-#define X(id) #id,
+#define X(id, func, sect) #id,
 # include "lex/tokenizer_lexer_dir.x"
 #undef X
 };
