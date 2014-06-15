@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "mips_emu.h"
+#include "mips.h"
 #include "assembler.h"
 #include "asm.h"
 
@@ -65,8 +65,6 @@ char *asm_escape_string(char *str)
 
 int asm_gen_from_file(struct asm_gen *gen, const char *filename)
 {
-    assemble_prog(gen, filename);
-
-    return 0;
+    return assemble_prog(gen, filename);
 }
 

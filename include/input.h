@@ -8,6 +8,8 @@
 #ifndef INCLUDE_INPUT_H
 #define INCLUDE_INPUT_H
 
+void exit_cmd(int argc, char **argv);
+int run_script(const char *s_file);
 void run_input_loop(void);
 
 #endif

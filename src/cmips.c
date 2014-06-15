@@ -9,29 +9,30 @@
 
 #include <stdlib.h>
 
-#include "mips_emu.h"
+#include "mips.h"
+#include "emu.h"
 #include "asm.h"
 #include "args.h"
 #include "input.h"
 
 struct mips_emu cmips_emu;
 struct asm_gen  cmips_asm_gen;
+struct arg_state cmips_arg_state;
 
 int main(int argc, char **argv)
 {
-    struct arg_state arg_state = { 0 };
 
     mips_emu_init(&cmips_emu);
     asm_init(&cmips_asm_gen);
 
     cmips_asm_gen.lowest_addr = 0x00100000;
 
-    parse_args(argc, argv, &arg_state);
+    parse_args(argc, argv, &cmips_arg_state);
 
-    if (!arg_state.quiet)
+    if (!cmips_arg_state.quiet)
         printf("%s", version_text);
 
-    if (!arg_state.noinput && !arg_state.run)
+    if (!cmips_arg_state.noinput)
         run_input_loop();
 
     asm_clear(&cmips_asm_gen);

@@ -10,7 +10,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "mips_emu.h"
+#include "mips.h"
+#include "emu.h"
 #include "special.h"
 
 static void op_jmp(struct mips_emu *emu, int addr)
@@ -35,7 +36,7 @@ static void nop_i(struct mips_emu *emu, int rs, int rt, int val)
 
 enum inst_type mips_opcode_to_type[64] = {
 #define X(op, code, fmt, func) [OP_##op] = fmt,
-# include "mips_emu/mips_emu_opcode.x"
+# include "mips/mips_emu_opcode.x"
 #undef X
 };
 
@@ -49,19 +50,19 @@ enum inst_type mips_opcode_to_type[64] = {
  */
 static void (*op_jmp_table[64])() = {
 #define X(op, code, fmt, func) [OP_##op] = func,
-# include "mips_emu/mips_emu_opcode.x"
+# include "mips/mips_emu_opcode.x"
 #undef X
 };
 
 const char *mips_opcode_names[64] = {
 #define X(op, val, fmt, func) [OP_##op] = #op,
-# include "mips_emu/mips_emu_opcode.x"
+# include "mips/mips_emu_opcode.x"
 #undef X
 };
 
 const char *mips_function_names[64] = {
 #define X(op, val, func) [OP_FUNC_##op] = #op,
-# include "mips_emu/mips_emu_function.x"
+# include "mips/mips_emu_function.x"
 #undef X
 };
 

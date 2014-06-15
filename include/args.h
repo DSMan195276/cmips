@@ -12,6 +12,8 @@ struct arg_state {
     int quiet :1;
     int run :1;
     int noinput :1;
+
+    const char *cmd_script;
 };
 
 void parse_args(int argc, char **argv, struct arg_state *);

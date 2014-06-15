@@ -9,7 +9,7 @@
 
 #include <string.h>
 
-#include "mips_emu.h"
+#include "mips.h"
 #include "tokenizer_lexer.h"
 #include "asm.h"
 #include "assembler_internal.h"
@@ -275,7 +275,7 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
 
     op = gen_op(inst, r);
 
-    add_to_seg(&a->text, &op, sizeof(uint32_t));
+    add_word_to_seg(&a->text, op);
 
     return RET_CONTINUE;
 }

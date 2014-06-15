@@ -24,7 +24,7 @@ static enum internal_ret dir_align(struct assembler *a)
     a->tok = yylex(&a->tokenizer);
     expect_token(a->tok, TOK_INTEGER);
 
-    /* a->align_next = a->tokenizer.val; */
+    align_seg(&a->data, a->tokenizer.val);
     return RET_CONTINUE;
 }
 
@@ -74,7 +74,7 @@ static enum internal_ret dir_extern(struct assembler *a)
     a->tok = yylex(&a->tokenizer);
     expect_token(a->tok, TOK_INTEGER);
 
-    return RET_UNEXPECTED;
+    return RET_CONTINUE;
 }
 
 static enum internal_ret dir_float(struct assembler *a)
@@ -114,6 +114,7 @@ static enum internal_ret dir_space(struct assembler *a)
     a->tok = yylex(&a->tokenizer);
     expect_token(a->tok, TOK_INTEGER);
 
+    printf("Space: %d\n", a->tokenizer.val);
     add_to_seg(&a->data, NULL, a->tokenizer.val);
     return RET_CONTINUE;
 }
@@ -127,7 +128,7 @@ static enum internal_ret dir_text(struct assembler *a)
 static enum internal_ret dir_word(struct assembler *a)
 {
 
-    return RET_CONTINUE;
+    return RET_UNEXPECTED;
 }
 
 static struct dir directives[] = {

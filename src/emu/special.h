@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "mips_emu.h"
+#include "emu.h"
 
 void op_special(struct mips_emu *emu, int rs, int rt, int rd, int sa, int func);
 

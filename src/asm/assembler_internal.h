@@ -10,7 +10,7 @@
 
 #include <stdint.h>
 
-#include "mips_emu.h"
+#include "mips.h"
 #include "tokenizer_lexer.h"
 #include "asm.h"
 #include "rbtree.h"
@@ -102,6 +102,8 @@ struct assembler {
     } while (0)
 
 void add_to_seg(struct asm_segment *seg, void *data, size_t len);
+void add_word_to_seg(struct asm_segment *seg, uint32_t word);
+void align_seg(struct asm_segment *seg, int alignment);
 const char *sect_to_str(enum section s);
 
 #endif

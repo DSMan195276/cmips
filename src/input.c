@@ -8,10 +8,21 @@
 #include "common.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 
+#include "cmips.h"
 #include "cmds.h"
+
+static const char *prompt = "cmips> ";
+
+static int exit_inp_loop = 0;
+
+void exit_cmd(int argc, char **argv)
+{
+    exit_inp_loop = 1;
+}
 
 static char **parse_line(char *line, int *argc)
 {
@@ -29,14 +40,14 @@ static char **parse_line(char *line, int *argc)
              sflag = 1;
          } else if (isspace(line[i]) && sflag) {
              line[i] = '\0';
-             lines[*argc - 1] = strdup(line + last);
+             lines[*argc - 1] = line + last;
              sflag = 0;
          }
     }
 
     if (sflag) {
-         lines[*argc - 1] = strdup(line + last);
-         sflag = 0;
+        lines[*argc - 1] = line + last;
+        sflag = 0;
     }
 
     return lines;
@@ -74,42 +85,79 @@ static char **complete_line(const char *line, int start, int end)
     return matches;
 }
 
-void run_input_loop(void)
+static void run_cmd(char *line)
 {
     struct cmips_cmd *cmd;
-    char *line = NULL, **lines;
-    int args, end_flag = 0, i;
+    char **lines;
+    int args;
+
+    lines = parse_line(line, &args);
+
+    for (cmd = cmips_cmds; cmd->cmd_id != NULL; cmd++) {
+        if (strcmp(lines[0], cmd->cmd_id) == 0) {
+            (cmd->cmd) (args - 1, lines + 1);
+            break;
+        }
+    }
+
+    if (cmd->cmd_id == NULL)
+        printf("Unknown command '%s'\n", lines[0]);
+
+    free(lines);
+
+    return ;
+}
+
+int run_script(const char *s_file)
+{
+    char *line = NULL;
+    size_t len;
+    FILE *script;
+
+    script = fopen(s_file, "r");
+
+    if (!script) {
+        printf("Error opening script '%s'\n", s_file);
+        return -1;
+    }
+
+    while ((len = getline(&line, &len, script)) != -1 && !exit_inp_loop) {
+        if (line[len - 1] == '\n')
+            line[len - 1] = '\0';
+        printf("%s%s\n", prompt, line);
+        run_cmd(line);
+    }
+
+    fclose(script);
+    free(line);
+
+    return 0;
+}
+
+void run_input_loop(void)
+{
+    char *line = NULL;
+
+    if (cmips_arg_state.cmd_script) {
+        run_script(cmips_arg_state.cmd_script);
+        return ;
+    }
 
     rl_attempted_completion_function = complete_line;
 
     do {
-        if (line)
-            free(line);
-        line = readline("cmips> ");
+        line = readline(prompt);
         if (line && *line)
             add_history(line);
         else
             continue;
 
-        lines = parse_line(line, &args);
+        run_cmd(line);
 
-        for (cmd = cmips_cmds; cmd->cmd_id != NULL; cmd++) {
-            if (strcmp(lines[0], cmd->cmd_id) == 0) {
-                if (cmd->cmd)
-                    (cmd->cmd) (args - 1, lines + 1);
-                else
-                    end_flag = 1; /* Only 'quit' doesn't have a function */
-                break;
-            }
-        }
+        if (line)
+            free(line);
+    } while (!exit_inp_loop);
 
-        for (i = 0; i < args; i++)
-            free(lines[i]);
-        free(lines);
-    } while (!end_flag);
-
-    if (line)
-        free(line);
     clear_history();
 }
 

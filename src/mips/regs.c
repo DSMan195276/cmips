@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "mips_emu.h"
+#include "mips.h"
 
 const char *mips_reg_names_strs[32] = {
     "zero", "at", "v0", "v1", "a0",
@@ -27,10 +27,11 @@ void mips_dump_regs(struct mips_regs *regs)
 {
     int i;
     for (i = 0; i < 32; i++) {
-        printf("%s: 0x%08x\t", mips_reg_names_strs[i], regs->regs[i]);
-        if ((i % 5) == 0)
+        printf("%s: 0x%08x  ", mips_reg_names_strs[i], regs->regs[i]);
+        if ((i % 5) == 1)
             printf("\n");
     }
-    printf("\n");
+    printf("hi: 0x%08x  lo: 0x%08x  pc: 0x%08x\n",
+            regs->hi, regs->lo, regs->pc);
 }
 

@@ -160,13 +160,15 @@ extern struct rbnode *rb_trav_next_postorder (rb_trav_state *);
  * On secuessive loops, the correct rb_trav_next_ function is called to advance
  * the node and it's checked again.
  */
-#define rb_foreach(tree, node, type)                                           \
+#define rb_foreach(tree, node, type, strut, member)                            \
     if (0)                                                                     \
         TP(_rb_finished, __LINE__): ;                                          \
     else                                                                       \
         for (rb_trav_state _rb_state ;;)                                       \
             if (1) {                                                           \
-                node = rb_trav_first_##type##order(tree, &_rb_state);          \
+                node = container_of(                                           \
+                        rb_trav_first_##type##order(tree, &_rb_state),         \
+                        strut, member);                                        \
                 goto TP(_rb_check, __LINE__);                                  \
             } else                                                             \
                 while (1)                                                      \
@@ -175,7 +177,9 @@ extern struct rbnode *rb_trav_next_postorder (rb_trav_state *);
                     else                                                       \
                         while (1)                                              \
                             if (1) {                                           \
-                                node = rb_trav_next_##type##order(&_rb_state); \
+                                node = container_of(                           \
+                                       rb_trav_next_##type##order(&_rb_state), \
+                                       strut, member);                         \
                                 TP(_rb_check, __LINE__):                       \
                                 if (node != NULL)                              \
                                     goto TP(_rb_body, __LINE__);               \
@@ -185,12 +189,12 @@ extern struct rbnode *rb_trav_next_postorder (rb_trav_state *);
                                 TP(_rb_body, __LINE__):
 
 
-#define rb_foreach_preorder(tree, node) \
-    rb_foreach(tree, node, pre)
-#define rb_foreach_inorder(tree, node) \
-    rb_foreach(tree, node, in)
-#define rb_foreach_postorder(tree, node) \
-    rb_foreach(tree, node, post)
+#define rb_foreach_preorder(tree, node, strut, member) \
+    rb_foreach(tree, node, pre, strut, member)
+#define rb_foreach_inorder(tree, node, strut, member) \
+    rb_foreach(tree, node, in, strut, member)
+#define rb_foreach_postorder(tree, node, strut, member) \
+    rb_foreach(tree, node, post, strut, member)
 
 /*
  * This is an example implementation of a rbnode containing simple string data.

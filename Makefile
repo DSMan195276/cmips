@@ -36,6 +36,11 @@ ifdef $(EXEC)_DEBUG
 	LDFLAGS += -g
 endif
 
+ifdef AUTO_CMDS
+	CPPFLAGS += -DAUTO_CMD_LIST
+endif
+
+
 # This includes everything in the 'include' folder of the $(objtree)
 # This is so that the code can reference generated include files
 CPPFLAGS += -I'$(objtree)/include/'

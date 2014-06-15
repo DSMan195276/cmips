@@ -411,7 +411,7 @@ struct rbnode *rb_trav_next_postorder(rb_trav_state *state)
 
     if (st.parent != NULL)
         st.current = st.parent;
-    else if (st.from != 0)
+    else if (st.from == 2)
         return NULL;
 
     while (st.current != NULL) {
@@ -428,6 +428,8 @@ struct rbnode *rb_trav_next_postorder(rb_trav_state *state)
                     st.from = 1;
                 else
                     st.from = 2;
+            } else {
+                st.from = 2;
             }
 
             *state = st;

@@ -1,11 +1,10 @@
 # Program wide settings
 EXE       := cmips
+EXEC      := CMIPS
 VERSION   := 0
 SUBLEVEL  := 1
 PATCH     := 0
 VERSION_N := $(VERSION).$(SUBLEVEL).$(PATCH)
-
-EXEC      := $(call uc,$(EXE))
 
 # Compiler settings
 CC      ?= cc

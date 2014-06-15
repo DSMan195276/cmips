@@ -12,7 +12,7 @@
 %{
 #include <string.h>
 #include <stdlib.h>
-#include "mips_emu.h"
+#include "mips.h"
 #include "tokenizer_lexer.h"
 
 #define YY_NO_INPUT

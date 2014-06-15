@@ -10,6 +10,6 @@
 
 #include "asm.h"
 
-void assemble_prog(struct asm_gen *gen, const char *filename);
+int assemble_prog(struct asm_gen *gen, const char *filename);
 
 #endif

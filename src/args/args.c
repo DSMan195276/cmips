@@ -48,9 +48,10 @@ static const struct arg cmips_args[] = {
 #define X(enu, id, arg, op, help_text) [ARG_##enu] = { .lng = id, .shrt = op, .help_txt = help_text, .has_arg = arg },
 # include "args.x"
 #undef X
+    { 0 }
 };
 
-static char *argarg;
+static const char *argarg;
 
 static int parser_argc, current_arg = 1;
 static char **parser_argv;
@@ -79,9 +80,20 @@ enum arg_list arg_parser(void)
             }
 
 
-            for (i = 0; i < ARG_LAST; i++)
-                if (strcmp(cmips_args[i].lng, cur + 2) == 0)
+            for (i = 0; i < ARG_LAST; i++) {
+                if (strcmp(cmips_args[i].lng, cur + 2) == 0) {
+                    if (cmips_args[i].has_arg) {
+                        if (parser_argc == current_arg + 1) {
+                            printf("%s: Not enough arguments to '%s'\n", parser_argv[0], cur);
+                            return ARG_ERR;
+                        }
+                        argarg = parser_argv[current_arg + 1];
+                        current_arg++;
+                    }
+
                     return i;
+                }
+            }
 
             printf("%s: unreconized argument '%s'\n", parser_argv[0], cur);
             current_arg++;
@@ -99,6 +111,20 @@ enum arg_list arg_parser(void)
                 if (!*shrt) {
                     shrt = NULL;
                     current_arg++;
+                }
+                if (cmips_args[i].has_arg) {
+                    if (shrt) {
+                        argarg = shrt;
+                        shrt = NULL;
+                        current_arg++;
+                    } else {
+                        if (parser_argc == current_arg) {
+                            printf("%s: Not enough arguments to '-%c'\n", parser_argv[0], cmips_args[i].shrt);
+                            return ARG_ERR;
+                        }
+                        argarg = parser_argv[current_arg];
+                        current_arg++;
+                    }
                 }
                 return i;
             }
@@ -162,8 +188,12 @@ void parse_args(int argc, char **argv, struct arg_state *s)
         case ARG_noinput:
             s->noinput = 1;
             break;
+        case ARG_script:
+            s->cmd_script = argarg;
+            break;
         case ARG_EXTRA:
-            asm_gen_from_file(&cmips_asm_gen, argarg);
+            if (asm_gen_from_file(&cmips_asm_gen, argarg) != 0)
+                printf("Error assembling file.\n");
             break;
         default:
         case ARG_ERR:

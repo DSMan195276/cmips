@@ -12,7 +12,7 @@
 #include <stdint.h>
 
 #include "rbtree.h"
-#include "mips_emu.h"
+#include "mips.h"
 #include "tokenizer_lexer.h"
 #include "asm.h"
 #include "assembler_internal.h"
@@ -34,6 +34,22 @@ void add_to_seg(struct asm_segment *seg, void *data, size_t len)
         memset(seg->s.data + seg->s.len, 0, len);
     seg->s.len += len;
     seg->last_addr = seg->s.addr + seg->s.len;
+}
+
+void add_word_to_seg(struct asm_segment *seg, uint32_t word)
+{
+    be32 val = cpu_to_be32(word);
+
+    add_to_seg(seg, &val, sizeof(be32));
+}
+
+void align_seg(struct asm_segment *seg, int alignment)
+{
+    int new_last_addr = (seg->last_addr + alignment - 1) & ~(alignment - 1);
+    int len = new_last_addr - seg->last_addr;
+
+    if (len > 0)
+        add_to_seg(seg, NULL, len);
 }
 
 const char *sect_to_str(enum section s)
@@ -85,21 +101,19 @@ static void assembler_init(struct assembler *a)
 
 static void assembler_free(struct assembler *a)
 {
-    struct rbnode *node = NULL;
     struct label_list *l;
     struct label_marker *m;
 
     free(a->tokenizer.ident);
 
-    rb_foreach_postorder(&a->labels, node) {
-        l = container_of(node, struct label_list, node);
+    rb_foreach_postorder(&a->labels, l, struct label_list, node)
         free(l);
-    }
 
-    rb_foreach_postorder(&a->markers, node) {
-        m = container_of(node, struct label_marker, node);
+    rb_foreach_postorder(&a->markers, m, struct label_marker, node)
         free(m);
-    }
+
+    free(a->text.s.data);
+    free(a->data.s.data);
 }
 
 int assemble_prog(struct asm_gen *gen, const char *filename)
@@ -164,13 +178,11 @@ exit:
 
     gen->text.data = a.text.s.data;
     gen->text.len= a.text.s.len;;
-    printf("Text segment (%d):\n", gen->text.len);
-    dump_mem(gen->text.data, gen->text.len, a.text.s.addr);
+    a.text.s.data = NULL;
 
     gen->data.data = a.data.s.data;
     gen->data.len = a.data.s.len;
-    printf("Data segment (%d):\n", gen->data.len);
-    dump_mem(gen->data.data, gen->data.len, a.data.s.addr);
+    a.data.s.data = NULL;
 
     assembler_free(&a);
     yylex_destroy();
