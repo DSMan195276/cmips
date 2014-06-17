@@ -12,21 +12,35 @@
 #include <stdint.h>
 
 struct mem_chunk {
-    uint32_t start;
+    uint32_t addr;
     uint32_t size;
     char *block;
 };
 
 struct mem_prog {
-    int chunk_count;
-    struct mem_chunk *chunks;
+    union {
+        struct {
+            struct mem_chunk text;
+            struct mem_chunk data;
+            struct mem_chunk stack;
+        };
+        struct mem_chunk mem[3];
+    };
 };
 
 void mem_prog_init(struct mem_prog *);
 void mem_prog_clear(struct mem_prog *);
 
-void mem_write_to_addr(struct mem_prog *, uint32_t addr, char *data, int len);
+/* Stack grows downward - addr should be the highest addr of the stack */
+void mem_set_stack(struct mem_prog *prog, uint32_t addr, int size);
 
-char *mem_read_from_addr(struct mem_prog *, uint32_t addr, int len);
+/* Note - These functions don't make copies. 'text' and 'data' should be 
+ * malloc allocated and will be freed by mem_prog_clear */
+void mem_set_text(struct mem_prog *prog, uint32_t addr, int size, void *text);
+void mem_set_data(struct mem_prog *prog, uint32_t addr, int size, void *data);
+
+void mem_write_to_addr(struct mem_prog *, uint32_t addr, int len, void *buf);
+
+void mem_read_from_addr(struct mem_prog *, uint32_t addr, int len, void *buf);
 
 #endif

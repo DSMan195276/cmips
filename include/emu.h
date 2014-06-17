@@ -18,6 +18,8 @@
 struct mips_emu {
     struct mips_regs r;
     struct mem_prog  mem;
+
+    unsigned int stop_prog :1;
 };
 
 void mips_emu_init(struct mips_emu *);
@@ -25,5 +27,6 @@ void mips_emu_clear(struct mips_emu *);
 
 void mips_run_inst(struct mips_emu *, uint32_t inst);
 void mips_run_next_inst(struct mips_emu *);
+void mips_run(struct mips_emu *);
 
 #endif

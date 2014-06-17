@@ -69,4 +69,11 @@ static inline uint32_t mips_create_r_format(uint32_t op, uint32_t rs, uint32_t r
     return (op << 26) + ((rs & 0x1F) << 21) + ((rt & 0x1F) << 16) + ((rd & 0x1F) << 11) + ((sa & 0x1F) << 6) + (func & 0x3F);
 }
 
+enum syscall {
+    SYSCALL_PRINT_INT = 1,
+    SYSCALL_PRINT_STRING = 4,
+    SYSCALL_READ_INT = 5,
+    SYSCALL_EXIT = 10
+};
+
 #endif

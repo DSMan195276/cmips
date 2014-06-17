@@ -20,21 +20,60 @@ void mem_prog_init(struct mem_prog *prog)
 
 void mem_prog_clear(struct mem_prog *prog)
 {
+    free(prog->text.block);
+    free(prog->data.block);
+    free(prog->stack.block);
+}
+
+void mem_set_stack(struct mem_prog *prog, uint32_t addr, int size)
+{
+    prog->stack.addr = addr - size;
+    prog->stack.size = size;
+    prog->stack.block = malloc(size);
+}
+
+void mem_set_text(struct mem_prog *prog, uint32_t addr, int size, void *text)
+{
+    prog->text.addr = addr;
+    prog->text.size = size;
+    prog->text.block = text;
+}
+
+void mem_set_data(struct mem_prog *prog, uint32_t addr, int size, void *data)
+{
+    prog->data.addr = addr;
+    prog->data.size = size;
+    prog->data.block = data;
+}
+
+void mem_write_to_addr(struct mem_prog *prog, uint32_t addr, int len, void *buf)
+{
     int i;
-    for (i = 0; i < prog->chunk_count; i++)
-        free(prog->chunks[i].block);
-
-    free(prog->chunks);
+    for (i = 0; i < sizeof(prog->mem) / sizeof(prog->mem[0]); i++) {
+        if (prog->mem[i].addr <= addr && prog->mem[i].addr + prog->mem[i].size >= addr) {
+            if (len <= prog->mem[i].size - (addr - prog->mem[i].addr))
+                memcpy(prog->mem[i].block + (addr - prog->mem[i].addr), buf, len);
+            else
+                memcpy(prog->mem[i].block + (addr - prog->mem[i].addr), buf,
+                        prog->mem[i].size - (addr - prog->mem[i].addr));
+            break;
+        }
+    }
 }
 
-void mem_write_to_addr(struct mem_prog *prog, uint32_t addr, char *data, int len)
+void mem_read_from_addr(struct mem_prog *prog, uint32_t addr, int len, void *buf)
 {
-
-}
-
-char *mem_read_from_addr(struct mem_prog *prog, uint32_t addr, int len)
-{
-
-    return NULL;
+    int i;
+    for (i = 0; i < sizeof(prog->mem) / sizeof(prog->mem[0]); i++) {
+        if (prog->mem[i].addr <= addr && prog->mem[i].addr + prog->mem[i].size >= addr) {
+            if (len <= prog->mem[i].size - (addr - prog->mem[i].addr))
+                memcpy(buf, prog->mem[i].block + (addr - prog->mem[i].addr), len);
+            else
+                memcpy(buf, prog->mem[i].block + (addr - prog->mem[i].addr),
+                        prog->mem[i].size - (addr - prog->mem[i].addr));
+            break;
+        }
+    }
+    return ;
 }
 

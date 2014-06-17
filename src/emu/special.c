@@ -33,12 +33,19 @@ static void op_func_subu(struct mips_emu *emu, int rs, int rt, int rd, int sa)
 
 static void op_func_syscall(struct mips_emu *emu, int rs, int rt, int rd, int sa)
 {
+    uint32_t addr;
+    char byte;
     switch (emu->r.regs[REG_V0]) {
-    case 1:
+    case SYSCALL_PRINT_INT:
         printf("%d", emu->r.regs[REG_A0]);
         break;
-    case 4:
-        /* printf("%s", (char *)emu->r.regs[REG_A0]); */
+    case SYSCALL_PRINT_STRING:
+        addr = emu->r.regs[REG_A0];
+        while (mem_read_from_addr(&emu->mem, addr++, 1, &byte), byte != 0)
+            putchar(byte);
+        break;
+    case SYSCALL_EXIT:
+        emu->stop_prog = 1;
         break;
     default:
         break;

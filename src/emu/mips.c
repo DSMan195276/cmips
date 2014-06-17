@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "mips.h"
+#include "emu/mem.h"
 #include "emu.h"
 #include "special.h"
 
@@ -103,7 +104,10 @@ void mips_disp_inst(uint32_t inst)
 
 void mips_run_next_inst(struct mips_emu *emu)
 {
+    be32 inst;
+    mem_read_from_addr(&emu->mem, emu->r.pc, sizeof(be32), &inst);
     emu->r.pc += 4;
+    mips_run_inst(emu, be32_to_cpu(inst));
 }
 
 void mips_run_inst(struct mips_emu *emu, uint32_t inst)
@@ -141,13 +145,22 @@ void mips_run_inst(struct mips_emu *emu, uint32_t inst)
     }
 }
 
+void mips_run(struct mips_emu *emu)
+{
+    int i;
+    for (i = 0; i < emu->mem.text.size && !emu->stop_prog; i+=4)
+        mips_run_next_inst(emu);
+}
+
 void mips_emu_init(struct mips_emu *emu)
 {
     memset(emu, 0, sizeof(struct mips_emu));
+
+    mem_prog_init(&emu->mem);
 }
 
 void mips_emu_clear(struct mips_emu *emu)
 {
-
+    mem_prog_clear(&emu->mem);
 }
 

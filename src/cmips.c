@@ -21,13 +21,25 @@ struct arg_state cmips_arg_state;
 
 int main(int argc, char **argv)
 {
-
     mips_emu_init(&cmips_emu);
     asm_init(&cmips_asm_gen);
 
-    cmips_asm_gen.lowest_addr = 0x00100000;
+    cmips_asm_gen.text.addr = 0x00100000;
+    /*cmips_asm_gen.data.addr = 0x01000000; */
 
     parse_args(argc, argv, &cmips_arg_state);
+
+    if (cmips_arg_state.run) {
+        mem_set_text(&cmips_emu.mem, cmips_asm_gen.text.addr,
+                cmips_asm_gen.text.len, cmips_asm_gen.text.data);
+        mem_set_data(&cmips_emu.mem, cmips_asm_gen.data.addr,
+                cmips_asm_gen.data.len, cmips_asm_gen.data.data);
+        cmips_asm_gen.text.data = NULL;
+        cmips_asm_gen.data.data = NULL;
+
+        cmips_emu.r.pc = cmips_asm_gen.text.addr;
+        mips_run(&cmips_emu);
+    }
 
     if (!cmips_arg_state.quiet)
         printf("%s", version_text);

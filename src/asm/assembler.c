@@ -125,8 +125,8 @@ int assemble_prog(struct asm_gen *gen, const char *filename)
     assembler_init(&a);
 
     a.gen = gen;
-    a.text.s.addr = gen->lowest_addr;
-    a.data.s.addr = 0x10000000;
+    a.text.s = gen->text;
+    a.data.s = gen->data;
     a.cur_section = SECT_TEXT;
 
     file = fopen(filename, "r");

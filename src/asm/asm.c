@@ -65,6 +65,7 @@ char *asm_escape_string(char *str)
 
 int asm_gen_from_file(struct asm_gen *gen, const char *filename)
 {
+    gen->gp_addr = gen->data.addr + 0x8000;
     return assemble_prog(gen, filename);
 }
 
