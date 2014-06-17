@@ -13,7 +13,7 @@
 
 #include "rbtree.h"
 #include "mips.h"
-#include "tokenizer_lexer.h"
+#include "lexer.h"
 #include "asm.h"
 #include "assembler_internal.h"
 #include "inst_parse.h"
@@ -104,7 +104,7 @@ static void assembler_free(struct assembler *a)
     struct label_list *l;
     struct label_marker *m;
 
-    free(a->tokenizer.ident);
+    free(a->lexer.ident);
 
     rb_foreach_postorder(&a->labels, l, struct label_list, node)
         free(l);
@@ -146,7 +146,7 @@ int assemble_prog(struct asm_gen *gen, const char *filename)
         break;           \
     }
 
-    while ((a.tok = yylex(&a.tokenizer)) != TOK_EOF) {
+    while ((a.tok = yylex(&a.lexer)) != TOK_EOF) {
 
         /* This label is here for the case that a token is read which an
          * internal function wants to pass off to the main parser. This label
@@ -174,7 +174,7 @@ again:
 
 exit:
     if (ret == 1)
-        printf("Unexpected characters on line %d: '%s'\n", a.tokenizer.line, yytext);
+        printf("Unexpected characters on line %d: '%s'\n", a.lexer.line, yytext);
 
     gen->text.data = a.text.s.data;
     gen->text.len= a.text.s.len;;

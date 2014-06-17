@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 #include "mips.h"
-#include "tokenizer_lexer.h"
+#include "lexer.h"
 #include "asm.h"
 #include "rbtree.h"
 
@@ -82,7 +82,7 @@ enum section {
 
 struct assembler {
     struct asm_gen *gen;
-    struct tokenizer tokenizer;
+    struct lexer lexer;
 
     enum asm_token tok;
 

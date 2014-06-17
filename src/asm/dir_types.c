@@ -9,13 +9,13 @@
 
 const char *asm_tok_types_str[] = {
 #define X(id) #id,
-# include "tokenizer_lexer.x"
+# include "lexer.x"
 #undef X
 };
 
 const char *asm_dir_types_str[] = {
 #define X(id, func, sect) #id,
-# include "tokenizer_lexer_dir.x"
+# include "lexer_dir.x"
 #undef X
 };
 

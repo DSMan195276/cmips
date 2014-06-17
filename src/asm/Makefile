@@ -1,14 +1,14 @@
-OBJS_y += asm.o assembler.o dir_parse.o inst_parse.o label_parse.o tokenizer_dir_types.o
+OBJS_y += asm.o assembler.o dir_parse.o inst_parse.o label_parse.o dir_types.o
 
-OBJS_y += tokenizer_lexer.o
+OBJS_y += lexer.o
 
-CLEAN_LIST_y += tokenizer_lexer.c
+CLEAN_LIST_y += lexer.c
 
-$(objtree)/tokenizer_lexer.c: $(srctree)/tokenizer_lexer.l
+$(objtree)/lexer.c: $(srctree)/lexer.l
 	@echo " LEX     $@"
 	$(Q)$(LEX) $(LFLAGS) -o $@ $<
 
-$(objtree)/tokenizer_lexer.o: $(objtree)/tokenizer_lexer.c
+$(objtree)/lexer.o: $(objtree)/lexer.c
 	@echo " CC      $@"
 	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 

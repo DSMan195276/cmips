@@ -17,7 +17,7 @@
 enum internal_ret parse_label(struct assembler *a)
 {
     struct label_list *label;
-    size_t size = sizeof(struct label_list) + strlen(a->tokenizer.ident) + 1;
+    size_t size = sizeof(struct label_list) + strlen(a->lexer.ident) + 1;
 
     label = malloc(size);
     memset(label, 0, size);
@@ -26,12 +26,12 @@ enum internal_ret parse_label(struct assembler *a)
         label->addr = a->text.last_addr;
     else
         label->addr = a->data.last_addr;
-    strcpy(label->ident, a->tokenizer.ident);
+    strcpy(label->ident, a->lexer.ident);
 
     printf("Label: %s, 0x%08x\n", label->ident, label->addr);
 
     if (!rb_insert(&a->labels, &label->node)) {
-        printf("Error: Duplicate label '%s' on line %d\n", label->ident, a->tokenizer.line);
+        printf("Error: Duplicate label '%s' on line %d\n", label->ident, a->lexer.line);
         free(label);
         return RET_ERR;
     }

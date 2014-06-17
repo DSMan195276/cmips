@@ -13,13 +13,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include "mips.h"
-#include "tokenizer_lexer.h"
+#include "lexer.h"
 
 #define YY_NO_INPUT
 
-#define YY_DECL enum asm_token yylex (struct tokenizer *state)
+#define YY_DECL enum asm_token yylex (struct lexer *state)
 
-static void append_c(struct tokenizer *t, char ch);
+static void append_c(struct lexer *t, char ch);
 %}
 
 %option noyywrap
@@ -183,7 +183,7 @@ static void append_c(struct tokenizer *t, char ch);
 
 %%
 
-static void append_c(struct tokenizer *t, char ch)
+static void append_c(struct lexer *t, char ch)
 {
     t->id_len++;
     if (t->id_alloc < t->id_len) {

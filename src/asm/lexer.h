@@ -13,25 +13,25 @@
 
 enum asm_token {
 #define X(id) id,
-# include "tokenizer_lexer.x"
+# include "lexer.x"
 #undef X
 };
 
 enum asm_dir {
     DIR_NONE = -1,
 #define X(dir, func, sect) DIR_##dir,
-# include "tokenizer_lexer_dir.x"
+# include "lexer_dir.x"
 #undef X
 };
 
-struct tokenizer {
+struct lexer {
     int line;
     int id_len, id_alloc;
     char *ident;
     uint32_t val;
 };
 
-enum asm_token yylex(struct tokenizer *);
+enum asm_token yylex(struct lexer *);
 extern FILE *yyin;
 extern char *yytext;
 extern int yylex_destroy(void);

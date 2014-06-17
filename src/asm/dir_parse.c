@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "assembler_internal.h"
-#include "tokenizer_lexer.h"
+#include "lexer.h"
 #include "dir_parse.h"
 
 struct dir {
@@ -21,37 +21,37 @@ struct dir {
 
 static enum internal_ret dir_align(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
-    align_seg(&a->data, a->tokenizer.val);
+    align_seg(&a->data, a->lexer.val);
     return RET_CONTINUE;
 }
 
 static enum internal_ret dir_ascii(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_QUOTE_STRING);
 
-    add_to_seg(&a->data, a->tokenizer.ident, strlen(a->tokenizer.ident));
+    add_to_seg(&a->data, a->lexer.ident, strlen(a->lexer.ident));
     return RET_CONTINUE;
 }
 
 static enum internal_ret dir_asciiz(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_QUOTE_STRING);
 
-    add_to_seg(&a->data, a->tokenizer.ident, strlen(a->tokenizer.ident) + 1);
+    add_to_seg(&a->data, a->lexer.ident, strlen(a->lexer.ident) + 1);
     return RET_CONTINUE;
 }
 
 static enum internal_ret dir_byte(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
-    add_to_seg(&a->data, &a->tokenizer.val, 1);
+    add_to_seg(&a->data, &a->lexer.val, 1);
     return RET_CONTINUE;
 }
 
@@ -68,10 +68,10 @@ static enum internal_ret dir_double(struct assembler *a)
 
 static enum internal_ret dir_extern(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_IDENT);
 
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
     return RET_CONTINUE;
@@ -84,7 +84,7 @@ static enum internal_ret dir_float(struct assembler *a)
 
 static enum internal_ret dir_globl(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_IDENT);
 
     return RET_CONTINUE;
@@ -92,10 +92,10 @@ static enum internal_ret dir_globl(struct assembler *a)
 
 static enum internal_ret dir_half(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
-    add_to_seg(&a->data, &a->tokenizer.val, 2);
+    add_to_seg(&a->data, &a->lexer.val, 2);
     return RET_CONTINUE;
 }
 
@@ -111,11 +111,11 @@ static enum internal_ret dir_ktext(struct assembler *a)
 
 static enum internal_ret dir_space(struct assembler *a)
 {
-    a->tok = yylex(&a->tokenizer);
+    a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
-    printf("Space: %d\n", a->tokenizer.val);
-    add_to_seg(&a->data, NULL, a->tokenizer.val);
+    printf("Space: %d\n", a->lexer.val);
+    add_to_seg(&a->data, NULL, a->lexer.val);
     return RET_CONTINUE;
 }
 
@@ -133,7 +133,7 @@ static enum internal_ret dir_word(struct assembler *a)
 
 static struct dir directives[] = {
 #define X(enu, func, sect) { DIR_##enu, func, sect },
-# include "tokenizer_lexer_dir.x"
+# include "lexer_dir.x"
 #undef X
     { 0 }
 };
@@ -142,7 +142,7 @@ enum internal_ret parse_directive(struct assembler *a)
 {
     struct dir *d;
     for (d = directives; d->id != DIR_NONE; d++) {
-        if (d->id == a->tokenizer.val) {
+        if (d->id == a->lexer.val) {
             if ((a->cur_section | d->required_sect) != d->required_sect) {
                 printf(".%s is not allowed in the %s segment\n", asm_dir_types_str[d->id], sect_to_str(a->cur_section));
                 return RET_ERR;

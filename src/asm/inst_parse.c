@@ -10,7 +10,7 @@
 #include <string.h>
 
 #include "mips.h"
-#include "tokenizer_lexer.h"
+#include "lexer.h"
 #include "asm.h"
 #include "assembler_internal.h"
 
@@ -225,22 +225,22 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
     memset(r, 0, sizeof(struct reg));
 
     for (i = 0; i < inst->reg_count; i++) {
-        a->tok = yylex(&a->tokenizer);
+        a->tok = yylex(&a->lexer);
 
         switch (inst->rs[i]) {
         case REG_REGISTER:
             expect_token(a->tok, TOK_REGISTER);
 
-            r[i].val = a->tokenizer.val;
+            r[i].val = a->lexer.val;
             break;
         case REG_IMMEDIATE:
             expect_token(a->tok, TOK_INTEGER);
 
-            r[i].val = a->tokenizer.val;
+            r[i].val = a->lexer.val;
             break;
         case REG_ADDRESS:
             if (a->tok == TOK_INTEGER) {
-                r[i].val = a->tokenizer.val;
+                r[i].val = a->lexer.val;
             } else if (a->tok == TOK_IDENT) {
 
             } else {
@@ -250,25 +250,25 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
         case REG_DEREF_REG:
             expect_token(a->tok, TOK_INTEGER);
 
-            r[i].val = a->tokenizer.val;
+            r[i].val = a->lexer.val;
 
-            a->tok = yylex(&a->tokenizer);
+            a->tok = yylex(&a->lexer);
             expect_token(a->tok, TOK_LPAREN);
 
-            a->tok = yylex(&a->tokenizer);
+            a->tok = yylex(&a->lexer);
             expect_token(a->tok, TOK_REGISTER);
 
-            r[i + 1].val = a->tokenizer.val;
+            r[i + 1].val = a->lexer.val;
             i++;
 
-            a->tok = yylex(&a->tokenizer);
+            a->tok = yylex(&a->lexer);
             expect_token(a->tok, TOK_RPAREN);
 
             break;
         }
 
         if (i != inst->reg_count - 1) {
-            a->tok = yylex(&a->tokenizer);
+            a->tok = yylex(&a->lexer);
             expect_token(a->tok, TOK_COMMA);
         }
     }
@@ -285,7 +285,7 @@ enum internal_ret parse_command(struct assembler *a)
     struct inst_desc *i;
 
     for (i = ids; i->ident != NULL; i++)
-        if (stringcasecmp(a->tokenizer.ident, i->ident) == 0)
+        if (stringcasecmp(a->lexer.ident, i->ident) == 0)
             return parse_instruction(a, i);
 
     return RET_UNEXPECTED;
