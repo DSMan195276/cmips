@@ -24,11 +24,11 @@ int main(int argc, char **argv)
 
     parse_args(argc, argv, &cmips_arg_state);
 
-    if (cmips_arg_state.run)
-        mips_run(&cmips_emu);
-
     if (!cmips_arg_state.quiet)
         printf("%s", version_text);
+
+    if (cmips_arg_state.run)
+        mips_run(&cmips_emu);
 
     if (!cmips_arg_state.noinput)
         run_input_loop();
