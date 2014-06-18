@@ -27,6 +27,7 @@ void mem_prog_clear(struct mem_prog *prog)
 
 void mem_set_stack(struct mem_prog *prog, uint32_t addr, int size)
 {
+    free(prog->stack.block);
     prog->stack.addr = addr - size;
     prog->stack.size = size;
     prog->stack.block = malloc(size);
@@ -34,6 +35,7 @@ void mem_set_stack(struct mem_prog *prog, uint32_t addr, int size)
 
 void mem_set_text(struct mem_prog *prog, uint32_t addr, int size, void *text)
 {
+    free(prog->text.block);
     prog->text.addr = addr;
     prog->text.size = size;
     prog->text.block = text;
@@ -41,6 +43,7 @@ void mem_set_text(struct mem_prog *prog, uint32_t addr, int size, void *text)
 
 void mem_set_data(struct mem_prog *prog, uint32_t addr, int size, void *data)
 {
+    free(prog->data.block);
     prog->data.addr = addr;
     prog->data.size = size;
     prog->data.block = data;

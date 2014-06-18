@@ -14,6 +14,7 @@
 
 #include "cmips.h"
 #include "asm.h"
+#include "emu.h"
 #include "args.h"
 
 const char *version_text =
@@ -192,7 +193,7 @@ void parse_args(int argc, char **argv, struct arg_state *s)
             s->cmd_script = argarg;
             break;
         case ARG_EXTRA:
-            if (asm_gen_from_file(&cmips_asm_gen, argarg) != 0)
+            if (mips_load_file(&cmips_emu, argarg))
                 printf("Error assembling file.\n");
             break;
         default:

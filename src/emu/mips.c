@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "mips.h"
@@ -152,15 +153,44 @@ void mips_run(struct mips_emu *emu)
         mips_run_next_inst(emu);
 }
 
+void mips_reset_emu(struct mips_emu *emu)
+{
+    void *m;
+
+    m = malloc(emu->gen.text.len);
+    memcpy(m, emu->gen.text.data, emu->gen.text.len);
+    mem_set_text(&emu->mem, emu->gen.text.addr, emu->gen.text.len, m);
+
+    m = malloc(emu->gen.data.len);
+    memcpy(m, emu->gen.data.data, emu->gen.data.len);
+    mem_set_data(&emu->mem, emu->gen.data.addr, emu->gen.data.len, m);
+
+    emu->r.pc = emu->gen.text.addr;
+}
+
+int mips_load_file(struct mips_emu *emu, const char *filename)
+{
+    if (asm_gen_from_file(&emu->gen, filename))
+        return 1;
+
+    mips_reset_emu(emu);
+    return 0;
+}
+
 void mips_emu_init(struct mips_emu *emu)
 {
     memset(emu, 0, sizeof(struct mips_emu));
 
     mem_prog_init(&emu->mem);
+    asm_init(&emu->gen);
+
+    emu->gen.text.addr = 0x00100000;
+    emu->gen.data.addr = 0;
 }
 
 void mips_emu_clear(struct mips_emu *emu)
 {
     mem_prog_clear(&emu->mem);
+    asm_clear(&emu->gen);
 }
 

@@ -11,6 +11,7 @@
 
 #include "mips.h"
 #include "emu/mem.h"
+#include "asm.h"
 
 /* This is an actual MIPS machine state. One of these should be created and
  * then sent to mips_emu_init() to be initalized. When you're done with it,
@@ -18,6 +19,8 @@
 struct mips_emu {
     struct mips_regs r;
     struct mem_prog  mem;
+
+    struct asm_gen gen;
 
     unsigned int stop_prog :1;
 };
@@ -28,5 +31,8 @@ void mips_emu_clear(struct mips_emu *);
 void mips_run_inst(struct mips_emu *, uint32_t inst);
 void mips_run_next_inst(struct mips_emu *);
 void mips_run(struct mips_emu *);
+
+void mips_reset_emu(struct mips_emu *);
+int mips_load_file(struct mips_emu *, const char *filename);
 
 #endif
