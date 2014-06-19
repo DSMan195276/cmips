@@ -28,6 +28,9 @@ struct parser {
 void parser_init(struct parser *);
 void parser_clear(struct parser *);
 
-int parser_asm_file(struct parser *, const char *filename);
+/* Matches based on the file extension */
+int parser_load_file(struct parser *, const char *filename);
+
+int parser_load_asm_file(struct parser *, const char *filename);
 
 #endif

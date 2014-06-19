@@ -161,7 +161,7 @@ int emulator_load_from_file(struct emulator *emu, const char *filename)
 
     parser.text.addr = 0x00100000;
 
-    if (parser_asm_file(&parser, filename)) {
+    if (parser_load_file(&parser, filename)) {
         ret = 1;
         goto cleanup;
     }
