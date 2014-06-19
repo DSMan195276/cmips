@@ -13,6 +13,7 @@
 
 #include "mips.h"
 #include "emu/mem.h"
+#include "parser.h"
 #include "emu.h"
 #include "special.h"
 
@@ -157,24 +158,51 @@ void mips_reset_emu(struct mips_emu *emu)
 {
     void *m;
 
-    m = malloc(emu->gen.text.len);
-    memcpy(m, emu->gen.text.data, emu->gen.text.len);
-    mem_set_text(&emu->mem, emu->gen.text.addr, emu->gen.text.len, m);
+    m = malloc(emu->backup_text.len);
+    memcpy(m, emu->backup_text.data, emu->backup_text.len);
+    mem_set_text(&emu->mem, emu->backup_text.addr, emu->backup_text.len, m);
 
-    m = malloc(emu->gen.data.len);
-    memcpy(m, emu->gen.data.data, emu->gen.data.len);
-    mem_set_data(&emu->mem, emu->gen.data.addr, emu->gen.data.len, m);
+    m = malloc(emu->backup_data.len);
+    memcpy(m, emu->backup_data.data, emu->backup_data.len);
+    mem_set_data(&emu->mem, emu->backup_data.addr, emu->backup_data.len, m);
 
-    emu->r.pc = emu->gen.text.addr;
+    emu->r.pc = emu->backup_text.addr;
 }
 
-int mips_load_file(struct mips_emu *emu, const char *filename)
+void mips_load_from_parser(struct mips_emu *emu, struct parser *parser)
 {
-    if (asm_gen_from_file(&emu->gen, filename))
-        return 1;
+    emu->backup_text.data = malloc(parser->text.len);
+    memcpy(emu->backup_text.data, parser->text.data, parser->text.len);
+    emu->backup_text.len = parser->text.len;
+    emu->backup_text.alloced = parser->text.len;
+    emu->backup_text.addr = parser->text.addr;
+
+    emu->backup_data.data = malloc(parser->data.len);
+    memcpy(emu->backup_data.data, parser->data.data, parser->data.len);
+    emu->backup_data.len = parser->data.len;
+    emu->backup_data.alloced = parser->data.len;
+    emu->backup_data.addr = parser->data.addr;
 
     mips_reset_emu(emu);
-    return 0;
+}
+
+int mips_load_from_file(struct mips_emu *emu, const char *filename)
+{
+    int ret = 0;
+    struct parser parser;
+
+    parser_init(&parser);
+
+    if (parser_asm_file(&parser, filename)) {
+        ret = 1;
+        goto cleanup;
+    }
+
+    mips_load_from_parser(emu, &parser);
+
+cleanup:
+    parser_clear(&parser);
+    return ret;
 }
 
 void mips_emu_init(struct mips_emu *emu)
@@ -182,15 +210,12 @@ void mips_emu_init(struct mips_emu *emu)
     memset(emu, 0, sizeof(struct mips_emu));
 
     mem_prog_init(&emu->mem);
-    asm_init(&emu->gen);
-
-    emu->gen.text.addr = 0x00100000;
-    emu->gen.data.addr = 0;
 }
 
 void mips_emu_clear(struct mips_emu *emu)
 {
     mem_prog_clear(&emu->mem);
-    asm_clear(&emu->gen);
+    free(emu->backup_text.data);
+    free(emu->backup_data.data);
 }
 

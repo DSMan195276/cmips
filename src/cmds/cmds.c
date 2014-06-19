@@ -14,7 +14,7 @@
 #include "cmips.h"
 #include "input.h"
 #include "mips.h"
-#include "asm.h"
+#include "parser.h"
 #include "cmds.h"
 
 static void dump_regs(int argc, char **argv)
@@ -53,7 +53,7 @@ static void load_file(int argc, char **argv)
         return ;
     }
 
-    mips_load_file(&cmips_emu, argv[0]);
+    mips_load_from_file(&cmips_emu, argv[0]);
 }
 
 static void script(int argc, char **argv)

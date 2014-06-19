@@ -13,7 +13,7 @@
 #include <getopt.h>
 
 #include "cmips.h"
-#include "asm.h"
+#include "parser.h"
 #include "emu.h"
 #include "args.h"
 
@@ -193,7 +193,7 @@ void parse_args(int argc, char **argv, struct arg_state *s)
             s->cmd_script = argarg;
             break;
         case ARG_EXTRA:
-            if (mips_load_file(&cmips_emu, argarg))
+            if (mips_load_from_file(&cmips_emu, argarg))
                 printf("Error assembling file.\n");
             break;
         default:

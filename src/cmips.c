@@ -11,7 +11,6 @@
 
 #include "mips.h"
 #include "emu.h"
-#include "asm.h"
 #include "args.h"
 #include "input.h"
 

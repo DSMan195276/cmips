@@ -116,7 +116,7 @@ static void assembler_free(struct assembler *a)
     free(a->data.s.data);
 }
 
-int assemble_prog(struct asm_gen *gen, const char *filename)
+int assemble_prog(struct parser *gen, const char *filename)
 {
     struct assembler a;
     FILE *file;
@@ -177,7 +177,7 @@ exit:
         printf("Unexpected characters on line %d: '%s'\n", a.lexer.line, yytext);
 
     gen->text.data = a.text.s.data;
-    gen->text.len= a.text.s.len;;
+    gen->text.len = a.text.s.len;;
     a.text.s.data = NULL;
 
     gen->data.data = a.data.s.data;

@@ -15,17 +15,6 @@
 #include "assembler.h"
 #include "asm.h"
 
-void asm_init(struct asm_gen *gen)
-{
-    memset(gen, 0, sizeof(struct asm_gen));
-}
-
-void asm_clear(struct asm_gen *gen)
-{
-    free(gen->text.data);
-    free(gen->data.data);
-}
-
 char *asm_escape_string(char *str)
 {
     char *res;
@@ -63,9 +52,9 @@ char *asm_escape_string(char *str)
     return res;
 }
 
-int asm_gen_from_file(struct asm_gen *gen, const char *filename)
+int parser_asm_file(struct parser *parser, const char *filename)
 {
-    gen->gp_addr = gen->data.addr + 0x8000;
-    return assemble_prog(gen, filename);
+    parser->gp_addr = parser->data.addr + 0x8000;
+    return assemble_prog(parser, filename);
 }
 

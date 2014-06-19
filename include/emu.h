@@ -11,7 +11,7 @@
 
 #include "mips.h"
 #include "emu/mem.h"
-#include "asm.h"
+#include "parser.h"
 
 /* This is an actual MIPS machine state. One of these should be created and
  * then sent to mips_emu_init() to be initalized. When you're done with it,
@@ -20,9 +20,10 @@ struct mips_emu {
     struct mips_regs r;
     struct mem_prog  mem;
 
-    struct asm_gen gen;
-
     unsigned int stop_prog :1;
+
+    struct parser_segment backup_text;
+    struct parser_segment backup_data;
 };
 
 void mips_emu_init(struct mips_emu *);
@@ -33,6 +34,8 @@ void mips_run_next_inst(struct mips_emu *);
 void mips_run(struct mips_emu *);
 
 void mips_reset_emu(struct mips_emu *);
-int mips_load_file(struct mips_emu *, const char *filename);
+
+void mips_load_from_parser(struct mips_emu *, struct parser *);
+int mips_load_from_file(struct mips_emu *emu, const char *filename);
 
 #endif

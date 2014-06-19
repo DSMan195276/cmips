@@ -1,4 +1,4 @@
 OBJS_y += cmips.o common.o input.o rbtree.o
 
-DIRINC_y += args asm cmds mips emu
+DIRINC_y += args parsers cmds mips emu
 

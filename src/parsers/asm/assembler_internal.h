@@ -12,6 +12,7 @@
 
 #include "mips.h"
 #include "lexer.h"
+#include "parser.h"
 #include "asm.h"
 #include "rbtree.h"
 
@@ -70,7 +71,7 @@ enum internal_ret {
 };
 
 struct asm_segment {
-    struct segment s;
+    struct parser_segment s;
     uint32_t last_addr;
     uint32_t align_next;
 };
@@ -81,7 +82,7 @@ enum section {
 };
 
 struct assembler {
-    struct asm_gen *gen;
+    struct parser *gen;
     struct lexer lexer;
 
     enum asm_token tok;

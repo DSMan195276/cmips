@@ -5,11 +5,15 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
-#ifndef SRC_ASM_ASSEMBLER_H
-#define SRC_ASM_ASSEMBLER_H
+#ifndef INCLUDE_ASM_H
+#define INCLUDE_ASM_H
+#include "common.h"
 
-#include "asm.h"
+#include <stdint.h>
 
-int assemble_prog(struct asm_gen *gen, const char *filename);
+#include "parser.h"
+
+/* Must free result */
+char *asm_escape_string(char *str);
 
 #endif

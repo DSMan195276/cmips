@@ -5,32 +5,29 @@
  * under the terms of the GNU General Public License v2 as published by the
  * Free Software Foundation.
  */
-#ifndef INCLUDE_ASM_H
-#define INCLUDE_ASM_H
-#include "common.h"
+#ifndef INCLUDE_PARSER_H
+#define INCLUDE_PARSER_H
 
 #include <stdint.h>
+#include <stdlib.h>
 
-struct segment {
+struct parser_segment {
     char *data;
     size_t alloced;
     size_t len;
     uint32_t addr;
 };
 
-struct asm_gen {
-    struct segment text;
-    struct segment data;
+struct parser {
+    struct parser_segment text;
+    struct parser_segment data;
 
     uint32_t gp_addr;
 };
 
-void asm_init(struct asm_gen *);
-void asm_clear(struct asm_gen *);
+void parser_init(struct parser *);
+void parser_clear(struct parser *);
 
-int asm_gen_from_file(struct asm_gen *, const char *filename);
-
-/* Must free result */
-char *asm_escape_string(char *str);
+int parser_asm_file(struct parser *, const char *filename);
 
 #endif
