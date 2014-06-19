@@ -22,7 +22,7 @@ void parser_clear(struct parser *parser)
     free(parser->data.data);
 }
 
-struct ext_parser {
+const static struct ext_parser {
     const char *extension;
     int (*parser) (struct parser *, const char *);
 } parsers[] = {
@@ -35,7 +35,7 @@ int parser_load_file(struct parser *parser, const char *filename)
 {
     const char *e = NULL;
     const char *ext = filename;
-    struct ext_parser *p;
+    const struct ext_parser *p;
 
     while (*ext) {
         if (*ext == '.')
