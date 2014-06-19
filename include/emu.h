@@ -16,7 +16,7 @@
 /* This is an actual MIPS machine state. One of these should be created and
  * then sent to mips_emu_init() to be initalized. When you're done with it,
  * call mips_emu_clear to toss out any memory it may be holding on to. */
-struct mips_emu {
+struct emulator {
     struct mips_regs r;
     struct mem_prog  mem;
 
@@ -26,16 +26,16 @@ struct mips_emu {
     struct parser_segment backup_data;
 };
 
-void mips_emu_init(struct mips_emu *);
-void mips_emu_clear(struct mips_emu *);
+void emulator_init(struct emulator *);
+void emulator_clear(struct emulator *);
 
-void mips_run_inst(struct mips_emu *, uint32_t inst);
-void mips_run_next_inst(struct mips_emu *);
-void mips_run(struct mips_emu *);
+void emulator_run_inst(struct emulator *, uint32_t inst);
+void emulator_run_next_inst(struct emulator *);
+void emulator_run(struct emulator *);
 
-void mips_reset_emu(struct mips_emu *);
+void emulator_reset(struct emulator *);
 
-void mips_load_from_parser(struct mips_emu *, struct parser *);
-int mips_load_from_file(struct mips_emu *emu, const char *filename);
+void emulator_load_from_parser(struct emulator *, struct parser *);
+int  emulator_load_from_file(struct emulator *emu, const char *filename);
 
 #endif

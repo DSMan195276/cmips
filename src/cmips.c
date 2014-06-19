@@ -14,12 +14,12 @@
 #include "args.h"
 #include "input.h"
 
-struct mips_emu cmips_emu;
+struct emulator cmips_emu;
 struct arg_state cmips_arg_state;
 
 int main(int argc, char **argv)
 {
-    mips_emu_init(&cmips_emu);
+    emulator_init(&cmips_emu);
 
     parse_args(argc, argv, &cmips_arg_state);
 
@@ -27,12 +27,12 @@ int main(int argc, char **argv)
         printf("%s", version_text);
 
     if (cmips_arg_state.run)
-        mips_run(&cmips_emu);
+        emulator_run(&cmips_emu);
 
     if (!cmips_arg_state.noinput)
         run_input_loop();
 
-    mips_emu_clear(&cmips_emu);
+    emulator_clear(&cmips_emu);
 
     return 0;
 }

@@ -52,7 +52,7 @@ static const struct arg cmips_args[] = {
     { 0 }
 };
 
-static const char *argarg;
+static const void *argarg;
 
 static int parser_argc, current_arg = 1;
 static char **parser_argv;
@@ -193,7 +193,7 @@ void parse_args(int argc, char **argv, struct arg_state *s)
             s->cmd_script = argarg;
             break;
         case ARG_EXTRA:
-            if (mips_load_from_file(&cmips_emu, argarg))
+            if (emulator_load_from_file(&cmips_emu, argarg))
                 printf("Error assembling file.\n");
             break;
         default:

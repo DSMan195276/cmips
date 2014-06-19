@@ -12,6 +12,6 @@
 
 #include "emu.h"
 
-void op_special(struct mips_emu *emu, int rs, int rt, int rd, int sa, int func);
+void op_special(struct emulator *emu, int rs, int rt, int rd, int sa, int func);
 
 #endif

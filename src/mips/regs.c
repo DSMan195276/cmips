@@ -35,3 +35,39 @@ void mips_dump_regs(struct mips_regs *regs)
             regs->hi, regs->lo, regs->pc);
 }
 
+void mips_disp_inst(uint32_t inst)
+{
+    enum inst_type t = mips_opcode_to_type[INST_OPCODE(inst)];
+    printf("Inst: 0x%08x(%s)\n- ", inst, mips_opcode_names[INST_OPCODE(inst)]);
+    if (t == R_FORMAT) {
+        int rs = INST_R_RS(inst);
+        int rt = INST_R_RT(inst);
+        int rd = INST_R_RD(inst);
+        int sa = INST_R_SA(inst);
+        int func = INST_R_FUNC(inst);
+
+        printf("R_FMT: rs: 0x%02x($%s), rt: 0x%02x($%s)\n         rd: 0x%02x($%s), sa: 0x%02x($%s), func: 0x%02x(%s)\n"
+                , rs, mips_reg_names_strs[rs]
+                , rt, mips_reg_names_strs[rt]
+                , rd, mips_reg_names_strs[rd]
+                , sa, mips_reg_names_strs[sa]
+                , func, mips_function_names[func]);
+    } else if (t == I_FORMAT) {
+        int rs = INST_I_RS(inst);
+        int rt = INST_I_RT(inst);
+        int off = INST_I_OFFSET(inst);
+
+        printf("I_FMT: rs: 0x%02x($%s), rt: 0x%02x($%s), off: 0x%04x(%d)\n"
+                , rs, mips_reg_names_strs[rs]
+                , rt, mips_reg_names_strs[rt]
+                , off, off);
+    } else if (t == J_FORMAT) {
+        int addr = INST_J_INDEX(inst);
+
+        printf("J_FMT: Jmp Addr: 0x%08x(%d) - Aligned: 0x%08x(%d)\n"
+                , addr, addr
+                , addr << 2, addr << 2);
+    }
+}
+
+

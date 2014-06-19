@@ -17,29 +17,29 @@
 #include "emu.h"
 #include "special.h"
 
-static void op_jmp(struct mips_emu *emu, int addr)
+static void op_jmp(struct emulator *emu, int addr)
 {
 
 }
 
-static void op_jmp_load(struct mips_emu *emu, int addr)
+static void op_jmp_load(struct emulator *emu, int addr)
 {
 
 }
 
-static void op_addi(struct mips_emu *emu, int rs, int rt, int val)
+static void op_addi(struct emulator *emu, int rs, int rt, int val)
 {
     emu->r.regs[rt] = emu->r.regs[rs] + val;
 }
 
-static void nop_i(struct mips_emu *emu, int rs, int rt, int val)
+static void nop_i(struct emulator *emu, int rs, int rt, int val)
 {
 
 }
 
 enum inst_type mips_opcode_to_type[64] = {
 #define X(op, code, fmt, func) [OP_##op] = fmt,
-# include "mips/mips_emu_opcode.x"
+# include "mips/emu_opcode.x"
 #undef X
 };
 
@@ -53,66 +53,32 @@ enum inst_type mips_opcode_to_type[64] = {
  */
 static void (*op_jmp_table[64])() = {
 #define X(op, code, fmt, func) [OP_##op] = func,
-# include "mips/mips_emu_opcode.x"
+# include "mips/emu_opcode.x"
 #undef X
 };
 
 const char *mips_opcode_names[64] = {
 #define X(op, val, fmt, func) [OP_##op] = #op,
-# include "mips/mips_emu_opcode.x"
+# include "mips/emu_opcode.x"
 #undef X
 };
 
 const char *mips_function_names[64] = {
 #define X(op, val, func) [OP_FUNC_##op] = #op,
-# include "mips/mips_emu_function.x"
+# include "mips/emu_function.x"
 #undef X
 };
 
-void mips_disp_inst(uint32_t inst)
-{
-    enum inst_type t = mips_opcode_to_type[INST_OPCODE(inst)];
-    printf("Inst: 0x%08x(%s)\n- ", inst, mips_opcode_names[INST_OPCODE(inst)]);
-    if (t == R_FORMAT) {
-        int rs = INST_R_RS(inst);
-        int rt = INST_R_RT(inst);
-        int rd = INST_R_RD(inst);
-        int sa = INST_R_SA(inst);
-        int func = INST_R_FUNC(inst);
 
-        printf("R_FMT: rs: 0x%02x($%s), rt: 0x%02x($%s)\n         rd: 0x%02x($%s), sa: 0x%02x($%s), func: 0x%02x(%s)\n"
-                , rs, mips_reg_names_strs[rs]
-                , rt, mips_reg_names_strs[rt]
-                , rd, mips_reg_names_strs[rd]
-                , sa, mips_reg_names_strs[sa]
-                , func, mips_function_names[func]);
-    } else if (t == I_FORMAT) {
-        int rs = INST_I_RS(inst);
-        int rt = INST_I_RT(inst);
-        int off = INST_I_OFFSET(inst);
-
-        printf("I_FMT: rs: 0x%02x($%s), rt: 0x%02x($%s), off: 0x%04x(%d)\n"
-                , rs, mips_reg_names_strs[rs]
-                , rt, mips_reg_names_strs[rt]
-                , off, off);
-    } else if (t == J_FORMAT) {
-        int addr = INST_J_INDEX(inst);
-
-        printf("J_FMT: Jmp Addr: 0x%08x(%d) - Aligned: 0x%08x(%d)\n"
-                , addr, addr
-                , addr << 2, addr << 2);
-    }
-}
-
-void mips_run_next_inst(struct mips_emu *emu)
+void emulator_run_next_inst(struct emulator *emu)
 {
     be32 inst;
     mem_read_from_addr(&emu->mem, emu->r.pc, sizeof(be32), &inst);
     emu->r.pc += 4;
-    mips_run_inst(emu, be32_to_cpu(inst));
+    emulator_run_inst(emu, be32_to_cpu(inst));
 }
 
-void mips_run_inst(struct mips_emu *emu, uint32_t inst)
+void emulator_run_inst(struct emulator *emu, uint32_t inst)
 {
     int op = INST_OPCODE(inst);
     void (*f)() = op_jmp_table[op];
@@ -147,14 +113,14 @@ void mips_run_inst(struct mips_emu *emu, uint32_t inst)
     }
 }
 
-void mips_run(struct mips_emu *emu)
+void emulator_run(struct emulator *emu)
 {
     int i;
     for (i = 0; i < emu->mem.text.size && !emu->stop_prog; i+=4)
-        mips_run_next_inst(emu);
+        emulator_run_next_inst(emu);
 }
 
-void mips_reset_emu(struct mips_emu *emu)
+void emulator_reset(struct emulator *emu)
 {
     void *m;
 
@@ -169,7 +135,7 @@ void mips_reset_emu(struct mips_emu *emu)
     emu->r.pc = emu->backup_text.addr;
 }
 
-void mips_load_from_parser(struct mips_emu *emu, struct parser *parser)
+void emulator_load_from_parser(struct emulator *emu, struct parser *parser)
 {
     emu->backup_text.data = malloc(parser->text.len);
     memcpy(emu->backup_text.data, parser->text.data, parser->text.len);
@@ -183,36 +149,38 @@ void mips_load_from_parser(struct mips_emu *emu, struct parser *parser)
     emu->backup_data.alloced = parser->data.len;
     emu->backup_data.addr = parser->data.addr;
 
-    mips_reset_emu(emu);
+    emulator_reset(emu);
 }
 
-int mips_load_from_file(struct mips_emu *emu, const char *filename)
+int emulator_load_from_file(struct emulator *emu, const char *filename)
 {
     int ret = 0;
     struct parser parser;
 
     parser_init(&parser);
 
+    parser.text.addr = 0x00100000;
+
     if (parser_asm_file(&parser, filename)) {
         ret = 1;
         goto cleanup;
     }
 
-    mips_load_from_parser(emu, &parser);
+    emulator_load_from_parser(emu, &parser);
 
 cleanup:
     parser_clear(&parser);
     return ret;
 }
 
-void mips_emu_init(struct mips_emu *emu)
+void emulator_init(struct emulator *emu)
 {
-    memset(emu, 0, sizeof(struct mips_emu));
+    memset(emu, 0, sizeof(struct emulator));
 
     mem_prog_init(&emu->mem);
 }
 
-void mips_emu_clear(struct mips_emu *emu)
+void emulator_clear(struct emulator *emu)
 {
     mem_prog_clear(&emu->mem);
     free(emu->backup_text.data);

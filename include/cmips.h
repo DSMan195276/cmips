@@ -12,7 +12,7 @@
 #include "emu.h"
 #include "args.h"
 
-extern struct mips_emu cmips_emu;
+extern struct emulator cmips_emu;
 extern struct arg_state cmips_arg_state;
 
 #endif

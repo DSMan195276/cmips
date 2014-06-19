@@ -38,12 +38,12 @@ static void run_inst(int argc, char **argv)
 
 static void run_code(int argc, char **argv)
 {
-    mips_run(&cmips_emu);
+    emulator_run(&cmips_emu);
 }
 
 static void reset_code(int argc, char **argv)
 {
-    mips_reset_emu(&cmips_emu);
+    emulator_reset(&cmips_emu);
 }
 
 static void load_file(int argc, char **argv)
@@ -53,7 +53,7 @@ static void load_file(int argc, char **argv)
         return ;
     }
 
-    mips_load_from_file(&cmips_emu, argv[0]);
+    emulator_load_from_file(&cmips_emu, argv[0]);
 }
 
 static void script(int argc, char **argv)
