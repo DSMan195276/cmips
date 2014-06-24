@@ -7,10 +7,9 @@
  */
 #include "common.h"
 
-#include <time.h>
-
 #include "mips.h"
 #include "emu.h"
+#include "syscall.h"
 #include "special.h"
 
 static void op_func_add(struct emulator *emu, int rs, int rt, int rd, int sa)
@@ -33,36 +32,9 @@ static void op_func_subu(struct emulator *emu, int rs, int rt, int rd, int sa)
     emu->r.regs[rd] = (uint32_t)(emu->r.regs[rs]) - (uint32_t)(emu->r.regs[rt]);
 }
 
-static void op_func_syscall(struct emulator *emu, int rs, int rt, int rd, int sa)
-{
-    uint32_t addr;
-    char byte;
-    struct timespec tim;
-
-    switch (emu->r.regs[REG_V0]) {
-    case SYSCALL_PRINT_INT:
-        printf("%d", emu->r.regs[REG_A0]);
-        break;
-    case SYSCALL_PRINT_STRING:
-        addr = emu->r.regs[REG_A0];
-        while (mem_read_from_addr(&emu->mem, addr++, 1, &byte), byte != 0)
-            putchar(byte);
-        break;
-    case SYSCALL_EXIT:
-        emu->stop_prog = 1;
-        break;
-    case SYSCALL_DELAY:
-        tim = (struct timespec) { emu->r.regs[REG_A0] / 1000, (emu->r.regs[REG_A0] % 1000) * 1000000 };
-        nanosleep(&tim, NULL);
-        break;
-    default:
-        break;
-    }
-    fflush(stdout);
-}
-
 static void op_func_jr(struct emulator *emu, int rs, int rt, int rd, int sa)
 {
+    printf("Jmp addr: 0x%08x\n", emu->r.regs[rs]);
     emu->r.pc = emu->r.regs[rs];
 }
 

@@ -64,6 +64,28 @@ const char *sect_to_str(enum section s)
     }
 }
 
+void create_marker(struct assembler *a, const char *ident, int bits, int shift, int mask, int is_branch)
+{
+    struct label_marker *m;
+    size_t len = strlen(ident);
+
+    m = malloc(sizeof(struct label_marker) + len + 1);
+    memset(m, 0, sizeof(struct label_marker) + len + 1);
+    strcpy(m->label, ident);
+
+    if (a->cur_section == SECT_TEXT)
+        m->addr = a->text.last_addr;
+    else
+        m->addr = a->data.last_addr;
+
+    m->is_branch = is_branch;
+    m->bits = bits;
+    m->shift = shift;
+    m->mask = mask;
+
+    rb_insert(&a->markers, &m->node);
+}
+
 static enum rbcomp label_cmp(const struct rbnode *c1, const struct rbnode *c2)
 {
     const struct label_list *l1 = container_of(c1, struct label_list, node);
@@ -109,8 +131,9 @@ static void assembler_free(struct assembler *a)
     rb_foreach_postorder(&a->labels, l, struct label_list, node)
         free(l);
 
-    rb_foreach_postorder(&a->markers, m, struct label_marker, node)
+    rb_foreach_postorder(&a->markers, m, struct label_marker, node) {
         free(m);
+    }
 
     free(a->text.s.data);
     free(a->data.s.data);
@@ -156,12 +179,13 @@ static void handle_markers(struct assembler *a)
 
         if (a->text.s.addr <= m->addr && a->text.last_addr >= m->addr)
             inst = (be32 *) (((char *)a->text.s.data) + m->addr - a->text.s.addr);
-        else if (a->data.s.addr >= m->addr && a->data.last_addr >= m->addr)
+        else if (a->data.s.addr >= m->addr && a->data.s.addr + a->data.s.len >= m->addr)
             inst = (be32 *) (((char *)a->data.s.data) + m->addr - a->data.s.addr);
         else
             inst = NULL;
 
-        *inst = cpu_to_be32(be32_to_cpu(*inst) | (addr & ((1 << (m->bits + 1)) - 1)));
+        *inst = cpu_to_be32((be32_to_cpu(*inst) & ~((1 << (m->bits + 1)) - 1))
+                | (addr & ((1 << (m->bits + 1)) - 1)));
     }
 }
 
@@ -176,6 +200,8 @@ int assemble_prog(struct parser *gen, const char *filename)
     a.gen = gen;
     a.text.s = gen->text;
     a.data.s = gen->data;
+    a.text.last_addr = a.text.s.addr;
+    a.data.last_addr = a.data.s.addr;
     a.cur_section = SECT_TEXT;
 
     file = fopen(filename, "r");

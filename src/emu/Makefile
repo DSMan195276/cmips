@@ -1,2 +1,2 @@
-OBJS_y += mips.o special.o mem.o
+OBJS_y += mips.o special.o mem.o syscall.o
 

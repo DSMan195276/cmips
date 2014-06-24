@@ -108,6 +108,7 @@ struct assembler {
 void add_to_seg(struct asm_segment *seg, void *data, size_t len);
 void add_word_to_seg(struct asm_segment *seg, uint32_t word);
 void align_seg(struct asm_segment *seg, int alignment);
+void create_marker(struct assembler *a, const char *ident, int bits, int shift, int mask, int is_branch);
 const char *sect_to_str(enum section s);
 
 #endif

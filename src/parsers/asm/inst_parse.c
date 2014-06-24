@@ -227,29 +227,6 @@ static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
             return RET_UNEXPECTED; \
     } while (0)
 
-static void create_marker(struct assembler *a, struct inst_desc *inst)
-{
-    struct label_marker *m;
-    size_t len = strlen(a->lexer.ident);
-
-    m = malloc(sizeof(struct label_marker) + len + 1);
-    memset(m, 0, sizeof(struct label_marker) + len + 1);
-    strcpy(m->label, a->lexer.ident);
-
-    if (a->cur_section == SECT_TEXT)
-        m->addr = a->text.last_addr;
-    else
-        m->addr = a->data.last_addr;
-
-    if (inst->addr_is_branch == 2)
-        m->is_branch = 1;
-
-    m->bits = inst->addr_bits;
-    m->shift = inst->addr_shift;
-    m->mask = inst->addr_mask;
-
-    rb_insert(&a->markers, &m->node);
-}
 
 static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc *inst)
 {
@@ -273,7 +250,8 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
                 r[i].val = a->lexer.val;
             } else if (a->tok == TOK_IDENT) {
                 r[i].val = 0;
-                create_marker(a, inst);
+                create_marker(a, a->lexer.ident, inst->addr_bits,
+                        inst->addr_shift, inst->addr_mask, inst->addr_is_branch == 2);
             } else {
                 return RET_UNEXPECTED;
             }
@@ -283,7 +261,8 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
                 r[i].val = a->lexer.val >> 2;
             } else if (a->tok == TOK_IDENT) {
                 r[i].val = 0;
-                create_marker(a, inst);
+                create_marker(a, a->lexer.ident, inst->addr_bits,
+                        inst->addr_shift, inst->addr_mask, inst->addr_is_branch == 2);
             } else {
                 return RET_UNEXPECTED;
             }
