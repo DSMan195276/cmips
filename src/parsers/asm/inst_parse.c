@@ -51,7 +51,11 @@
     .func = 0,                                           \
     .reg_count = 3,                                      \
     .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
-    .place = { REGP_RT, REGP_RS, REGP_IMMEDIATE }        \
+    .place = { REGP_RT, REGP_RS, REGP_IMMEDIATE },       \
+    .addr_is_branch = 1,                                 \
+    .addr_bits = 16,                                     \
+    .addr_shift = 0,                                     \
+    .addr_mask = 0x0000FFFF,                             \
 }
 
 #define ID_SHIFT(str, funcn) {                           \
@@ -91,7 +95,11 @@
     .func = 0,                                        \
     .reg_count = 3,                                   \
     .rs = { REG_REGISTER, REG_REGISTER, REG_ADDRESS}, \
-    .place = { REGP_RS, REGP_RT, REGP_ADDRRESS }      \
+    .place = { REGP_RS, REGP_RT, REGP_IMMEDIATE },    \
+    .addr_is_branch = 2,                              \
+    .addr_bits = 16,                                  \
+    .addr_shift = 2,                                  \
+    .addr_mask = 0xFFFFFFFC                           \
 }
 
 #define ID_J(str, op) {        \
@@ -101,7 +109,11 @@
     .func = 0,                 \
     .reg_count = 1,            \
     .rs = { REG_ADDRESS },     \
-    .place = { REGP_ADDRRESS } \
+    .place = { REGP_ADDRESS }, \
+    .addr_is_branch = 1,       \
+    .addr_bits = 26,           \
+    .addr_shift = 2,           \
+    .addr_mask = 0xFFFFFFFC    \
 }
 
 #define ID_MEM(str, op) {                                 \
@@ -196,7 +208,7 @@ static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
             sa = regs + i;
         else if (id->place[i] == REGP_IMMEDIATE)
             imm = regs + i;
-        else if (id->place[i] == REGP_ADDRRESS)
+        else if (id->place[i] == REGP_ADDRESS)
             addr = regs + i;
 
     if (id->format == I_FORMAT)
@@ -215,6 +227,29 @@ static uint32_t gen_op(struct inst_desc *id, struct reg *regs)
             return RET_UNEXPECTED; \
     } while (0)
 
+static void create_marker(struct assembler *a, struct inst_desc *inst)
+{
+    struct label_marker *m;
+    size_t len = strlen(a->lexer.ident);
+
+    m = malloc(sizeof(struct label_marker) + len + 1);
+    memset(m, 0, sizeof(struct label_marker) + len + 1);
+    strcpy(m->label, a->lexer.ident);
+
+    if (a->cur_section == SECT_TEXT)
+        m->addr = a->text.last_addr;
+    else
+        m->addr = a->data.last_addr;
+
+    if (inst->addr_is_branch == 2)
+        m->is_branch = 1;
+
+    m->bits = inst->addr_bits;
+    m->shift = inst->addr_shift;
+    m->mask = inst->addr_mask;
+
+    rb_insert(&a->markers, &m->node);
+}
 
 static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc *inst)
 {
@@ -234,15 +269,21 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
             r[i].val = a->lexer.val;
             break;
         case REG_IMMEDIATE:
-            expect_token(a->tok, TOK_INTEGER);
-
-            r[i].val = a->lexer.val;
-            break;
-        case REG_ADDRESS:
             if (a->tok == TOK_INTEGER) {
                 r[i].val = a->lexer.val;
             } else if (a->tok == TOK_IDENT) {
-
+                r[i].val = 0;
+                create_marker(a, inst);
+            } else {
+                return RET_UNEXPECTED;
+            }
+            break;
+        case REG_ADDRESS:
+            if (a->tok == TOK_INTEGER) {
+                r[i].val = a->lexer.val >> 2;
+            } else if (a->tok == TOK_IDENT) {
+                r[i].val = 0;
+                create_marker(a, inst);
             } else {
                 return RET_UNEXPECTED;
             }

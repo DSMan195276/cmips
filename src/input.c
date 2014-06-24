@@ -93,6 +93,9 @@ static void run_cmd(char *line)
 
     lines = parse_line(line, &args);
 
+    if (lines == NULL)
+        return ;
+
     for (cmd = cmips_cmds; cmd->cmd_id != NULL; cmd++) {
         if (strcmp(lines[0], cmd->cmd_id) == 0) {
             (cmd->cmd) (args - 1, lines + 1);
@@ -124,6 +127,8 @@ int run_script(const char *s_file)
     while ((len = getline(&line, &len, script)) != -1 && !exit_inp_loop) {
         if (line[len - 1] == '\n')
             line[len - 1] = '\0';
+        if (len == 1)
+            continue ;
         printf("%s%s\n", prompt, line);
         run_cmd(line);
     }

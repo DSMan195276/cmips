@@ -73,7 +73,8 @@ enum syscall {
     SYSCALL_PRINT_INT = 1,
     SYSCALL_PRINT_STRING = 4,
     SYSCALL_READ_INT = 5,
-    SYSCALL_EXIT = 10
+    SYSCALL_EXIT = 10,
+    SYSCALL_DELAY = 80
 };
 
 #endif

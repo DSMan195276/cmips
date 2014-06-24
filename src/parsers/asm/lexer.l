@@ -57,7 +57,7 @@ static void append_c(struct lexer *t, char ch);
 \.(word|WORD) { state->val = DIR_word; return TOK_DIRECTIVE; }
 
 
-\.?[a-zA-Z][a-zA-Z0-9]*: {
+\.?[a-zA-Z][a-zA-Z0-9_]*: {
     if (state->ident)
         free(state->ident);
     state->ident = strndup(yytext, strlen(yytext) - 1);
@@ -166,7 +166,7 @@ static void append_c(struct lexer *t, char ch);
     }
 }
 
-\.?[a-zA-Z][a-zA-Z0-9]* {
+\.?[a-zA-Z][a-zA-Z0-9_]* {
     if (state->ident)
         free(state->ident);
     state->id_len = 0;

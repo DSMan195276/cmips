@@ -29,11 +29,11 @@ enum reg_place {
     REGP_RS,
     REGP_SA,
     REGP_IMMEDIATE,
-    REGP_ADDRRESS
+    REGP_ADDRESS,
 };
 
 struct reg {
-    int val;
+    uint32_t val;
 };
 
 struct inst_desc {
@@ -44,6 +44,8 @@ struct inst_desc {
     int reg_count;
     enum reg_type rs[4];
     enum reg_place place[4];
+
+    int addr_is_branch, addr_bits, addr_shift, addr_mask;
 };
 
 struct label_list {
@@ -57,8 +59,9 @@ struct label_marker {
     struct rbnode node;
 
     uint32_t addr;
+    uint32_t mask, shift, bits;
+
     unsigned int is_branch :1;
-    unsigned int is_jmp    :1;
 
     char label[];
 };

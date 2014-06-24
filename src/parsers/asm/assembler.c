@@ -116,6 +116,55 @@ static void assembler_free(struct assembler *a)
     free(a->data.s.data);
 }
 
+static struct label_list *find_label(struct assembler *a, const char *label)
+{
+    size_t len;
+    struct label_list *l, *lab;
+
+    len = strlen(label);
+
+    lab = malloc(sizeof(struct label_list) + len + 1);
+    memset(lab, 0, sizeof(struct label_list) + len + 1);
+    strcpy(lab->ident, label);
+
+    l = container_of(rb_search(&a->labels, &lab->node), struct label_list, node);
+
+    free(lab);
+
+    return l;
+}
+
+static void handle_markers(struct assembler *a)
+{
+    uint32_t addr;
+
+    be32 *inst = NULL;
+
+    struct label_marker *m;
+    struct label_list *l;
+
+    rb_foreach_inorder(&a->markers, m, struct label_marker, node) {
+        l = find_label(a, m->label);
+
+        addr = l->addr;
+        addr &= m->mask;
+
+        if (m->is_branch)
+            addr -= m->addr + 4;
+
+        addr >>= m->shift;
+
+        if (a->text.s.addr <= m->addr && a->text.last_addr >= m->addr)
+            inst = (be32 *) (((char *)a->text.s.data) + m->addr - a->text.s.addr);
+        else if (a->data.s.addr >= m->addr && a->data.last_addr >= m->addr)
+            inst = (be32 *) (((char *)a->data.s.data) + m->addr - a->data.s.addr);
+        else
+            inst = NULL;
+
+        *inst = cpu_to_be32(be32_to_cpu(*inst) | (addr & ((1 << (m->bits + 1)) - 1)));
+    }
+}
+
 int assemble_prog(struct parser *gen, const char *filename)
 {
     struct assembler a;
@@ -171,6 +220,8 @@ again:
         }
 
     }
+
+    handle_markers(&a);
 
 exit:
     if (ret == 1)

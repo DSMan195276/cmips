@@ -8,8 +8,8 @@
 #ifndef INCLUDE_COMMON_H
 #define INCLUDE_COMMON_H
 
-#define _XOPEN_SOURCE 600
-#define _POSIX_C_SOURCE 200809
+#define _XOPEN_SOURCE 700
+#define _POSIX_C_SOURCE 199309L
 
 #include <stddef.h>
 #include <stdarg.h>

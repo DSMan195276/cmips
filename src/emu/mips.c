@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "mips.h"
 #include "emu/mem.h"
@@ -17,14 +18,44 @@
 #include "emu.h"
 #include "special.h"
 
+static struct emulator *cur_run_emu = NULL;
+
+static void sig_int_handler(int sigval)
+{
+    if (cur_run_emu)
+        cur_run_emu->stop_prog = 1;
+}
+
 static void op_jmp(struct emulator *emu, int addr)
 {
+    uint32_t a = addr << 2;
 
+    a |= (emu->r.pc & 0xC0000000);
+
+    emu->r.pc = a;
 }
 
 static void op_jmp_load(struct emulator *emu, int addr)
 {
+    uint32_t old = emu->r.pc;
+    uint32_t a = addr << 2;
 
+    a |= (emu->r.pc & 0xC0000000);
+
+    emu->r.pc = a;
+    emu->r.regs[REG_RA] = old;
+}
+
+static void op_beq(struct emulator *emu, int rs, int rt, int val)
+{
+    if (emu->r.regs[rs] == emu->r.regs[rt])
+        emu->r.pc += val << 2;
+}
+
+static void op_bne(struct emulator *emu, int rs, int rt, int val)
+{
+    if (emu->r.regs[rs] != emu->r.regs[rt])
+        emu->r.pc += val << 2;
 }
 
 static void op_addi(struct emulator *emu, int rs, int rt, int val)
@@ -115,9 +146,11 @@ void emulator_run_inst(struct emulator *emu, uint32_t inst)
 
 void emulator_run(struct emulator *emu)
 {
-    int i;
-    for (i = 0; i < emu->mem.text.size && !emu->stop_prog; i+=4)
+    cur_run_emu = emu;
+    sigset(SIGINT, sig_int_handler);
+    while (!emu->stop_prog)
         emulator_run_next_inst(emu);
+    sigrelse(SIGINT);
 }
 
 void emulator_reset(struct emulator *emu)
