@@ -14,7 +14,7 @@
 #include "dir_parse.h"
 
 struct dir {
-    enum asm_dir id;
+    const char *id;
     enum internal_ret (*func) (struct assembler *a);
     enum section required_sect;
 };
@@ -95,7 +95,7 @@ static enum internal_ret dir_half(struct assembler *a)
     a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
-    add_to_seg(&a->data, &a->lexer.val, 2);
+    add_halfword_to_seg(&a->data, a->lexer.val);
     return RET_CONTINUE;
 }
 
@@ -127,12 +127,27 @@ static enum internal_ret dir_text(struct assembler *a)
 
 static enum internal_ret dir_word(struct assembler *a)
 {
+    struct asm_segment *s;
+    if (a->cur_section == SECT_TEXT)
+        s = &a->text;
+    else
+        s = &a->data;
 
-    return RET_UNEXPECTED;
+    a->tok = yylex(&a->lexer);
+    if (a->tok == TOK_INTEGER) {
+        add_word_to_seg(s, a->lexer.val);
+    } else if (a->tok == TOK_IDENT) {
+        add_word_to_seg(s, 0);
+        create_marker(a, a->lexer.ident, 32, 0, 0xFFFFFFFF, 0);
+    } else {
+        return RET_UNEXPECTED;
+    }
+
+    return RET_CONTINUE;
 }
 
 static struct dir directives[] = {
-#define X(enu, func, sect) { DIR_##enu, func, sect },
+#define X(id, enu, func, sect) { #id, func, sect },
 # include "lexer_dir.x"
 #undef X
     { 0 }
@@ -141,10 +156,10 @@ static struct dir directives[] = {
 enum internal_ret parse_directive(struct assembler *a)
 {
     struct dir *d;
-    for (d = directives; d->id != DIR_NONE; d++) {
-        if (d->id == a->lexer.val) {
+    for (d = directives; d->id != NULL; d++) {
+        if (stringcasecmp(d->id, a->lexer.ident) == 0) {
             if ((a->cur_section | d->required_sect) != d->required_sect) {
-                printf(".%s is not allowed in the %s segment\n", asm_dir_types_str[d->id], sect_to_str(a->cur_section));
+                printf(".%s is not allowed in the %s segment\n", d->id, sect_to_str(a->cur_section));
                 return RET_ERR;
             }
             return (d->func) (a);

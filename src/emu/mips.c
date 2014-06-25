@@ -49,18 +49,18 @@ static void op_jmp_load(struct emulator *emu, int addr)
 static void op_beq(struct emulator *emu, int rs, int rt, int val)
 {
     if (emu->r.regs[rs] == emu->r.regs[rt])
-        emu->r.pc += val << 2;
+        emu->r.pc += ((int16_t)val) << 2;
 }
 
 static void op_bne(struct emulator *emu, int rs, int rt, int val)
 {
     if (emu->r.regs[rs] != emu->r.regs[rt])
-        emu->r.pc += val << 2;
+        emu->r.pc += ((int16_t)val) << 2;
 }
 
 static void op_addi(struct emulator *emu, int rs, int rt, int val)
 {
-    emu->r.regs[rt] = emu->r.regs[rs] + val;
+    emu->r.regs[rt] = emu->r.regs[rs] + (int16_t)val;
 }
 
 static void nop_i(struct emulator *emu, int rs, int rt, int val)
@@ -104,6 +104,10 @@ const char *mips_function_names[64] = {
 void emulator_run_next_inst(struct emulator *emu)
 {
     be32 inst;
+
+    if (emu->stop_prog)
+        return ;
+
     mem_read_from_addr(&emu->mem, emu->r.pc, sizeof(be32), &inst);
     emu->r.pc += 4;
     emulator_run_inst(emu, be32_to_cpu(inst));
@@ -166,6 +170,7 @@ void emulator_reset(struct emulator *emu)
     mem_set_data(&emu->mem, emu->backup_data.addr, emu->backup_data.len, m);
 
     emu->r.pc = emu->backup_text.addr;
+    emu->stop_prog = 0;
 }
 
 void emulator_load_from_parser(struct emulator *emu, struct parser *parser)

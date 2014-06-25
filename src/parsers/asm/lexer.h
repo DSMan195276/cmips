@@ -19,7 +19,7 @@ enum asm_token {
 
 enum asm_dir {
     DIR_NONE = -1,
-#define X(dir, func, sect) DIR_##dir,
+#define X(str, dir, func, sect) DIR_##dir,
 # include "lexer_dir.x"
 #undef X
 };

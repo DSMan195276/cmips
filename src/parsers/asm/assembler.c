@@ -36,6 +36,13 @@ void add_to_seg(struct asm_segment *seg, void *data, size_t len)
     seg->last_addr = seg->s.addr + seg->s.len;
 }
 
+void add_halfword_to_seg(struct asm_segment *seg, uint16_t half)
+{
+    be16 val = cpu_to_be16(half);
+
+    add_to_seg(seg, &val, sizeof(be16));
+}
+
 void add_word_to_seg(struct asm_segment *seg, uint32_t word)
 {
     be32 val = cpu_to_be32(word);
@@ -104,14 +111,13 @@ static enum rbcomp marker_cmp(const struct rbnode *c1, const struct rbnode *c2)
 {
     const struct label_marker *m1 = container_of(c1, struct label_marker, node);
     const struct label_marker *m2 = container_of(c2, struct label_marker, node);
-    int cmp = strcmp(m1->label, m2->label);
 
-    if (cmp == 0)
-        return RB_EQ;
-    else if (cmp < 0)
+    if (m1->addr > m2->addr)
+        return RB_GT;
+    else if (m1->addr < m2->addr)
         return RB_LT;
     else
-        return RB_GT;
+        return RB_EQ;
 }
 
 static void assembler_init(struct assembler *a)
@@ -131,9 +137,8 @@ static void assembler_free(struct assembler *a)
     rb_foreach_postorder(&a->labels, l, struct label_list, node)
         free(l);
 
-    rb_foreach_postorder(&a->markers, m, struct label_marker, node) {
+    rb_foreach_postorder(&a->markers, m, struct label_marker, node)
         free(m);
-    }
 
     free(a->text.s.data);
     free(a->data.s.data);
@@ -184,8 +189,8 @@ static void handle_markers(struct assembler *a)
         else
             inst = NULL;
 
-        *inst = cpu_to_be32((be32_to_cpu(*inst) & ~((1 << (m->bits + 1)) - 1))
-                | (addr & ((1 << (m->bits + 1)) - 1)));
+        *inst = cpu_to_be32((be32_to_cpu(*inst) & ~((1 << (m->bits)) - 1))
+                | (addr & ((1 << (m->bits)) - 1)));
     }
 }
 
@@ -203,6 +208,7 @@ int assemble_prog(struct parser *gen, const char *filename)
     a.text.last_addr = a.text.s.addr;
     a.data.last_addr = a.data.s.addr;
     a.cur_section = SECT_TEXT;
+    a.lexer.line = 1;
 
     file = fopen(filename, "r");
     yyin = file;

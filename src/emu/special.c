@@ -34,7 +34,6 @@ static void op_func_subu(struct emulator *emu, int rs, int rt, int rd, int sa)
 
 static void op_func_jr(struct emulator *emu, int rs, int rt, int rd, int sa)
 {
-    printf("Jmp addr: 0x%08x\n", emu->r.regs[rs]);
     emu->r.pc = emu->r.regs[rs];
 }
 

@@ -7,6 +7,8 @@
  */
 #include "common.h"
 
+#include "lexer.h"
+
 const char *asm_tok_types_str[] = {
 #define X(id) #id,
 # include "lexer.x"
@@ -14,7 +16,7 @@ const char *asm_tok_types_str[] = {
 };
 
 const char *asm_dir_types_str[] = {
-#define X(id, func, sect) #id,
+#define X(id, enm, func, sect) [DIR_##enm] = #id,
 # include "lexer_dir.x"
 #undef X
 };

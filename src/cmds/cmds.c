@@ -66,6 +66,16 @@ static void script(int argc, char **argv)
     run_script(argv[0]);
 }
 
+static void step_inst(int argc, char **argv)
+{
+    int i = 1;
+    if (argc == 1)
+        i = strtol(argv[0], NULL, 0);
+
+    while (i--)
+        emulator_run_next_inst(&cmips_emu);
+}
+
 static void help(int argc, char **argv)
 {
     char buf[50];
@@ -87,6 +97,7 @@ struct cmips_cmd cmips_cmds[] = {
     { "run-inst", run_inst, "Run a single instruction given as an argument.", "<instruction>" },
     { "dump-mem", dump_seg_mem, "Dump the current contents of memory", "" },
     { "run-script", script, "Run a command script", "<filename>" },
+    { "step", step_inst, "Run the next instruction and then stop", "" },
 
     { "help", help, "Display help information.", "" },
     { "quit", exit_cmd, "Exit the program.", "" },

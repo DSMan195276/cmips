@@ -193,8 +193,12 @@ void parse_args(int argc, char **argv, struct arg_state *s)
             s->cmd_script = argarg;
             break;
         case ARG_EXTRA:
-            if (emulator_load_from_file(&cmips_emu, argarg))
+            if (emulator_load_from_file(&cmips_emu, argarg)) {
                 printf("Error assembling file.\n");
+                s->quiet = 1;
+                s->noinput = 1;
+                return ;
+            }
             break;
         default:
         case ARG_ERR:

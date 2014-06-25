@@ -40,24 +40,15 @@ static void append_c(struct lexer *t, char ch);
 ")" { return TOK_RPAREN; }
 "," { return TOK_COMMA; }
 
-\.(align|ALIGN) { state->val = DIR_align; return TOK_DIRECTIVE; }
-\.(ascii|ASCII) { state->val = DIR_ascii; return TOK_DIRECTIVE; }
-\.(asciiz|ASCIIZ) { state->val = DIR_asciiz; return TOK_DIRECTIVE; }
-\.(byte|BYTE) { state->val = DIR_byte; return TOK_DIRECTIVE; }
-\.(data|DATA) { state->val = DIR_data; return TOK_DIRECTIVE; }
-\.(double|DOUBLE) { state->val = DIR_double; return TOK_DIRECTIVE; }
-\.(extern|EXTERN) { state->val = DIR_extern; return TOK_DIRECTIVE; }
-\.(float|FLOAT) { state->val = DIR_float; return TOK_DIRECTIVE; }
-\.(globl|GLOBL) { state->val = DIR_globl; return TOK_DIRECTIVE; }
-\.(half|HALF) { state->val = DIR_half; return TOK_DIRECTIVE; }
-\.(kdata|KDATA) { state->val = DIR_kdata; return TOK_DIRECTIVE; }
-\.(ktext|KTEXT) { state->val = DIR_ktext; return TOK_DIRECTIVE; }
-\.(space|SPACE) { state->val = DIR_space; return TOK_DIRECTIVE; }
-\.(text|TEXT) { state->val = DIR_text; return TOK_DIRECTIVE; }
-\.(word|WORD) { state->val = DIR_word; return TOK_DIRECTIVE; }
+\.[a-zA-Z]* {
+    if (state->ident)
+        free(state->ident);
+    state->ident = strdup(yytext);
+    return TOK_DIRECTIVE;
+}
 
 
-\.?[a-zA-Z][a-zA-Z0-9_]*: {
+[a-zA-Z][a-zA-Z0-9_]*: {
     if (state->ident)
         free(state->ident);
     state->ident = strndup(yytext, strlen(yytext) - 1);

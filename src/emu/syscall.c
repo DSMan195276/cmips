@@ -30,6 +30,13 @@ static void print_string(struct emulator *emu)
     fflush(stdout);
 }
 
+static void read_int(struct emulator *emu)
+{
+    int32_t val;
+    scanf("%d", &val);
+    emu->r.regs[REG_V0] = val;
+}
+
 static void exit_prog(struct emulator *emu)
 {
     emu->stop_prog = 1;
@@ -46,12 +53,17 @@ static void prog_delay(struct emulator *emu)
 void (*handlers[]) (struct emulator *emu) = {
     [SYSCALL_PRINT_INT] = print_int,
     [SYSCALL_PRINT_STRING] = print_string,
+    [SYSCALL_READ_INT] = read_int,
     [SYSCALL_EXIT] = exit_prog,
     [SYSCALL_DELAY] = prog_delay,
 };
 
 void syscall_handler(struct emulator *emu, int rs, int rt, int rd, int sa)
 {
-    (handlers[emu->r.regs[REG_V0]]) (emu);
+    void (*hand) (struct emulator *emu);
+
+    hand = handlers[emu->r.regs[REG_V0]];
+    if (hand)
+        (hand) (emu);
 }
 
