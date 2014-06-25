@@ -157,7 +157,7 @@ enum internal_ret parse_directive(struct assembler *a)
 {
     struct dir *d;
     for (d = directives; d->id != NULL; d++) {
-        if (stringcasecmp(d->id, a->lexer.ident) == 0) {
+        if (stringcasecmp(d->id, a->lexer.ident + 1) == 0) {
             if ((a->cur_section | d->required_sect) != d->required_sect) {
                 printf(".%s is not allowed in the %s segment\n", d->id, sect_to_str(a->cur_section));
                 return RET_ERR;
