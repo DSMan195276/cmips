@@ -1,4 +1,4 @@
-DIRINC_y += asm
+DIRINC_y += in
 
 OBJS_y += parser.o
 

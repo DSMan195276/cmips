@@ -22,6 +22,8 @@ REAL_OBJS_y :=
 # Predefine this variable. It contains a list of extra files to clean. Ex.
 CLEAN_LIST :=
 
+DEPS :=
+
 # Set configuration options
 ifdef V
 	Q :=
@@ -58,8 +60,16 @@ CLEAN_LIST_y :=
 _tmp := $$(shell mkdir -p $$(objtree))
 include $$(srctree)/Makefile
 
-REAL_OBJS_y += $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
-CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y))
+CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y)) $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
+
+DEPS += $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
+
+$(1)tre := $$(objtree).o
+$(1)objs := $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) $$(patsubst %,$$(objtree)/%.o,$$(DIRINC_y))
+
+$$($(1)tre): $$($(1)objs)
+	@echo " LD      $$@"
+	$(Q)$(LD) -r $$($(1)objs) -o $$@
 
 $$(foreach subdir,$$(DIRINC_y),$$(eval $$(call subdir_inc,$$(subdir))))
 
@@ -71,6 +81,8 @@ endef
 
 # Include the base directories for source files - That is, the generic 'src'
 $(eval $(call subdir_inc,src))
+
+REAL_OBJS_y += src.o
 
 define compile_file
 
@@ -94,11 +106,11 @@ $(foreach file,$(REAL_OBJS_y),$(eval $(call compile_file,$(file))))
 
 ifneq ($(MAKECMDGOALS),clean)
 ifneq ($(MAKECMDGOALS),dist)
--include $(REAL_OBJS_y:.o=.d)
+-include $(DEPS:.o=.d)
 endif
 endif
 
-CLEAN_LIST += $(REAL_OBJS_y:.o=.d)
+CLEAN_LIST += $(DEPS:.o=.d)
 
 
 # Actual entry
