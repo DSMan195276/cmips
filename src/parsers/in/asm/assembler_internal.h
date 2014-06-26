@@ -15,38 +15,7 @@
 #include "parser.h"
 #include "asm.h"
 #include "rbtree.h"
-
-enum reg_type {
-    REG_REGISTER,
-    REG_IMMEDIATE,
-    REG_ADDRESS,
-    REG_DEREF_REG
-};
-
-enum reg_place {
-    REGP_RT,
-    REGP_RD,
-    REGP_RS,
-    REGP_SA,
-    REGP_IMMEDIATE,
-    REGP_ADDRESS,
-};
-
-struct reg {
-    uint32_t val;
-};
-
-struct inst_desc {
-    const char *ident;
-    enum inst_type format;
-    int opcode;
-    int func;
-    int reg_count;
-    enum reg_type rs[4];
-    enum reg_place place[4];
-
-    int addr_is_branch, addr_bits, addr_shift, addr_mask;
-};
+#include "mips/inst.h"
 
 struct label_list {
     struct rbnode node;

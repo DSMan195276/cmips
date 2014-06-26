@@ -68,12 +68,6 @@ static void nop_i(struct emulator *emu, int rs, int rt, int val)
 
 }
 
-enum inst_type mips_opcode_to_type[64] = {
-#define X(op, code, fmt, func) [OP_##op] = fmt,
-# include "mips/opcode.x"
-#undef X
-};
-
 /* Note - This jmp table contains 4 types of function pointers
  *
  * Each instruction type has it's own format - We deconstruct the instruction
@@ -87,19 +81,6 @@ static void (*op_jmp_table[64])() = {
 # include "mips/opcode.x"
 #undef X
 };
-
-const char *mips_opcode_names[64] = {
-#define X(op, val, fmt, func) [OP_##op] = #op,
-# include "mips/opcode.x"
-#undef X
-};
-
-const char *mips_function_names[64] = {
-#define X(op, val, func) [OP_FUNC_##op] = #op,
-# include "mips/function.x"
-#undef X
-};
-
 
 void emulator_run_next_inst(struct emulator *emu)
 {
