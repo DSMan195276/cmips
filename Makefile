@@ -4,8 +4,8 @@ include ./config.mk
 srctree := .
 objtree := .
 
-EXE_OBJ := $(EXE).o
-EXECUTABLE := $(EXE)
+EXE_OBJ := ./$(EXE).o
+EXECUTABLE := ./$(EXE)
 
 # This is our default target - The default is the first target in the file so
 # we need to define this fairly high-up.
@@ -60,7 +60,7 @@ CLEAN_LIST_y :=
 _tmp := $$(shell mkdir -p $$(objtree))
 include $$(srctree)/Makefile
 
-CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y)) $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
+CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y)) $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) $$(objtree).o
 
 DEPS += $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
 
@@ -82,26 +82,7 @@ endef
 # Include the base directories for source files - That is, the generic 'src'
 $(eval $(call subdir_inc,src))
 
-REAL_OBJS_y += src.o
-
-define compile_file
-
-_tmp := $$(subst /,_,$$(basename $(1)))_y
-ifdef $$(_tmp)
-
-CLEAN_LIST += $$($$(_tmp))
-
-$(1)_t := $$($$(_tmp))
-
-$(1): $(1)_t
-	@echo " LD      $$@"
-	$$(Q)$$(LD) -r -o $$@ $(1)_t
-
-endif
-
-endef
-
-$(foreach file,$(REAL_OBJS_y),$(eval $(call compile_file,$(file))))
+REAL_OBJS_y += ./src.o
 
 
 ifneq ($(MAKECMDGOALS),clean)
