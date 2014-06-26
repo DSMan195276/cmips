@@ -50,7 +50,7 @@ static void op_func_nop(struct emulator *emu, int rs, int rt, int rd, int sa)
 
 static void (*op_special_func_jmp_table[64])(struct emulator *emu, int rs, int rt, int rd, int sa) = {
 #define X(op, code, func) [OP_FUNC_##op] = func,
-# include "mips/emu_function.x"
+# include "mips/function.x"
 #undef X
 };
 

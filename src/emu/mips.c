@@ -70,7 +70,7 @@ static void nop_i(struct emulator *emu, int rs, int rt, int val)
 
 enum inst_type mips_opcode_to_type[64] = {
 #define X(op, code, fmt, func) [OP_##op] = fmt,
-# include "mips/emu_opcode.x"
+# include "mips/opcode.x"
 #undef X
 };
 
@@ -84,19 +84,19 @@ enum inst_type mips_opcode_to_type[64] = {
  */
 static void (*op_jmp_table[64])() = {
 #define X(op, code, fmt, func) [OP_##op] = func,
-# include "mips/emu_opcode.x"
+# include "mips/opcode.x"
 #undef X
 };
 
 const char *mips_opcode_names[64] = {
 #define X(op, val, fmt, func) [OP_##op] = #op,
-# include "mips/emu_opcode.x"
+# include "mips/opcode.x"
 #undef X
 };
 
 const char *mips_function_names[64] = {
 #define X(op, val, func) [OP_FUNC_##op] = #op,
-# include "mips/emu_function.x"
+# include "mips/function.x"
 #undef X
 };
 

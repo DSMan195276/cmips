@@ -4,7 +4,6 @@ include ./config.mk
 srctree := .
 objtree := .
 
-EXE_OBJ := ./$(EXE).o
 EXECUTABLE := ./$(EXE)
 
 # This is our default target - The default is the first target in the file so
@@ -106,18 +105,14 @@ dist: clean
 	@echo " Created $(EXE)-$(VERSION_N).tar.gz"
 
 clean:
-	$(Q)for file in $(REAL_OBJS_y) $(CLEAN_LIST) $(EXE_OBJ) $(EXECUTABLE); do \
+	$(Q)for file in $(CLEAN_LIST) $(EXECUTABLE); do \
 		echo " RM      $$file"; \
 		rm -f $$file; \
 	done
 
-$(EXECUTABLE): $(EXE_OBJ)
+$(EXECUTABLE): $(REAL_OBJS_y)
 	@echo " CCLD    $@"
-	$(Q)$(CC) $(LDFLAGS) -o $@ $< $(LIBFLAGS)
-
-$(EXE_OBJ): $(REAL_OBJS_y)
-	@echo " LD      $@"
-	$(Q)$(LD) -r $(REAL_OBJS_y) -o $@
+	$(Q)$(CC) $(LDFLAGS) -o $@ $(REAL_OBJS_y) $(LIBFLAGS)
 
 $(objtree)/%.o: $(srctree)/%.c
 	@echo " CC      $@"
