@@ -13,6 +13,7 @@ CFLAGS  += -Wall -I'./include' -O2 -std=c99             \
            -D$(EXEC)_SUBLEVEL=$(SUBLEVEL)               \
            -D$(EXEC)_PATCH=$(PATCH)                     \
            -D$(EXEC)_VERSION_N="$(VERSION_N)"           \
+		   -Wno-unused-result                           \
 		   -D_GNU_SOURCE
 LDFLAGS ?=
 LIBFLAGS := -lreadline

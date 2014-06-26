@@ -32,8 +32,9 @@ static void print_string(struct emulator *emu)
 
 static void read_int(struct emulator *emu)
 {
-    int32_t val;
-    scanf("%d", &val);
+    int32_t val = 0;
+    while (scanf("%d", &val) != 1)
+        scanf("%*s");
     emu->r.regs[REG_V0] = val;
 }
 
