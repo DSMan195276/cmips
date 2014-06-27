@@ -43,7 +43,7 @@ enum internal_ret parse_instruction(struct assembler *a, const struct inst_gener
     int i;
     struct inst_reg r[4];
 
-    memset(r, 0, sizeof(struct inst_reg));
+    memset(r, 0, sizeof(struct inst_reg) * 4);
 
     for (i = 0; i < inst->reg_count; i++) {
         a->tok = yylex(&a->lexer);
