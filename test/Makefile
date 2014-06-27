@@ -23,7 +23,7 @@ TEST_OBJS += ./test/asm_parser.o
 define TEST_template
 TEST_TESTS += ./test/bin/$(1)_test
 ./test/bin/$(1)_test: ./test/test.o $$($(1).OBJ) | ./test/bin
-	@echo " CCLD    ./test/bin/$(1)_test"
+	@echo " CCLD    test/bin/$(1)_test"
 	$(Q)$(CC) $(LDFLAGS) ./test/test.o -o $$@ $$($(1).OBJ)
 endef
 
@@ -31,12 +31,12 @@ endef
 $(foreach test,$(TESTS),$(eval $(call TEST_template,$(test))))
 
 test/bin:
-	@echo " MKDIR   ./test/bin"
+	@echo " MKDIR   $@"
 	$(Q)mkdir ./test/bin
 
 DEPS += $(TEST_OBJS)
 CLEAN_LIST += $(TEST_OBJS)
-CLEAN_LIST += $(TEST_TESTS) ./test/test.o
+CLEAN_LIST += $(TEST_TESTS) ./test/test.o ./test/bin
 
 run_tests: ./test/test.o $(TEST_TESTS)
 	$(Q)./test/run_tests.sh $(TESTS)

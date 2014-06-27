@@ -112,7 +112,7 @@ dist: clean
 clean:
 	$(Q)for file in $(CLEAN_LIST) $(EXECUTABLE); do \
 		echo " RM      $$file"; \
-		rm -f $$file; \
+		rm -rf $$file; \
 	done
 
 $(EXECUTABLE): $(REAL_OBJS_y)
