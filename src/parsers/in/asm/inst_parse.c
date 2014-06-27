@@ -21,11 +21,26 @@
             return RET_UNEXPECTED; \
     } while (0)
 
+static void handle_inst(struct assembler *a, const struct inst_generic *inst, struct inst_reg *r)
+{
+    const struct inst_desc *desc = container_of(inst, const struct inst_desc, g);
+    uint32_t op;
+    int i;
 
-static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc *inst)
+    for (i = 0; i < 4; i++)
+        if (r[i].ident)
+            create_marker(a, r[i].ident, desc->addr_bits,
+                desc->addr_shift, desc->addr_mask, desc->addr_is_branch == 2);
+
+    op = inst_gen(desc, r);
+
+    add_word_to_seg(&a->text, op);
+}
+
+enum internal_ret parse_instruction(struct assembler *a, const struct inst_generic *inst,
+        void (*handler) (struct assembler *, const struct inst_generic *, struct inst_reg *))
 {
     int i;
-    uint32_t op;
     struct inst_reg r[4];
 
     memset(r, 0, sizeof(struct inst_reg));
@@ -44,8 +59,7 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
                 r[i].val = a->lexer.val;
             } else if (a->tok == TOK_IDENT) {
                 r[i].val = 0;
-                create_marker(a, a->lexer.ident, inst->addr_bits,
-                        inst->addr_shift, inst->addr_mask, inst->addr_is_branch == 2);
+                r[i].ident = strdup(a->lexer.ident);
             } else {
                 return RET_UNEXPECTED;
             }
@@ -55,8 +69,7 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
                 r[i].val = a->lexer.val >> 2;
             } else if (a->tok == TOK_IDENT) {
                 r[i].val = 0;
-                create_marker(a, a->lexer.ident, inst->addr_bits,
-                        inst->addr_shift, inst->addr_mask, inst->addr_is_branch == 2);
+                r[i].ident = strdup(a->lexer.ident);
             } else {
                 return RET_UNEXPECTED;
             }
@@ -87,20 +100,21 @@ static enum internal_ret parse_instruction(struct assembler *a, struct inst_desc
         }
     }
 
-    op = inst_gen(inst, r);
+    (handler) (a, inst, r);
 
-    add_word_to_seg(&a->text, op);
+    for (i = 0; i < 4; i++)
+        free(r[i].ident);
 
     return RET_CONTINUE;
 }
 
 enum internal_ret parse_command(struct assembler *a)
 {
-    struct inst_desc *i;
+    const struct inst_desc *i;
 
-    for (i = inst_ids; i->ident != NULL; i++)
-        if (stringcasecmp(a->lexer.ident, i->ident) == 0)
-            return parse_instruction(a, i);
+    for (i = inst_ids; i->g.ident != NULL; i++)
+        if (stringcasecmp(a->lexer.ident, i->g.ident) == 0)
+            return parse_instruction(a, &i->g, handle_inst);
 
     return RET_UNEXPECTED;
 }

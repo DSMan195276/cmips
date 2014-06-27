@@ -31,6 +31,7 @@ void parser_clear(struct parser *);
 /* Matches based on the file extension */
 int parser_load_file(struct parser *, const char *filename);
 
-int parser_load_asm_file(struct parser *, const char *filename);
+#include "parser/in/asm.h"
+#include "parser/out/asm.h"
 
 #endif

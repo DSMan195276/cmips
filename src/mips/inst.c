@@ -10,43 +10,51 @@
 #include "mips.h"
 #include "mips/inst.h"
 
-#define ID_3_OPER_SPEC(str, funcn) {                    \
-    .ident = str,                                       \
-    .format = R_FORMAT,                                 \
-    .opcode = OP_SPECIAL,                               \
-    .func = (funcn),                                    \
-    .reg_count = 3,                                     \
-    .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
-    .place = { REGP_RD, REGP_RS, REGP_RT }              \
+#define ID_3_OPER_SPEC(str, funcn) {                        \
+    {                                                       \
+        .ident = str,                                       \
+        .reg_count = 3,                                     \
+        .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }  \
+    },                                                      \
+    .format = R_FORMAT,                                     \
+    .opcode = OP_SPECIAL,                                   \
+    .func = (funcn),                                        \
+    .place = { REGP_RD, REGP_RS, REGP_RT }                  \
 }
 
 #define ID_3_OPER_SPEC_NONE(str, funcn) { \
+    { \
     .ident = str,                         \
+    .reg_count = 0,                       \
+    .rs = { 0 }                          \
+    }, \
     .format = R_FORMAT,                   \
     .opcode = OP_SPECIAL,                 \
     .func = (funcn),                      \
-    .reg_count = 0,                       \
-    .rs = { 0 },                          \
     .place = { 0 }                        \
 }
 
 #define ID_3_OPER_JR(str, funcn) { \
+    { \
     .ident = str,                  \
+    .reg_count = 1,                \
+    .rs = { REG_REGISTER },        \
+    }, \
     .format = R_FORMAT,            \
     .opcode = OP_SPECIAL,          \
     .func = (funcn),               \
-    .reg_count = 1,                \
-    .rs = { REG_REGISTER },        \
     .place = { REGP_RS }           \
 }
 
 #define ID_3_OPER_I(str, op) {                           \
+    { \
     .ident = str,                                        \
+    .reg_count = 3,                                      \
+    .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
+    }, \
     .format = I_FORMAT,                                  \
     .opcode = op,                                        \
     .func = 0,                                           \
-    .reg_count = 3,                                      \
-    .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
     .place = { REGP_RT, REGP_RS, REGP_IMMEDIATE },       \
     .addr_is_branch = 1,                                 \
     .addr_bits = 16,                                     \
@@ -55,42 +63,50 @@
 }
 
 #define ID_SHIFT(str, funcn) {                           \
+    { \
     .ident = str,                                        \
+    .reg_count = 3,                                      \
+    .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
+    }, \
     .format = R_FORMAT,                                  \
     .opcode = OP_SPECIAL,                                \
     .func = funcn,                                       \
-    .reg_count = 3,                                      \
-    .rs = { REG_REGISTER, REG_REGISTER, REG_IMMEDIATE }, \
     .place = { REGP_RD, REGP_RT, REGP_SA }               \
 }
 
 #define ID_SHIFT_VAR(str, funcn) {                      \
+    { \
     .ident = str,                                       \
+    .reg_count = 3,                                     \
+    .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
+    }, \
     .format = R_FORMAT,                                 \
     .opcode = OP_SPECIAL,                               \
     .func = funcn,                                      \
-    .reg_count = 3,                                     \
-    .rs = { REG_REGISTER, REG_REGISTER, REG_REGISTER }, \
     .place = { REGP_RD, REGP_RT, REGP_SA }              \
 }
 
 #define ID_LUI(str, op) {                  \
+    { \
     .ident = str,                          \
+    .reg_count = 2,                        \
+    .rs = { REG_REGISTER, REG_IMMEDIATE }, \
+    }, \
     .format = I_FORMAT,                    \
     .opcode = op,                          \
     .func = 0,                             \
-    .reg_count = 2,                        \
-    .rs = { REG_REGISTER, REG_IMMEDIATE }, \
     .place = { REGP_RT, REGP_IMMEDIATE }   \
 }
 
 #define ID_BRANCH(str, op) {                          \
+    { \
     .ident = str,                                     \
+    .reg_count = 3,                                   \
+    .rs = { REG_REGISTER, REG_REGISTER, REG_ADDRESS}, \
+    }, \
     .format = I_FORMAT,                               \
     .opcode = op,                                     \
     .func = 0,                                        \
-    .reg_count = 3,                                   \
-    .rs = { REG_REGISTER, REG_REGISTER, REG_ADDRESS}, \
     .place = { REGP_RS, REGP_RT, REGP_IMMEDIATE },    \
     .addr_is_branch = 2,                              \
     .addr_bits = 16,                                  \
@@ -99,12 +115,14 @@
 }
 
 #define ID_J(str, op) {        \
+    { \
     .ident = str,              \
+    .reg_count = 1,            \
+    .rs = { REG_ADDRESS },     \
+    }, \
     .format = J_FORMAT,        \
     .opcode = op,              \
     .func = 0,                 \
-    .reg_count = 1,            \
-    .rs = { REG_ADDRESS },     \
     .place = { REGP_ADDRESS }, \
     .addr_is_branch = 1,       \
     .addr_bits = 26,           \
@@ -113,16 +131,18 @@
 }
 
 #define ID_MEM(str, op) {                                 \
+    { \
     .ident = str,                                         \
+    .reg_count = 3,                                       \
+    .rs = { REG_REGISTER, REG_DEREF_REG, REG_DEREF_REG }, \
+    }, \
     .format = I_FORMAT,                                   \
     .opcode = op,                                         \
     .func = 0,                                            \
-    .reg_count = 3,                                       \
-    .rs = { REG_REGISTER, REG_DEREF_REG, REG_DEREF_REG }, \
     .place = { REGP_RT, REGP_IMMEDIATE, REGP_RS }         \
 }
 
-struct inst_desc inst_ids[] = {
+const struct inst_desc inst_ids[] = {
     ID_SHIFT("sll", OP_FUNC_SLL),
     ID_SHIFT("srl", OP_FUNC_SRL),
     ID_SHIFT("sra", OP_FUNC_SRA),
@@ -177,9 +197,9 @@ struct inst_desc inst_ids[] = {
     ID_MEM("sw",  OP_SW),
     ID_MEM("swr", OP_SWR),
 
-    { "nop",  R_FORMAT, 0, 0, 0, { 0 }, { 0 } },
-    { "noop", R_FORMAT, 0, 0, 0, { 0 }, { 0 } },
-    { NULL }
+    { { "nop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },
+    { { "noop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },
+    { { NULL } }
 };
 
 enum inst_type mips_opcode_to_type[64] = {
@@ -200,7 +220,7 @@ const char *mips_function_names[64] = {
 #undef X
 };
 
-uint32_t inst_gen(struct inst_desc *id, struct inst_reg *regs)
+uint32_t inst_gen(const struct inst_desc *id, struct inst_reg *regs)
 {
     struct inst_reg empty = { 0 };
     struct inst_reg *rt = &empty;
@@ -211,7 +231,7 @@ uint32_t inst_gen(struct inst_desc *id, struct inst_reg *regs)
     struct inst_reg *addr = &empty;
     int i = 0;
 
-    for (; i < id->reg_count; i++)
+    for (; i < id->g.reg_count; i++)
         if (id->place[i] == REGP_RT)
             rt = regs + i;
         else if (id->place[i] == REGP_RS)

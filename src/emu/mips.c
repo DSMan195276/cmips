@@ -185,6 +185,8 @@ int emulator_load_from_file(struct emulator *emu, const char *filename)
         goto cleanup;
     }
 
+    parser_write_asm_file(&parser, stdout);
+
     emulator_load_from_parser(emu, &parser);
 
 cleanup:

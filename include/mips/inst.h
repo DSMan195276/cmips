@@ -40,23 +40,29 @@ enum inst_reg_place {
 
 struct inst_reg {
     uint32_t val;
+    char *ident;
+};
+
+struct inst_generic {
+    const char *ident;
+    int reg_count;
+    enum inst_reg_type rs[4];
 };
 
 struct inst_desc {
-    const char *ident;
+    struct inst_generic g;
+
     enum inst_type format;
     int opcode;
     int func;
-    int reg_count;
-    enum inst_reg_type rs[4];
     enum inst_reg_place place[4];
 
     int addr_is_branch, addr_bits, addr_shift, addr_mask;
 };
 
-extern struct inst_desc inst_ids[];
+extern const struct inst_desc inst_ids[];
 
-uint32_t inst_gen(struct inst_desc *id, struct inst_reg *regs);
+uint32_t inst_gen(const struct inst_desc *id, struct inst_reg *regs);
 void mips_disp_inst(uint32_t inst);
 
 extern const char *mips_opcode_names[64];

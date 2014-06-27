@@ -1,0 +1,2 @@
+DIRINC_y += asm
+
