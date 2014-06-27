@@ -27,7 +27,7 @@ void exit_cmd(int argc, char **argv)
 static char **parse_line(char *line, int *argc)
 {
     char **lines = NULL;
-    int sflag = 0, i, len, last;
+    int sflag = 0, i, len, last = 0;
 
     len = strlen(line);
     *argc = 0;
