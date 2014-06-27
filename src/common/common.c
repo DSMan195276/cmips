@@ -53,7 +53,7 @@ int stringcasecmp(const char *s1, const char *s2)
 
 void dump_mem(void *buf, size_t len, uint32_t base_addr)
 {
-    char *b = buf;
+    unsigned char *b = buf;
     int i = 0, j;
     for (; i < len; i += 16) {
         printf("0x%08x  ", (i) + base_addr);
@@ -68,7 +68,7 @@ void dump_mem(void *buf, size_t len, uint32_t base_addr)
 
         printf(" |");
         for (j = i; j < i + 16 && j < len; j++)
-            if (b[j] > 31 && b[j] < 128)
+            if (b[j] > 31 && b[j] <= 127)
                 printf("%c", b[j]);
             else
                 putchar('.');

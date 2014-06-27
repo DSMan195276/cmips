@@ -152,7 +152,7 @@ static void display_help_text(const char *prog)
 
     for (a = cmips_args; a->lng != NULL; a++) {
         printf("  ");
-        if (a->shrt< 256)
+        if (a->shrt != 0)
             printf("-%c, ", a->shrt);
         else
             printf("     ");
@@ -177,7 +177,7 @@ void parse_args(int argc, char **argv, struct arg_state *s)
             exit(0);
             break;
         case ARG_version:
-            printf(version_text);
+            printf("%s", version_text);
             exit(0);
             break;
         case ARG_quiet:
