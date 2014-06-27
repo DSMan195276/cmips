@@ -14,7 +14,7 @@ TESTS := asm_parser
 # More complex tests may require the use of more then just one .c file from
 # ./src, in which case all of them should be listed. Also possible is having
 # more the one test program per ./src file.
-asm_parser.OBJ := ./src/common.o ./src/mips.o ./src/parsers/in/asm.o ./test/asm_parser.o
+asm_parser.OBJ := ./src/common.o ./src/mips.o ./src/parsers.o ./test/asm_parser.o
 TEST_OBJS += ./test/asm_parser.o
 
 

@@ -35,7 +35,7 @@ struct unit_test {
 #define COLOR_BG_MAGENTA   "\033[45m"
 #define COLOR_BG_CYAN      "\033[46m"
 
-#define TEST_ASSERT(cond) assert_true(#cond, __LINE__, !!(cond))
+#define test_assert(cond) assert_true(#cond, __LINE__, !!(cond))
 
 extern int run_tests(const char *test_mod_name, struct unit_test *, int test_count);
 extern int assert_true(const char *arg, int line, int cond);

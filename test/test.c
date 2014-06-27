@@ -70,8 +70,3 @@ int assert_true(const char *arg, int line, int cond)
     return !cond;
 }
 
-
-
-
-
-

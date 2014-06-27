@@ -94,19 +94,13 @@ extern const char *mips_function_names[64];
 #define INST_R_SA(inst)     (((inst) >> 6)  & 0x1F)
 #define INST_R_FUNC(inst)   ((inst) & 0x3F)
 
-static inline uint32_t mips_create_i_format(uint32_t op, uint32_t rs, uint32_t rt, uint32_t offset)
-{
-    return (op << 26) + ((rs & 0x1F) << 21) + ((rt & 0x1F) << 16) + (offset & 0xFFFF);
-}
+#define mips_create_i_format(op, rs, rt, offset) \
+    ((uint32_t) (((op) << 26) + (((rs) & 0x1F) << 21) + (((rt) & 0x1F) << 16) + ((offset) & 0xFFFF)))
 
-static inline uint32_t mips_create_j_format(uint32_t op, uint32_t j_addr)
-{
-    return (op << 26) + (j_addr & 0x3FFFFFF);
-}
+#define mips_create_j_format(op, jaddr) \
+    ((uint32_t) (((op) << 26) + ((jaddr) & 0x3FFFFFFF)))
 
-static inline uint32_t mips_create_r_format(uint32_t op, uint32_t rs, uint32_t rt, uint32_t rd, uint32_t sa, uint32_t func)
-{
-    return (op << 26) + ((rs & 0x1F) << 21) + ((rt & 0x1F) << 16) + ((rd & 0x1F) << 11) + ((sa & 0x1F) << 6) + (func & 0x3F);
-}
+#define mips_create_r_format(op, rs, rt, rd, sa, func) \
+    ((uint32_t) (((op) << 26) + (((rs) & 0x1F) << 21) + (((rt) & 0x1F) << 16) + (((rd) & 0x1F) << 11) + (((sa) & 0x1F) << 6) + ((func) & 0x3F)))
 
 #endif
