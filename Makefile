@@ -42,6 +42,12 @@ endif
 # This is so that the code can reference generated include files
 CPPFLAGS += -I'$(objtree)/include/'
 
+define create_link_rule
+$(1): $(2)
+	@echo " LD      $$@"
+	$(Q)$(LD) -r $(2) -o $$@
+endef
+
 # Traverse into tree
 define subdir_inc
 objtree := $$(objtree)/$(1)
@@ -55,10 +61,12 @@ CLEAN_LIST_y :=
 _tmp := $$(shell mkdir -p $$(objtree))
 include $$(srctree)/Makefile
 
-REAL_OBJS_y += $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) 
-CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y)) $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) 
+CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y)) $$(objtree).o
 DEPS += $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
 
+objs := $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) $$(patsubst %,$$(objtree)/%.o,$$(DIRINC_y))
+
+$$(eval $$(call create_link_rule,$$(objtree).o,$$(objs)))
 
 $$(foreach subdir,$$(DIRINC_y),$$(eval $$(call subdir_inc,$$(subdir))))
 
@@ -70,6 +78,15 @@ endef
 
 # Include the base directories for source files - That is, the generic 'src'
 $(eval $(call subdir_inc,src))
+REAL_OBJS_y += src.o
+
+# Include tests
+ifeq ($(MAKECMDGOALS),check)
+include ./test/Makefile
+endif
+ifeq ($(MAKECMDGOALS),clean)
+include ./test/Makefile
+endif
 
 
 ifneq ($(MAKECMDGOALS),clean)
