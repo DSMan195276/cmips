@@ -185,6 +185,10 @@ struct test_dir {
 };
 
 static struct test_dir dir_tests[] = {
+    { ".data", "\x11\x22\x33\x44",
+              ".data\n"
+              ".word 0x11223344"
+              , 4 },
     { ".word", "\x11\x22\x33\x44\x11\x22\x33\x44\x11\x11\x11\x11\xFF\xFF\xFF\xFF",
               ".data\n"
               ".word 0x11223344\n"
@@ -211,6 +215,20 @@ static struct test_dir dir_tests[] = {
                 ".space 10\n"
                 ".space 6\n"
                 , 16 },
+    { ".asciiz", "Test test test\x00",
+                ".data\n"
+                ".asciiz \"Test test test\"\n"
+                , 15 },
+    { ".ascii", "Test test test",
+                ".data\n"
+                ".ascii \"Test test test\"\n"
+                , 14 },
+    { ".align", "\x11\x22\x33\x44\x00\x00\x00\x00\x11\x22\x33\x44",
+                ".data\n"
+                ".word 0x11223344\n"
+                ".align 8\n"
+                ".word 0x11223344\n"
+                , 12 },
     { NULL, NULL, NULL }
 };
 
