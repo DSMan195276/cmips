@@ -194,10 +194,9 @@ static void handle_markers(struct assembler *a)
     }
 }
 
-int assemble_prog(struct parser *gen, const char *filename)
+int assemble_prog(struct parser *gen, FILE *file)
 {
     struct assembler a;
-    FILE *file;
     int ret = 0;
 
     assembler_init(&a);
@@ -210,7 +209,6 @@ int assemble_prog(struct parser *gen, const char *filename)
     a.cur_section = SECT_TEXT;
     a.lexer.line = 1;
 
-    file = fopen(filename, "r");
     yyin = file;
 
 #define call_parser(c)   \
@@ -271,7 +269,6 @@ exit:
     yylex_destroy();
 
     yyin = NULL;
-    fclose(file);
 
     return ret;
 }

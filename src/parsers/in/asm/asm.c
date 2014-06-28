@@ -52,9 +52,19 @@ char *asm_escape_string(char *str)
     return res;
 }
 
-int parser_load_asm_file(struct parser *parser, const char *filename)
+int parser_load_asm(struct parser *parser, FILE *file)
 {
     parser->gp_addr = parser->data.addr + 0x8000;
-    return assemble_prog(parser, filename);
+    return assemble_prog(parser, file);
+}
+
+int parser_load_asm_file(struct parser *parser, const char *filename)
+{
+    FILE *file = fopen(filename, "r");
+    if (file == NULL)
+        return 1;
+    int ret = parser_load_asm(parser, file);
+    fclose(file);
+    return ret;
 }
 

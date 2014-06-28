@@ -10,6 +10,6 @@
 
 #include "asm.h"
 
-int assemble_prog(struct parser *, const char *);
+int assemble_prog(struct parser *, FILE *file); 
 
 #endif

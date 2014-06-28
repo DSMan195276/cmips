@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include <string.h>
+#include <stdio.h>
 #include <stdint.h>
 
 #include "test.h"
@@ -17,82 +18,86 @@
 struct test_inst {
     const uint32_t inst;
     const char *instname;
+    char *text;
 };
 
-#define DEF_I_FORMAT(op, name) {               \
+#define DEF_I_FORMAT(op, name, cmd) {          \
     .inst = mips_create_i_format(op, 0, 0, 0), \
     .instname = #name,                         \
+    .text = cmd                                \
 }
 
-#define DEF_R_FORMAT(func, name) {                              \
+#define DEF_R_FORMAT(func, name, cmd) {                         \
     .inst = mips_create_r_format(OP_SPECIAL, 0, 0, 0, 0, func), \
     .instname = #name,                                          \
+    .text = cmd                                                 \
 }
 
-#define DEF_J_FORMAT(op, name) {         \
+#define DEF_J_FORMAT(op, name, cmd) {    \
     .inst = mips_create_j_format(op, 0), \
     .instname = #name,                   \
+    .text = cmd                          \
 }
 
 static struct test_inst asm_inst[] = {
-    DEF_R_FORMAT(OP_FUNC_SLL, sll),
-    DEF_R_FORMAT(OP_FUNC_SRL, srl),
-    DEF_R_FORMAT(OP_FUNC_SRA, sra),
+    DEF_R_FORMAT(OP_FUNC_SLL, sll, "sll $0, $0, 0"),
+    DEF_R_FORMAT(OP_FUNC_SRL, srl, "srl $0, $0, 0"),
+    DEF_R_FORMAT(OP_FUNC_SRA, sra, "sra $0, $0, 0"),
 
-    DEF_R_FORMAT(OP_FUNC_SLLV, sllv),
-    DEF_R_FORMAT(OP_FUNC_SRLV, srlv),
-    DEF_R_FORMAT(OP_FUNC_SRAV, srav),
+    DEF_R_FORMAT(OP_FUNC_SLLV, sllv, "sllv $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_SRLV, srlv, "srlv $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_SRAV, srav, "srav $0, $0, $0"),
 
-    DEF_R_FORMAT(OP_FUNC_JR, jr),
-    DEF_R_FORMAT(OP_FUNC_JALR, jalr),
+    DEF_R_FORMAT(OP_FUNC_JR, jr, "jr $0"),
+    DEF_R_FORMAT(OP_FUNC_JALR, jalr, "jalr $0"),
 
-    DEF_R_FORMAT(OP_FUNC_ADD, add),
-    DEF_R_FORMAT(OP_FUNC_ADDU, addu),
-    DEF_R_FORMAT(OP_FUNC_SUB, sub),
-    DEF_R_FORMAT(OP_FUNC_SUBU, subu),
-    DEF_R_FORMAT(OP_FUNC_AND, and),
-    DEF_R_FORMAT(OP_FUNC_OR, or),
-    DEF_R_FORMAT(OP_FUNC_XOR, xor),
-    DEF_R_FORMAT(OP_FUNC_NOR, nor),
-    DEF_R_FORMAT(OP_FUNC_SLT, slt),
-    DEF_R_FORMAT(OP_FUNC_SLTU, sltu),
+    DEF_R_FORMAT(OP_FUNC_ADD, add, "add $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_ADDU, addu, "addu $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_SUB, sub, "sub $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_SUBU, subu, "subu $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_AND, and, "and $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_OR, or, "or $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_XOR, xor, "xor $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_NOR, nor, "nor $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_SLT, slt, "slt $0, $0, $0"),
+    DEF_R_FORMAT(OP_FUNC_SLTU, sltu,"sltu $0, $0, $0"),
 
-    DEF_R_FORMAT(OP_FUNC_SYSCALL, syscall),
-    DEF_R_FORMAT(OP_FUNC_BREAK, break),
+    DEF_R_FORMAT(OP_FUNC_SYSCALL, syscall, "syscall"),
+    DEF_R_FORMAT(OP_FUNC_BREAK, break, "break"),
 
-    DEF_J_FORMAT(OP_J, j),
-    DEF_J_FORMAT(OP_JAL, jal),
+    DEF_J_FORMAT(OP_J, j, "j 0"),
+    DEF_J_FORMAT(OP_JAL, jal, "jal 0"),
 
-    DEF_I_FORMAT(OP_BEQ, beq),
-    DEF_I_FORMAT(OP_BNE, bne),
+    DEF_I_FORMAT(OP_BEQ, beq, "beq $0, $0, 0"),
+    DEF_I_FORMAT(OP_BNE, bne, "bne $0, $0, 0"),
 
-    DEF_I_FORMAT(OP_ADDI, addi),
-    DEF_I_FORMAT(OP_ADDIU, addiu),
-    DEF_I_FORMAT(OP_SLTI, slti),
-    DEF_I_FORMAT(OP_SLTIU, sltiu),
-    DEF_I_FORMAT(OP_ANDI, andi),
-    DEF_I_FORMAT(OP_ORI, ori),
-    DEF_I_FORMAT(OP_XORI, xori),
+    DEF_I_FORMAT(OP_ADDI, addi, "addi $0, $0, 0"),
+    DEF_I_FORMAT(OP_ADDIU, addiu, "addiu $0, $0, 0"),
+    DEF_I_FORMAT(OP_SLTI, slti, "slti $0, $0, 0"),
+    DEF_I_FORMAT(OP_SLTIU, sltiu, "sltiu $0, $0, 0"),
+    DEF_I_FORMAT(OP_ANDI, andi, "andi $0, $0, 0"),
+    DEF_I_FORMAT(OP_ORI, ori, "ori $0, $0, 0"),
+    DEF_I_FORMAT(OP_XORI, xori, "xori $0, $0, 0"),
 
-    DEF_I_FORMAT(OP_LUI, lui),
+    DEF_I_FORMAT(OP_LUI, lui, "lui $0, 0"),
 
-    DEF_I_FORMAT(OP_LB, lb),
-    DEF_I_FORMAT(OP_LH, lh),
-    DEF_I_FORMAT(OP_LWL, lwl),
-    DEF_I_FORMAT(OP_LW, lw),
-    DEF_I_FORMAT(OP_LBU, lbu),
-    DEF_I_FORMAT(OP_LHU, lhu),
-    DEF_I_FORMAT(OP_LWR, lwr),
-    DEF_I_FORMAT(OP_SB, sb),
-    DEF_I_FORMAT(OP_SH, sh),
-    DEF_I_FORMAT(OP_SWL, swl),
-    DEF_I_FORMAT(OP_SW, sw),
-    DEF_I_FORMAT(OP_SWR, swr),
+    DEF_I_FORMAT(OP_LB, lb, "lb $0, 0($0)"),
+    DEF_I_FORMAT(OP_LH, lh, "lh $0, 0($0)"),
+    DEF_I_FORMAT(OP_LWL, lwl, "lwl $0, 0($0)"),
+    DEF_I_FORMAT(OP_LW, lw, "lw $0, 0($0)"),
+    DEF_I_FORMAT(OP_LBU, lbu, "lbu $0, 0($0)"),
+    DEF_I_FORMAT(OP_LHU, lhu, "lhu $0, 0($0)"),
+    DEF_I_FORMAT(OP_LWR, lwr, "lwr $0, 0($0)"),
+    DEF_I_FORMAT(OP_SB, sb, "sb $0, 0($0)"),
+    DEF_I_FORMAT(OP_SH, sh, "sh $0, 0($0)"),
+    DEF_I_FORMAT(OP_SWL, swl, "swl $0, 0($0)"),
+    DEF_I_FORMAT(OP_SW, sw, "sw $0, 0($0)"),
+    DEF_I_FORMAT(OP_SWR, swr, "swr $0, 0($0)"),
 
-    DEF_R_FORMAT(0, nop),
-    DEF_R_FORMAT(0, noop),
+    DEF_R_FORMAT(0, nop, "nop"),
+    DEF_R_FORMAT(0, noop, "noop"),
 
-    { 0, NULL }
+    { 0, NULL, NULL }
 };
 
 static int assert_with_name(const char *name, const char *arg, int line, int cond)
@@ -108,26 +113,25 @@ static int assert_with_name(const char *name, const char *arg, int line, int con
 
 int test_comp_asm(void)
 {
-    struct test_inst *inst = asm_inst;
+    struct test_inst *inst;
     struct parser parser;
-    int ret = 0, r, i = 0, comp;
-    size_t len;
+    FILE *file;
+    int ret = 0, comp;
 
-    parser_init(&parser);
+    for (inst = asm_inst; inst->instname != NULL; inst++) {
 
-    r = parser_load_asm_file(&parser, "./test/asm/cmds.s");
-    ret += test_assert_with_name("parser", r == 0);
+        parser_init(&parser);
+        file = fmemopen(inst->text, strlen(inst->text), "r");
 
-    len = (sizeof(asm_inst) / (sizeof(asm_inst[0])) - 1) * 4;
-    ret += test_assert_with_name("parser", parser.text.len == len);
+        ret += test_assert_with_name(inst->instname, parser_load_asm(&parser, file) == 0);
+        ret += test_assert_with_name(inst->instname, parser.text.len == 4);
 
-    for (; inst->instname != NULL; inst++, i++) {
-
-        comp = be32_to_cpu(((be32*)parser.text.data)[i]);
+        comp = be32_to_cpu(*(be32 *)parser.text.data);
         ret += test_assert_with_name(inst->instname, comp == inst->inst);
-    }
 
-    parser_clear(&parser);
+        parser_clear(&parser);
+        fclose(file);
+    }
 
     return ret;
 }

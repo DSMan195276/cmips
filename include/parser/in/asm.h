@@ -8,8 +8,10 @@
 #ifndef INCLUDE_PARSER_IN_ASH_H
 #define INCLUDE_PARSER_IN_ASH_H
 
+#include <stdio.h>
 #include "parser.h"
 
 int parser_load_asm_file(struct parser *, const char *filename);
+int parser_load_asm(struct parser *, FILE *file);
 
 #endif
