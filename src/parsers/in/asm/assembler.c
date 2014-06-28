@@ -193,10 +193,8 @@ static void handle_markers(struct assembler *a)
         if (m->bits != 32)
             *inst = cpu_to_be32((be32_to_cpu(*inst) & ~((1 << (m->bits)) - 1))
                  | (addr & ((1 << (m->bits)) - 1)));
-        else {
-            printf("Addr: 0x%08x, orig: 0x%08x\n", addr, l->addr);
+        else
             *inst = cpu_to_be32(addr);
-        }
     }
 }
 
