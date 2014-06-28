@@ -56,7 +56,7 @@ static void append_c(struct lexer *t, char ch);
 }
 
 0x[0-9a-fA-F]+ {
-    state->val = strtol(yytext, NULL, 0);
+    state->val = strtoul(yytext, NULL, 0);
     return TOK_INTEGER;
 }
 

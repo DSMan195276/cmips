@@ -92,10 +92,16 @@ static enum internal_ret dir_globl(struct assembler *a)
 
 static enum internal_ret dir_half(struct assembler *a)
 {
+    struct asm_segment *s;
+    if (a->cur_section == SECT_TEXT)
+        s = &a->text;
+    else
+        s = &a->data;
+
     a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
-    add_halfword_to_seg(&a->data, a->lexer.val);
+    add_halfword_to_seg(s, a->lexer.val);
     return RET_CONTINUE;
 }
 
@@ -114,7 +120,6 @@ static enum internal_ret dir_space(struct assembler *a)
     a->tok = yylex(&a->lexer);
     expect_token(a->tok, TOK_INTEGER);
 
-    printf("Space: %d\n", a->lexer.val);
     add_to_seg(&a->data, NULL, a->lexer.val);
     return RET_CONTINUE;
 }
