@@ -111,27 +111,67 @@ static int assert_with_name(const char *name, const char *arg, int line, int con
 
 #define test_assert_with_name(name, cond) assert_with_name(name, #cond, __LINE__, !!(cond))
 
-int test_comp_asm(void)
+int test_inst(char *buf, const char *disp, uint32_t inst)
 {
-    struct test_inst *inst;
     struct parser parser;
     FILE *file;
     int ret = 0, comp;
 
-    for (inst = asm_inst; inst->instname != NULL; inst++) {
+    parser_init(&parser);
+    file = fmemopen(buf, strlen(buf), "r");
 
-        parser_init(&parser);
-        file = fmemopen(inst->text, strlen(inst->text), "r");
+    ret += test_assert_with_name(disp, parser_load_asm(&parser, file) == 0);
+    ret += test_assert_with_name(disp, parser.text.len == 4);
 
-        ret += test_assert_with_name(inst->instname, parser_load_asm(&parser, file) == 0);
-        ret += test_assert_with_name(inst->instname, parser.text.len == 4);
+    comp = be32_to_cpu(*(be32 *)parser.text.data);
+    ret += test_assert_with_name(disp, comp == inst);
 
-        comp = be32_to_cpu(*(be32 *)parser.text.data);
-        ret += test_assert_with_name(inst->instname, comp == inst->inst);
+    fclose(file);
+    parser_clear(&parser);
 
-        parser_clear(&parser);
-        fclose(file);
+    return ret;
+}
+
+int test_comp_asm(void)
+{
+    struct test_inst *inst;
+    int ret = 0;
+
+    for (inst = asm_inst; inst->instname != NULL; inst++)
+        ret += test_inst(inst->text, inst->instname, inst->inst);
+
+    return ret;
+}
+int test_args(void)
+{
+    char buf[50];
+    int i, ret = 0, inst;
+
+    for (i = 0; i < 32; i++) {
+        inst = mips_create_r_format(OP_SPECIAL, i, i, i, 0, OP_FUNC_ADD);
+        sprintf(buf, "add $%d, $%d, $%d", i, i, i);
+        ret += test_inst(buf, buf, inst);
     }
+
+    for (i = 0; i < 32; i++) {
+        inst = mips_create_r_format(OP_SPECIAL, i, i, i, 0, OP_FUNC_ADD);
+        sprintf(buf, "add $%s, $%s, $%s", mips_reg_names_strs[i], mips_reg_names_strs[i], mips_reg_names_strs[i]);
+        ret += test_inst(buf, buf, inst);
+    }
+
+    for (i = 0; i < 32; i++) {
+        inst = mips_create_r_format(OP_SPECIAL, 0, 0, 0, i, OP_FUNC_SLLV);
+        sprintf(buf, "sllv $0, $0, $%s", mips_reg_names_strs[i]);
+        ret += test_inst(buf, buf, inst);
+    }
+
+    inst = mips_create_j_format(OP_J, 0x03FFFFFF);
+    sprintf(buf, "j 0x0FFFFFFC");
+    ret += test_inst(buf, buf, inst);
+
+    inst = mips_create_i_format(OP_ADDI, 0, 0, 0xFFFF);
+    sprintf(buf, "addi $0, $0, -1");
+    ret += test_inst(buf, buf, inst);
 
     return ret;
 }
@@ -140,7 +180,8 @@ int main()
 {
     int ret;
     struct unit_test tests[] = {
-        { test_comp_asm, "asm parser" }
+        { test_comp_asm, "asm parser" },
+        { test_args, "asm cmd arg test" },
     };
 
     ret = run_tests("Test asm parser", tests, sizeof(tests) / sizeof(tests[0]));

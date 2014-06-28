@@ -59,7 +59,7 @@ int run_tests(const char *mod_name, struct unit_test *tests, int test_count)
 int assert_true(const char *arg, int line, int cond)
 {
     cur_test_count++;
-    printf(" [%d:%d] L:%d \"%s\": ", total_test_count, cur_test_count, line, arg);
+    printf(" [%d:%d] L:%d -> %s: ", total_test_count, cur_test_count, line, arg);
     if (cond)
         printf(COLOR_GREEN "PASS" COLOR_RESET);
     else
