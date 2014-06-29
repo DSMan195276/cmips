@@ -100,17 +100,6 @@ static struct test_inst asm_inst[] = {
     { 0, NULL, NULL }
 };
 
-static int assert_with_name(const char *name, const char *arg, int line, int cond)
-{
-    char buf[256];
-    strcpy(buf, name);
-    strcat(buf, ": ");
-    strcat(buf, arg);
-    return assert_true(buf, line, cond);
-}
-
-#define test_assert_with_name(name, cond) assert_with_name(name, #cond, __LINE__, !!(cond))
-
 int test_inst(char *buf, const char *disp, uint32_t inst)
 {
     struct parser parser;

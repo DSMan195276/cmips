@@ -6,6 +6,7 @@
  * Free Software Foundation.
  */
 #include <stdio.h>
+#include <string.h>
 
 #include "test.h"
 
@@ -68,5 +69,14 @@ int assert_true(const char *arg, int line, int cond)
     printf("\n");
 
     return !cond;
+}
+
+int assert_with_name(const char *name, const char *arg, int line, int cond)
+{
+    char buf[256];
+    strcpy(buf, name);
+    strcat(buf, ": ");
+    strcat(buf, arg);
+    return assert_true(buf, line, cond);
 }
 

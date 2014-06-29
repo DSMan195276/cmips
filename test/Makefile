@@ -1,7 +1,9 @@
 
 TEST_OBJS :=
+TESTS :=
 # This defines the names of all the tests we should run
-TESTS := asm_parser
+TESTS += asm_parser
+TESTS += emulator
 
 # Definitions of the tests listed above
 # Each test is defined by a list of files that make it up
@@ -16,6 +18,8 @@ TESTS := asm_parser
 # more the one test program per ./src file.
 asm_parser.OBJ := ./src/common.o ./src/mips.o ./src/parsers.o ./test/asm_parser.o
 TEST_OBJS += ./test/asm_parser.o
+emulator.OBJ := ./src/common.o ./src/mips.o ./src/emu.o ./src/parsers.o ./test/emulator.o
+TEST_OBJS += ./test/emulator.o
 
 
 # This template generates a list of the outputted test executables, as well as

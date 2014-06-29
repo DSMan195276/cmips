@@ -24,14 +24,15 @@ void parser_clear(struct parser *parser)
 
 const static struct ext_parser {
     const char *extension;
-    int (*parser) (struct parser *, const char *);
+    int (*parser) (struct parser *, FILE *);
 } parsers[] = {
-    { "s", parser_load_asm_file },
-    { "asm", parser_load_asm_file },
+    { "s", parser_load_asm },
+    { "asm", parser_load_asm },
     { NULL }
 };
 
-int parser_load_file(struct parser *parser, const char *filename)
+int (*parser_get_correct_func(const char *filename))
+    (struct parser *, FILE *)
 {
     const char *e = NULL;
     const char *ext = filename;
@@ -44,14 +45,14 @@ int parser_load_file(struct parser *parser, const char *filename)
     }
 
     if (!e)
-        return 1;
+        return NULL;
 
     e++;
 
     for (p = parsers; p->extension != NULL; p++)
         if (stringcasecmp(p->extension, e) == 0)
-            return (p->parser) (parser, filename);
+            return p->parser;
 
-    return 1;
+    return NULL;
 }
 

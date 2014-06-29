@@ -171,7 +171,7 @@ void emulator_load_from_parser(struct emulator *emu, struct parser *parser)
     emulator_reset(emu);
 }
 
-int emulator_load_from_file(struct emulator *emu, const char *filename)
+static int emulator_load_parser(struct emulator *emu, FILE *file, int (*parser_func) (struct parser *, FILE *))
 {
     int ret = 0;
     struct parser parser;
@@ -180,7 +180,7 @@ int emulator_load_from_file(struct emulator *emu, const char *filename)
 
     parser.text.addr = 0x00100000;
 
-    if (parser_load_file(&parser, filename)) {
+    if ((parser_func) (&parser, file)) {
         ret = 1;
         goto cleanup;
     }
@@ -189,6 +189,29 @@ int emulator_load_from_file(struct emulator *emu, const char *filename)
 
 cleanup:
     parser_clear(&parser);
+    return ret;
+}
+
+int emulator_load_asm(struct emulator *emu, FILE *file)
+{
+    return emulator_load_parser(emu, file, parser_load_asm);
+}
+
+int emulator_load_from_file(struct emulator *emu, const char *filename)
+{
+    int ret = 0;
+    FILE *file;
+    int (*p) (struct parser *, FILE *);
+
+    p = parser_get_correct_func(filename);
+
+    file = fopen(filename, "r");
+    if (file == NULL)
+        return 1;
+
+    ret = emulator_load_parser(emu, file, p);
+
+    fclose(file);
     return ret;
 }
 

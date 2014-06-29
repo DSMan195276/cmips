@@ -36,6 +36,8 @@ void emulator_run(struct emulator *);
 void emulator_reset(struct emulator *);
 
 void emulator_load_from_parser(struct emulator *, struct parser *);
-int  emulator_load_from_file(struct emulator *emu, const char *filename);
+
+int emulator_load_asm(struct emulator *emu, FILE *file);
+int emulator_load_from_file(struct emulator *emu, const char *filename);
 
 #endif
