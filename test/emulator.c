@@ -42,7 +42,7 @@ int main()
         { test_regs, "registers" },
     };
 
-    ret = run_tests("Test asm parser", tests, sizeof(tests) / sizeof(tests[0]));
+    ret = run_tests("emulator", tests, sizeof(tests) / sizeof(tests[0]));
 
     return ret;
 }
