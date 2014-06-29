@@ -81,21 +81,9 @@ $(eval $(call subdir_inc,src))
 REAL_OBJS_y += src.o
 
 # Include tests
-ifeq ($(MAKECMDGOALS),check)
+ifneq (,$(filter $(MAKECMDGOALS),check clean))
 include ./test/Makefile
 endif
-ifeq ($(MAKECMDGOALS),clean)
-include ./test/Makefile
-endif
-
-
-ifneq ($(MAKECMDGOALS),clean)
-ifneq ($(MAKECMDGOALS),dist)
--include $(DEPS:.o=.d)
-endif
-endif
-
-CLEAN_LIST += $(DEPS:.o=.d)
 
 
 # Actual entry
@@ -111,8 +99,10 @@ dist: clean
 
 clean:
 	$(Q)for file in $(CLEAN_LIST) $(EXECUTABLE); do \
-		echo " RM      $$file"; \
-		rm -rf $$file; \
+		if [ -e $$file ]; then \
+			echo " RM      $$file"; \
+			rm -rf $$file; \
+		fi \
 	done
 
 $(EXECUTABLE): $(REAL_OBJS_y)
@@ -123,10 +113,14 @@ $(objtree)/%.o: $(srctree)/%.c
 	@echo " CC      $@"
 	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_$@) -c $< -o $@
 
-$(objtree)/%.d: $(srctree)/%.c
-	@echo " CCDEP   $@"
+$(objtree)/.%.d: $(srctree)/%.c
 	$(Q)$(CC) -MM -MP -MF $@ $(CPPFLAGS) $< -MT $(objtree)/$*.o -MT $@
 
+DEP_LIST := $(join $(foreach dir,$(DEPS),$(dir $(dir))),$(foreach file,$(DEPS),.$(notdir $(file))))
+DEP_LIST := $(DEP_LIST:.o=.d)
+
+-include $(DEP_LIST)
+CLEAN_LIST += $(DEP_LIST)
 
 .PHONY: $(PHONY)
 
