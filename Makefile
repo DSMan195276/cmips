@@ -119,7 +119,9 @@ $(objtree)/.%.d: $(srctree)/%.c
 DEP_LIST := $(join $(foreach dir,$(DEPS),$(dir $(dir))),$(foreach file,$(DEPS),.$(notdir $(file))))
 DEP_LIST := $(DEP_LIST:.o=.d)
 
+ifneq ($(MAKECMDGOALS),clean)
 -include $(DEP_LIST)
+endif
 CLEAN_LIST += $(DEP_LIST)
 
 .PHONY: $(PHONY)

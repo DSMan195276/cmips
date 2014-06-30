@@ -63,6 +63,16 @@ static void op_addi(struct emulator *emu, int rs, int rt, int val)
     emu->r.regs[rt] = emu->r.regs[rs] + (int16_t)val;
 }
 
+static void op_addiu(struct emulator *emu, int rs, int rt, int val)
+{
+    emu->r.regs[rt] = (uint32_t)((uint32_t)emu->r.regs[rs] + (uint16_t)val);
+}
+
+static void op_andi(struct emulator *emu, int rs, int rt, int val)
+{
+    emu->r.regs[rt] = (uint32_t)emu->r.regs[rs] & (uint32_t)val;
+}
+
 static void nop_i(struct emulator *emu, int rs, int rt, int val)
 {
 
