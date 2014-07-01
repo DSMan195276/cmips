@@ -73,6 +73,49 @@ static void op_andi(struct emulator *emu, int rs, int rt, int val)
     emu->r.regs[rt] = (uint32_t)emu->r.regs[rs] & (uint32_t)val;
 }
 
+static void op_ori(struct emulator *emu, int rs, int rt, int val)
+{
+    emu->r.regs[rt] = (uint32_t)emu->r.regs[rs] | (uint32_t)val;
+}
+
+static void op_xori(struct emulator *emu, int rs, int rt, int val)
+{
+    emu->r.regs[rt] = (uint32_t)emu->r.regs[rs] ^ (uint32_t)val;
+}
+
+static void op_slti(struct emulator *emu, int rs, int rt, int val)
+{
+    emu->r.regs[rt] = (int32_t)emu->r.regs[rs] < (int32_t)val;
+}
+
+static void op_sltiu(struct emulator *emu, int rs, int rt, int val)
+{
+    emu->r.regs[rt] = (uint32_t)emu->r.regs[rs] < (uint32_t)val;
+}
+
+static void op_lui(struct emulator *emu, int rs, int rt, int val)
+{
+    emu->r.regs[rt] = (uint32_t)emu->r.regs[rs] | (((uint32_t)val) << 16);
+}
+
+static void op_sw(struct emulator *emu, int rs, int rt, int val)
+{
+    be32 word;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    word = cpu_to_be32((uint32_t)emu->r.regs[rt]);
+    mem_write_to_addr(&emu->mem, addr, sizeof(be32), &word);
+}
+
+static void op_lw(struct emulator *emu, int rs, int rt, int val)
+{
+    be32 word;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    mem_read_from_addr(&emu->mem, addr, sizeof(be32), &word);
+    emu->r.regs[rt] = be32_to_cpu(word);
+}
+
 static void nop_i(struct emulator *emu, int rs, int rt, int val)
 {
 

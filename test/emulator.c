@@ -39,6 +39,17 @@ static struct test_cmd cmd_tests[] = {
         (uint32_t []){ mips_create_i_format(OP_ADDI, 0, REG_T1, 0x0FF0),
                        mips_create_i_format(OP_ANDI, REG_T1, REG_T2, 0xFF00) }, 2,
         { { [REG_T2] = 0x0F00 } }, { { [REG_T2] = 1 } } },
+    { "ori",
+        (uint32_t []){ mips_create_i_format(OP_ADDI, 0, REG_T1, 0x0FF0),
+                       mips_create_i_format(OP_ORI, REG_T1, REG_T2, 0xFF00) }, 2,
+        { { [REG_T2] = 0xFFF0 } }, { { [REG_T2] = 1 } } },
+    { "xori",
+        (uint32_t []){ mips_create_i_format(OP_ADDI, 0, REG_T1, 0x0FF0),
+                       mips_create_i_format(OP_XORI, REG_T1, REG_T2, 0xFF00) }, 2,
+        { { [REG_T2] = 0xF0F0 } }, { { [REG_T2] = 1 } } },
+    { "lui",
+        (uint32_t []){ mips_create_i_format(OP_LUI, 0, REG_T1, 0xFFFFF) }, 1,
+        { { [REG_T1] = 0xFFFF0000 } }, { { [REG_T1] = 1 } } },
     { NULL, NULL, 0, { { 0 } }, { { 0 } } }
 };
 
@@ -76,7 +87,7 @@ int run_cmd_tests(void)
 
         for (i = 0; i < 32; i++) {
             if (test->flags.regs[i]) {
-                sprintf(buf, "%s: %s, %d, %d", test->name, mips_reg_names_strs[i], test->r.regs[i], emu.r.regs[i]);
+                sprintf(buf, "%s: %s", test->name, mips_reg_names_strs[i]);
                 ret += test_assert_with_name(buf, emu.r.regs[i] == test->r.regs[i]);
             }
         }
