@@ -31,7 +31,7 @@ extern int a_sprintfv(char **buf, const char *format, va_list list);
 
 int stringcasecmp(const char *s1, const char *s2);
 
-void dump_mem(void *buf, size_t len, uint32_t base_addr);
+void dump_mem(const void *buf, size_t len, uint32_t base_addr);
 
 typedef struct { uint32_t v; } be32;
 typedef struct { uint32_t v; } le32;

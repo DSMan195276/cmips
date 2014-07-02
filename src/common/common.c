@@ -52,11 +52,11 @@ int stringcasecmp(const char *s1, const char *s2)
     return 0;
 }
 
-void dump_mem(void *buf, size_t len, uint32_t base_addr)
+void dump_mem(const void *buf, size_t len, uint32_t base_addr)
 {
-    char strbuf[100], strbuf2[100];
+    char strbuf[100], strbuf2[100] = { 0 };
     char *cur_b, *start, *to_print;
-    unsigned char *b = buf;
+    const unsigned char *b = buf;
     int i = 0, j, skipping = 0;
 
     cur_b = strbuf;
@@ -66,7 +66,7 @@ void dump_mem(void *buf, size_t len, uint32_t base_addr)
         cur_b += sprintf(cur_b, "0x%08x  ", (i) + base_addr);
         for (j = i; j < i + 16; j++) {
             if (j < len)
-                cur_b += sprintf(cur_b, "%02x ", (unsigned char)b[j]);
+                cur_b += sprintf(cur_b, "%02x ", (const unsigned int)b[j]);
             else
                 cur_b += sprintf(cur_b, "   ");
             if (j - i == 7)
