@@ -57,10 +57,10 @@ int run_tests(const char *mod_name, struct unit_test *tests, int test_count)
     return error_count;
 }
 
-int assert_true(const char *arg, int line, int cond)
+int assert_true(const char *arg, const char *func, int cond)
 {
     cur_test_count++;
-    printf(" [%02d:%03d] L=%03d: %s: ", total_test_count, cur_test_count, line, arg);
+    printf(" [%02d:%03d] %s: %s: ", total_test_count, cur_test_count, func, arg);
     if (cond)
         printf(COLOR_GREEN "PASS" COLOR_RESET);
     else
@@ -71,10 +71,10 @@ int assert_true(const char *arg, int line, int cond)
     return !cond;
 }
 
-int assert_with_name(const char *name, const char *arg, int line, int cond)
+int assert_with_name(const char *name, const char *arg, const char *func, int cond)
 {
     char buf[256];
     sprintf(buf, "%s: \"%s\"", name, arg);
-    return assert_true(buf, line, cond);
+    return assert_true(buf, func, cond);
 }
 

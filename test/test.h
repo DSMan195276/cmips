@@ -35,11 +35,11 @@ struct unit_test {
 #define COLOR_BG_MAGENTA   "\033[45m"
 #define COLOR_BG_CYAN      "\033[46m"
 
-#define test_assert(cond) assert_true(#cond, __LINE__, !!(cond))
-#define test_assert_with_name(name, cond) assert_with_name(name, #cond, __LINE__, !!(cond))
+#define test_assert(cond) assert_true(#cond, __func__, !!(cond))
+#define test_assert_with_name(name, cond) assert_with_name(name, #cond, __func__, !!(cond))
 
 extern int run_tests(const char *test_mod_name, struct unit_test *, int test_count);
-extern int assert_true(const char *arg, int line, int cond);
-extern int assert_with_name(const char *name, const char *arg, int line, int cond);
+extern int assert_true(const char *arg, const char *func, int cond);
+extern int assert_with_name(const char *name, const char *arg, const char *func, int cond);
 
 #endif
