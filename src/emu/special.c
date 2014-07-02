@@ -32,6 +32,21 @@ static void op_func_subu(struct emulator *emu, int rs, int rt, int rd, int sa)
     emu->r.regs[rd] = (uint32_t)(emu->r.regs[rs]) - (uint32_t)(emu->r.regs[rt]);
 }
 
+static void op_func_and(struct emulator *emu, int rs, int rt, int rd, int sa)
+{
+    emu->r.regs[rd] = (uint32_t)(emu->r.regs[rs]) & (uint32_t)(emu->r.regs[rt]);
+}
+
+static void op_func_or(struct emulator *emu, int rs, int rt, int rd, int sa)
+{
+    emu->r.regs[rd] = (uint32_t)(emu->r.regs[rs]) | (uint32_t)(emu->r.regs[rt]);
+}
+
+static void op_func_xor(struct emulator *emu, int rs, int rt, int rd, int sa)
+{
+    emu->r.regs[rd] = (uint32_t)(emu->r.regs[rs]) ^ (uint32_t)(emu->r.regs[rt]);
+}
+
 static void op_func_jr(struct emulator *emu, int rs, int rt, int rd, int sa)
 {
     emu->r.pc = emu->r.regs[rs];
