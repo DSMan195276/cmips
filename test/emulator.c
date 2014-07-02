@@ -23,17 +23,26 @@ struct test_cmd {
     struct mips_regs r;
     struct mips_regs flags;
 
+    /* Ending state of the text and data segments */
     const char *res_text;
     size_t res_text_len;
+
     const char *res_data;
     size_t res_data_len;
 };
 
+/* Code to end a program */
 #define END_CODE "addi $v0, $0, 10\nsyscall\n"
+/* The same code above, but in binary form */
 #define END_TEXT "\x20\x02\x00\x0a\x00\x00\x00\x0C"
+/* Length of the binary form */
 #define END_TEXT_LEN 8
+/* Ending settings from the end program code */
 #define END_REGS [REG_V0] = 10
 #define END_FLAGS [REG_V0] = 1
+
+#define DEF_TEXT_SEG 0x00400000
+#define DEF_DATA_SEG 0x10000000
 
 static struct test_cmd cmd_tests[] = {
     { "addi", "addi $t1, $0, 30\n" END_CODE, { { [REG_T1] = 30, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL, 0 },
@@ -100,6 +109,14 @@ static struct test_cmd cmd_tests[] = {
         { { [REG_T0] = 0x0FF0, [REG_T1] = 0xFF00, [REG_T2] = 0xF0F0, END_REGS } },
         { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2 ] = 1, END_FLAGS } },
         NULL, 0, NULL, 0 },
+    { "nor",
+        "addi $t0, $0, 0x0FF0\n"
+        "addiu $t1, $0, 0xFF00\n"
+        "nor $t2, $t0, $t1\n"
+        END_CODE,
+        { { [REG_T0] = 0x0FF0, [REG_T1] = 0xFF00, [REG_T2] = 0xFFFF000F, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
     { "data",
         ".data\n"
         ".word 0x11223344\n"
@@ -163,6 +180,7 @@ int run_cmd_tests(void)
 
         if (test->res_text) {
             sprintf(buf, "%s: %s", test->name, "text");
+            ret += test_assert_with_name(buf, emu.mem.text.size == test->res_text_len);
             if (test_assert_with_name(buf, memcmp(emu.mem.text.block, test->res_text, test->res_text_len) == 0)) {
                 ret++;
                 printf("    Found:\n");
@@ -172,8 +190,10 @@ int run_cmd_tests(void)
             }
         }
 
+
         if (test->res_data) {
             sprintf(buf, "%s: %s", test->name, "data");
+            ret += test_assert_with_name(buf, emu.mem.data.size == test->res_data_len);
             if (test_assert_with_name(buf, memcmp(emu.mem.data.block, test->res_data, test->res_data_len) == 0)) {
                 ret++;
                 printf("    Found:\n");
