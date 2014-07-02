@@ -1,2 +1,2 @@
-OBJS_y += regs.o inst.o
+objs-y += regs.o inst.o
 

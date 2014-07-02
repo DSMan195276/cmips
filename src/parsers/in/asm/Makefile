@@ -1,8 +1,8 @@
-OBJS_y += asm.o assembler.o dir_parse.o inst_parse.o label_parse.o dir_types.o
+objs-y += asm.o assembler.o dir_parse.o inst_parse.o label_parse.o dir_types.o
 
-OBJS_y += lexer.o
+objs-y += lexer.o
 
-CLEAN_LIST_y += lexer.c
+clean-list-y += lexer.c
 
 $(objtree)/lexer.c: $(srctree)/lexer.l
 	@echo " LEX     $@"

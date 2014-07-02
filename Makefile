@@ -53,26 +53,24 @@ define subdir_inc
 objtree := $$(objtree)/$(1)
 srctree := $$(srctree)/$(1)
 
-pfix := $$(subst /,_,$$(objtree))_
-DIRINC_y :=
-OBJS_y :=
-CLEAN_LIST_y :=
+subdir-y :=
+objs-y :=
+clean-list-y :=
 
 _tmp := $$(shell mkdir -p $$(objtree))
 include $$(srctree)/Makefile
 
-CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) $$(patsubst %,$$(objtree)/%,$$(CLEAN_LIST_y)) $$(objtree).o
-DEPS += $$(patsubst %,$$(objtree)/%,$$(OBJS_y))
+CLEAN_LIST += $$(patsubst %,$$(objtree)/%,$$(objs-y)) $$(patsubst %,$$(objtree)/%,$$(clean-list-y)) $$(objtree).o
+DEPS += $$(patsubst %,$$(objtree)/%,$$(objs-y))
 
-objs := $$(patsubst %,$$(objtree)/%,$$(OBJS_y)) $$(patsubst %,$$(objtree)/%.o,$$(DIRINC_y))
+objs := $$(patsubst %,$$(objtree)/%,$$(objs-y)) $$(patsubst %,$$(objtree)/%.o,$$(subdir-y))
 
 $$(eval $$(call create_link_rule,$$(objtree).o,$$(objs)))
 
-$$(foreach subdir,$$(DIRINC_y),$$(eval $$(call subdir_inc,$$(subdir))))
+$$(foreach subdir,$$(subdir-y),$$(eval $$(call subdir_inc,$$(subdir))))
 
 srctree := $$(patsubst %/$(1),%,$$(srctree))
 objtree := $$(patsubst %/$(1),%,$$(objtree))
-pfix := $$(subst /,_,$$(objtree))_
 endef
 
 

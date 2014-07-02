@@ -1,2 +1,2 @@
-OBJS_y += common.o rbtree.o
+objs-y += common.o rbtree.o
 

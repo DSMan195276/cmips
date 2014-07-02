@@ -1,2 +1,2 @@
-DIRINC_y += asm
+subdir-y += asm
 

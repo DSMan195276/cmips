@@ -1,2 +1,2 @@
-OBJS_y += asm.o
+objs-y += asm.o
 

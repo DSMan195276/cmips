@@ -1,4 +1,4 @@
-DIRINC_y += in out
+subdir-y += in out
 
-OBJS_y += parser.o
+objs-y += parser.o
 
