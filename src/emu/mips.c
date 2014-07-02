@@ -231,7 +231,8 @@ static int emulator_load_parser(struct emulator *emu, FILE *file, int (*parser_f
 
     parser_init(&parser);
 
-    parser.text.addr = 0x00100000;
+    parser.text.addr = 0x00400000;
+    parser.data.addr = 0x10000000;
 
     if ((parser_func) (&parser, file)) {
         ret = 1;
