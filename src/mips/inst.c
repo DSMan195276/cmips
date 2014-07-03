@@ -186,16 +186,12 @@ const struct inst_desc inst_ids[] = {
 
     ID_MEM("lb",  OP_LB),
     ID_MEM("lh",  OP_LH),
-    ID_MEM("lwl", OP_LWL),
     ID_MEM("lw",  OP_LW),
     ID_MEM("lbu", OP_LBU),
     ID_MEM("lhu", OP_LHU),
-    ID_MEM("lwr", OP_LWR),
     ID_MEM("sb",  OP_SB),
     ID_MEM("sh",  OP_SH),
-    ID_MEM("swl", OP_SWL),
     ID_MEM("sw",  OP_SW),
-    ID_MEM("swr", OP_SWR),
 
     { { "nop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },
     { { "noop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },

@@ -107,6 +107,24 @@ static void op_sw(struct emulator *emu, int rs, int rt, int val)
     mem_write_to_addr(&emu->mem, addr, sizeof(be32), &word);
 }
 
+static void op_sh(struct emulator *emu, int rs, int rt, int val)
+{
+    be16 half;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    half = cpu_to_be16((uint16_t)(emu->r.regs[rt] & 0xFFFF));
+    mem_write_to_addr(&emu->mem, addr, sizeof(be16), &half);
+}
+
+static void op_sb(struct emulator *emu, int rs, int rt, int val)
+{
+    uint8_t byte;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    byte = (uint8_t)(emu->r.regs[rt] & 0xFF);
+    mem_write_to_addr(&emu->mem, addr, sizeof(uint8_t), &byte);
+}
+
 static void op_lw(struct emulator *emu, int rs, int rt, int val)
 {
     be32 word;
@@ -114,6 +132,42 @@ static void op_lw(struct emulator *emu, int rs, int rt, int val)
 
     mem_read_from_addr(&emu->mem, addr, sizeof(be32), &word);
     emu->r.regs[rt] = be32_to_cpu(word);
+}
+
+static void op_lh(struct emulator *emu, int rs, int rt, int val)
+{
+    be16 half;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    mem_read_from_addr(&emu->mem, addr, sizeof(be16), &half);
+    emu->r.regs[rt] = (int32_t)((int16_t)be16_to_cpu(half));
+}
+
+static void op_lhu(struct emulator *emu, int rs, int rt, int val)
+{
+    be16 half;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    mem_read_from_addr(&emu->mem, addr, sizeof(be16), &half);
+    emu->r.regs[rt] = (uint16_t)be16_to_cpu(half);
+}
+
+static void op_lb(struct emulator *emu, int rs, int rt, int val)
+{
+    int8_t byte;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    mem_read_from_addr(&emu->mem, addr, sizeof(int8_t), &byte);
+    emu->r.regs[rt] = byte;
+}
+
+static void op_lbu(struct emulator *emu, int rs, int rt, int val)
+{
+    uint8_t byte;
+    uint32_t addr = emu->r.regs[rs] + (int32_t)val;
+
+    mem_read_from_addr(&emu->mem, addr, sizeof(uint8_t), &byte);
+    emu->r.regs[rt] = byte;
 }
 
 static void nop_i(struct emulator *emu, int rs, int rt, int val)
@@ -232,7 +286,7 @@ static int emulator_load_parser(struct emulator *emu, FILE *file, int (*parser_f
     parser_init(&parser);
 
     parser.text.addr = 0x00400000;
-    parser.data.addr = 0x10000000;
+    parser.data.addr = 0x00000000;
 
     if ((parser_func) (&parser, file)) {
         ret = 1;
