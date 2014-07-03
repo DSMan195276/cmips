@@ -42,7 +42,7 @@ struct test_cmd {
 #define END_FLAGS [REG_V0] = 1
 
 #define DEF_TEXT_SEG 0x00400000
-#define DEF_DATA_SEG 0x10000000
+#define DEF_DATA_SEG 0x00000000
 
 static struct test_cmd cmd_tests[] = {
     { "addi", "addi $t1, $0, 30\n" END_CODE, { { [REG_T1] = 30, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL, 0 },
@@ -127,6 +127,125 @@ static struct test_cmd cmd_tests[] = {
         { { END_FLAGS } },
         "\x00\x00\x00\x00" END_TEXT, 4 + END_TEXT_LEN,
         "\x11\x22\x33\x44", 4 },
+    { "lw",
+        ".data\n"
+        "label: .word 0x11223344\n"
+        ".text\n"
+        "addi $t1, $0, label\n"
+        "lw $t0, 0($t1)\n"
+        END_CODE,
+        { { [REG_T0] = 0x11223344, [REG_T1] = DEF_DATA_SEG, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0,
+        "\x11\x22\x33\x44", 4 },
+    { "lh",
+        ".data\n"
+        "label: .word 0x11223344\n"
+        ".text\n"
+        "addi $t1, $0, label\n"
+        "lh $t0, 0($t1)\n"
+        END_CODE,
+        { { [REG_T0] = 0x00001122, [REG_T1] = DEF_DATA_SEG, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0,
+        "\x11\x22\x33\x44", 4 },
+    { "lh extend",
+        ".data\n"
+        "label: .word 0xF1223344\n"
+        ".text\n"
+        "addi $t1, $0, label\n"
+        "lh $t0, 0($t1)\n"
+        END_CODE,
+        { { [REG_T0] = 0xFFFFF122, [REG_T1] = DEF_DATA_SEG, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0,
+        "\xF1\x22\x33\x44", 4 },
+    { "lhu",
+        ".data\n"
+        "label: .word 0xF1223344\n"
+        ".text\n"
+        "addi $t1, $0, label\n"
+        "lhu $t0, 0($t1)\n"
+        END_CODE,
+        { { [REG_T0] = 0x0000F122, [REG_T1] = DEF_DATA_SEG, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0,
+        "\xF1\x22\x33\x44", 4 },
+    { "lb",
+        ".data\n"
+        "label: .word 0x11223344\n"
+        ".text\n"
+        "addi $t1, $0, label\n"
+        "lb $t0, 0($t1)\n"
+        END_CODE,
+        { { [REG_T0] = 0x00000011, [REG_T1] = DEF_DATA_SEG, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0,
+        "\x11\x22\x33\x44", 4 },
+    { "lb",
+        ".data\n"
+        "label: .word 0xF1223344\n"
+        ".text\n"
+        "addi $t1, $0, label\n"
+        "lb $t0, 0($t1)\n"
+        END_CODE,
+        { { [REG_T0] = 0xFFFFFFF1, [REG_T1] = DEF_DATA_SEG, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0,
+        "\xF1\x22\x33\x44", 4 },
+    { "lbu",
+        ".data\n"
+        "label: .word 0xF1223344\n"
+        ".text\n"
+        "addi $t1, $0, label\n"
+        "lbu $t0, 0($t1)\n"
+        END_CODE,
+        { { [REG_T0] = 0x000000F1, [REG_T1] = DEF_DATA_SEG, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0,
+        "\xF1\x22\x33\x44", 4 },
+    { "sw",
+        ".data\n"
+        "label: .word 0x00000000\n"
+        "value: .word 0x11223344\n"
+        ".text\n"
+        "addi $t0, $0, label\n"
+        "addi $t1, $0, value\n"
+        "lw $t2, 0($t1)\n"
+        "sw $t2, 0($t0)\n"
+        END_CODE,
+        { { [REG_T0] = DEF_DATA_SEG, [REG_T1] = DEF_DATA_SEG + 4, [REG_T2] = 0x11223344, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0,
+        "\x11\x22\x33\x44\x11\x22\x33\x44", 8 },
+    { "sh",
+        ".data\n"
+        "label: .word 0x00000000\n"
+        "value: .word 0x11223344\n"
+        ".text\n"
+        "addi $t0, $0, label\n"
+        "addi $t1, $0, value\n"
+        "lw $t2, 0($t1)\n"
+        "sh $t2, 0($t0)\n"
+        END_CODE,
+        { { [REG_T0] = DEF_DATA_SEG, [REG_T1] = DEF_DATA_SEG + 4, [REG_T2] = 0x11223344, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0,
+        "\x33\x44\x00\x00\x11\x22\x33\x44", 8 },
+    { "sb",
+        ".data\n"
+        "label: .word 0x00000000\n"
+        "value: .word 0x11223344\n"
+        ".text\n"
+        "addi $t0, $0, label\n"
+        "addi $t1, $0, value\n"
+        "lw $t2, 0($t1)\n"
+        "sb $t2, 0($t0)\n"
+        END_CODE,
+        { { [REG_T0] = DEF_DATA_SEG, [REG_T1] = DEF_DATA_SEG + 4, [REG_T2] = 0x11223344, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0,
+        "\x44\x00\x00\x00\x11\x22\x33\x44", 8 },
     { "lui", "lui $t1, 0xFFFF\n" END_CODE, { { [REG_T1] = 0xFFFF0000, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL,  },
     { NULL, NULL, { { 0 } }, { { 0 } }, NULL, 0, NULL, 0 }
 };
@@ -165,7 +284,11 @@ int run_cmd_tests(void)
         emulator_init(&emu);
         file = fmemopen(test->code, strlen(test->code), "r");
 
-        emulator_load_asm(&emu, file);
+        if (test_assert_with_name(test->name, emulator_load_asm(&emu, file) == 0)) {
+            ret++;
+            goto cleanup;
+        }
+
         emulator_run(&emu);
 
         for (i = 0; i < 32; i++) {
@@ -203,6 +326,7 @@ int run_cmd_tests(void)
             }
         }
 
+cleanup:
         fclose(file);
         emulator_clear(&emu);
     }

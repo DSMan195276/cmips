@@ -83,16 +83,12 @@ static struct test_inst asm_inst[] = {
 
     DEF_I_FORMAT(OP_LB, lb, "lb $0, 0($0)"),
     DEF_I_FORMAT(OP_LH, lh, "lh $0, 0($0)"),
-    DEF_I_FORMAT(OP_LWL, lwl, "lwl $0, 0($0)"),
     DEF_I_FORMAT(OP_LW, lw, "lw $0, 0($0)"),
     DEF_I_FORMAT(OP_LBU, lbu, "lbu $0, 0($0)"),
     DEF_I_FORMAT(OP_LHU, lhu, "lhu $0, 0($0)"),
-    DEF_I_FORMAT(OP_LWR, lwr, "lwr $0, 0($0)"),
     DEF_I_FORMAT(OP_SB, sb, "sb $0, 0($0)"),
     DEF_I_FORMAT(OP_SH, sh, "sh $0, 0($0)"),
-    DEF_I_FORMAT(OP_SWL, swl, "swl $0, 0($0)"),
     DEF_I_FORMAT(OP_SW, sw, "sw $0, 0($0)"),
-    DEF_I_FORMAT(OP_SWR, swr, "swr $0, 0($0)"),
 
     DEF_R_FORMAT(0, nop, "nop"),
     DEF_R_FORMAT(0, noop, "noop"),
