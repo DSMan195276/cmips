@@ -29,7 +29,7 @@ static void handle_inst(struct assembler *a, const struct inst_generic *inst, st
 
     for (i = 0; i < 4; i++)
         if (r[i].ident)
-            create_marker(a, r[i].ident, desc->addr_bits,
+            create_marker(a, r[i].ident, a->lexer.line, desc->addr_bits,
                 desc->addr_shift, desc->addr_mask, desc->addr_is_branch == 2);
 
     op = inst_gen(desc, r);

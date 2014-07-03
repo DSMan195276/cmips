@@ -27,6 +27,8 @@ struct label_list {
 struct label_marker {
     struct rbnode node;
 
+    int line;
+
     uint32_t addr;
     uint32_t mask, shift, bits;
 
@@ -78,7 +80,7 @@ void add_to_seg(struct asm_segment *seg, void *data, size_t len);
 void add_word_to_seg(struct asm_segment *seg, uint32_t word);
 void add_halfword_to_seg(struct asm_segment *seg, uint16_t half);
 void align_seg(struct asm_segment *seg, int alignment);
-void create_marker(struct assembler *a, const char *ident, int bits, int shift, int mask, int is_branch);
+void create_marker(struct assembler *a, const char *ident, int line, int bits, int shift, int mask, int is_branch);
 const char *sect_to_str(enum section s);
 
 #endif

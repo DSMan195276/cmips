@@ -142,7 +142,7 @@ static enum internal_ret dir_word(struct assembler *a)
     if (a->tok == TOK_INTEGER) {
         add_word_to_seg(s, a->lexer.val);
     } else if (a->tok == TOK_IDENT) {
-        create_marker(a, a->lexer.ident, 32, 0, 0xFFFFFFFF, 0);
+        create_marker(a, a->lexer.ident, a->lexer.line, 32, 0, 0xFFFFFFFF, 0);
         add_word_to_seg(s, 0);
     } else {
         return RET_UNEXPECTED;

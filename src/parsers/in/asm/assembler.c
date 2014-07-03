@@ -71,7 +71,7 @@ const char *sect_to_str(enum section s)
     }
 }
 
-void create_marker(struct assembler *a, const char *ident, int bits, int shift, int mask, int is_branch)
+void create_marker(struct assembler *a, const char *ident, int line, int bits, int shift, int mask, int is_branch)
 {
     struct label_marker *m;
     size_t len = strlen(ident);
@@ -85,6 +85,7 @@ void create_marker(struct assembler *a, const char *ident, int bits, int shift, 
     else
         m->addr = a->data.last_addr;
 
+    m->line = line;
     m->is_branch = is_branch;
     m->bits = bits;
     m->shift = shift;
@@ -147,6 +148,7 @@ static void assembler_free(struct assembler *a)
 static struct label_list *find_label(struct assembler *a, const char *label)
 {
     size_t len;
+    struct rbnode *node;
     struct label_list *l, *lab;
 
     len = strlen(label);
@@ -155,14 +157,21 @@ static struct label_list *find_label(struct assembler *a, const char *label)
     memset(lab, 0, sizeof(struct label_list) + len + 1);
     strcpy(lab->ident, label);
 
-    l = container_of(rb_search(&a->labels, &lab->node), struct label_list, node);
+    node = rb_search(&a->labels, &lab->node);
+    if (node == NULL) {
+        l = NULL;
+        goto cleanup;
+    }
 
+    l = container_of(node, struct label_list, node);
+
+cleanup:
     free(lab);
 
     return l;
 }
 
-static void handle_markers(struct assembler *a)
+static int handle_markers(struct assembler *a)
 {
     uint32_t addr;
 
@@ -173,6 +182,11 @@ static void handle_markers(struct assembler *a)
 
     rb_foreach_inorder(&a->markers, m, struct label_marker, node) {
         l = find_label(a, m->label);
+
+        if (l == NULL) {
+            printf("Error: Label '%s' on line %d can't be found\n", m->label, m->line);
+            return 1;
+        }
 
         addr = l->addr;
         addr &= m->mask;
@@ -189,6 +203,10 @@ static void handle_markers(struct assembler *a)
         else
             inst = NULL;
 
+        if (!inst) {
+            printf("Error: Address 0x%08x of instruction on line %d can't be found allocated\n", m->addr, m->line);
+            return 1;
+        }
 
         if (m->bits != 32)
             *inst = cpu_to_be32((be32_to_cpu(*inst) & ~((1 << (m->bits)) - 1))
@@ -196,6 +214,8 @@ static void handle_markers(struct assembler *a)
         else
             *inst = cpu_to_be32(addr);
     }
+
+    return 0;
 }
 
 int assemble_prog(struct parser *gen, FILE *file)
@@ -255,7 +275,8 @@ again:
 
     }
 
-    handle_markers(&a);
+    if (handle_markers(&a))
+        ret = 2;
 
 exit:
     if (ret == 1)
