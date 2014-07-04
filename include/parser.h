@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 struct parser_segment {
     char *data;
@@ -25,11 +26,12 @@ struct parser {
 
     uint32_t gp_addr;
 
-    void (*err_disp) (const char *err, ...);
+    void (*err_disp) (const char *err, va_list args);
 };
 
 void parser_init(struct parser *);
 void parser_clear(struct parser *);
+void parser_disp_err(struct parser *p, const char *err, ...);
 
 /* Matches based on the file extension */
 int (*parser_get_correct_func(const char *filename))

@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <string.h>
 
 #include "test/test.h"
@@ -20,7 +21,7 @@
 
 int error_was_caught = 0;
 
-static void err_catcher(const char *err, ...)
+static void err_catcher(const char *err, va_list args)
 {
     error_was_caught = 1;
 }

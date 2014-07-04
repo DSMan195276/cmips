@@ -9,12 +9,40 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdint.h>
 
 #include "test/test.h"
 #include "mips.h"
 #include "parser.h"
 #include "emu.h"
+
+int test_regs(void)
+{
+    int ret = 0, i, inst;
+    struct emulator emu;
+
+    for (i = 0; i < 32; i++) {
+        inst = mips_create_i_format(OP_ADDI, 0, i, 20);
+
+        emulator_init(&emu);
+
+        emulator_run_inst(&emu, inst);
+        if (test_assert_with_name(mips_reg_names_strs[i], emu.r.regs[i] == 20)) {
+            ret++;
+            printf("    Found: 0x%08x - Expected: 0x%08x\n", emu.r.regs[i], 20);
+        }
+
+        emulator_clear(&emu);
+    }
+
+    return ret;
+}
+
+static void disp_errors(const char *err, va_list args)
+{
+    vprintf(err, args);
+}
 
 struct test_cmd {
     const char *name;
@@ -117,16 +145,12 @@ static struct test_cmd cmd_tests[] = {
         { { [REG_T0] = 0x0FF0, [REG_T1] = 0xFF00, [REG_T2] = 0xFFFF000F, END_REGS } },
         { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
         NULL, 0, NULL, 0 },
-    { "data",
-        ".data\n"
-        ".word 0x11223344\n"
-        ".text\n"
-        "nop\n"
-        END_CODE,
-        { { END_REGS } },
-        { { END_FLAGS } },
-        "\x00\x00\x00\x00" END_TEXT, 4 + END_TEXT_LEN,
-        "\x11\x22\x33\x44", 4 },
+    { "lui",
+        "lui $t1, 0xFFFF\n"
+         END_CODE,
+        { { [REG_T1] = 0xFFFF0000, END_REGS } },
+        { { [REG_T1] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
     { "lw",
         ".data\n"
         "label: .word 0x11223344\n"
@@ -260,31 +284,70 @@ static struct test_cmd cmd_tests[] = {
         { { [REG_T0] = 20, END_REGS }, .lo = 20 },
         { { [REG_T0] = 1, END_FLAGS }, .lo = 1 },
         NULL, 0, NULL, 0 },
-    { "lui", "lui $t1, 0xFFFF\n" END_CODE, { { [REG_T1] = 0xFFFF0000, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL,  },
+    { "mfhi",
+        "addi $t0, $0, 20\n"
+        "mthi $t0\n"
+        "mfhi $t1\n"
+        END_CODE,
+        { { [REG_T0] = 20, [REG_T1] = 20, END_REGS }, .hi = 20 },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS }, .hi = 1 },
+        NULL, 0, NULL, 0 },
+    { "mfhi",
+        "addi $t0, $0, 20\n"
+        "mtlo $t0\n"
+        "mflo $t1\n"
+        END_CODE,
+        { { [REG_T0] = 20, [REG_T1] = 20, END_REGS }, .lo = 20 },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS }, .lo = 1 },
+        NULL, 0, NULL, 0 },
+    { "sll",
+        "addi $t0, $0, 0x00F0\n"
+        "sll $t1, $t0, 4\n"
+        END_CODE,
+        { { [REG_T0] = 0x00F0, [REG_T1] = 0x0F00, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "srl",
+        "lui $t0, 0xFFF0\n"
+        "srl $t1, $t0, 4\n"
+        END_CODE,
+        { { [REG_T0] = 0xFFF00000, [REG_T1] = 0x0FFF0000, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "sra",
+        "lui $t0, 0xFFF0\n"
+        "sra $t1, $t0, 4\n"
+        END_CODE,
+        { { [REG_T0] = 0xFFF00000, [REG_T1] = 0xFFFF0000, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "sllv",
+        "addi $t0, $0, 0x00F0\n"
+        "addi $t2, $0, 4\n"
+        "sllv $t1, $t0, $t2\n"
+        END_CODE,
+        { { [REG_T0] = 0x00F0, [REG_T1] = 0x0F00, [REG_T2] = 4, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "srlv",
+        "lui $t0, 0xFFF0\n"
+        "addi $t2, $0, 4\n"
+        "srlv $t1, $t0, $t2\n"
+        END_CODE,
+        { { [REG_T0] = 0xFFF00000, [REG_T1] = 0x0FFF0000, [REG_T2] = 4, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "srav",
+        "lui $t0, 0xFFF0\n"
+        "addi $t2, $0, 4\n"
+        "srav $t1, $t0, $t2\n"
+        END_CODE,
+        { { [REG_T0] = 0xFFF00000, [REG_T1] = 0xFFFF0000, [REG_T2] = 4, END_REGS } },
+        { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
     { NULL, NULL, { { 0 } }, { { 0 } }, NULL, 0, NULL, 0 }
 };
 
-int test_regs(void)
-{
-    int ret = 0, i, inst;
-    struct emulator emu;
-
-    for (i = 0; i < 32; i++) {
-        inst = mips_create_i_format(OP_ADDI, 0, i, 20);
-
-        emulator_init(&emu);
-
-        emulator_run_inst(&emu, inst);
-        if (test_assert_with_name(mips_reg_names_strs[i], emu.r.regs[i] == 20)) {
-            ret++;
-            printf("    Found: 0x%08x - Expected: 0x%08x\n", emu.r.regs[i], 20);
-        }
-
-        emulator_clear(&emu);
-    }
-
-    return ret;
-}
 
 int run_cmd_tests(void)
 {
@@ -297,6 +360,8 @@ int run_cmd_tests(void)
     for (test = cmd_tests; test->name != NULL; test++) {
         emulator_init(&emu);
         file = fmemopen(test->code, strlen(test->code), "r");
+
+        emu.err_disp = disp_errors;
 
         if (test_assert_with_name(test->name, emulator_load_asm(&emu, file) == 0)) {
             ret++;

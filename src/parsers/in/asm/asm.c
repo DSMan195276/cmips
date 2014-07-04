@@ -15,6 +15,7 @@
 #include "assembler.h"
 #include "asm.h"
 
+
 char *asm_escape_string(char *str)
 {
     char *res;

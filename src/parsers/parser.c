@@ -22,6 +22,18 @@ void parser_clear(struct parser *parser)
     free(parser->data.data);
 }
 
+void parser_disp_err(struct parser *p, const char *err, ...)
+{
+    va_list args;
+    /* We don't display errors unless we have a callback to call */
+    if (!p->err_disp)
+        return ;
+
+    va_start(args, err);
+    (p->err_disp) (err, args);
+    va_end(args);
+}
+
 const static struct ext_parser {
     const char *extension;
     int (*parser) (struct parser *, FILE *);

@@ -95,7 +95,7 @@ static void op_sltiu(struct emulator *emu, int rs, int rt, int val)
 
 static void op_lui(struct emulator *emu, int rs, int rt, int val)
 {
-    emu->r.regs[rt] = (uint32_t)emu->r.regs[rs] | (((uint32_t)val) << 16);
+    emu->r.regs[rt] = (uint32_t)emu->r.regs[rt] | (((uint32_t)val) << 16);
 }
 
 static void op_sw(struct emulator *emu, int rs, int rt, int val)

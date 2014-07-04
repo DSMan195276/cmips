@@ -16,4 +16,6 @@
 /* Must free result */
 char *asm_escape_string(char *str);
 
+void asm_disp_err(struct parser *p, const char *err, ...);
+
 #endif

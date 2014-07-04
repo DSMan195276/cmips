@@ -10,6 +10,7 @@
 #include "common.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "mips.h"
 #include "emu/mem.h"
@@ -29,7 +30,7 @@ struct emulator {
 
     FILE *in, *out;
 
-    void (*err_disp) (const char *err, ...);
+    void (*err_disp) (const char *err, va_list args);
 };
 
 void emulator_init(struct emulator *);

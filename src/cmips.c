@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include "mips.h"
 #include "emu.h"
@@ -17,12 +18,9 @@
 struct emulator cmips_emu;
 struct arg_state cmips_arg_state;
 
-static void catch_errs(const char *err, ...)
+static void catch_errs(const char *err,va_list args)
 {
-    va_list args;
-    va_start(args, err);
     vprintf(err, args);
-    va_end(args);
 }
 
 int main(int argc, char **argv)
