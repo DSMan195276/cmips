@@ -142,6 +142,18 @@
     .place = { REGP_RT, REGP_IMMEDIATE, REGP_RS }             \
 }
 
+#define ID_MV(str, funcop) {                  \
+    {                                         \
+        .ident = str,                         \
+        .reg_count = 1,                       \
+        .rs = { REG_REGISTER },               \
+    },                                        \
+    .format = R_FORMAT,                       \
+    .opcode = OP_SPECIAL,                     \
+    .func = funcop,                           \
+    .place = { REGP_RD }                      \
+}
+
 const struct inst_desc inst_ids[] = {
     ID_SHIFT("sll", OP_FUNC_SLL),
     ID_SHIFT("srl", OP_FUNC_SRL),
@@ -192,6 +204,11 @@ const struct inst_desc inst_ids[] = {
     ID_MEM("sb",  OP_SB),
     ID_MEM("sh",  OP_SH),
     ID_MEM("sw",  OP_SW),
+
+    ID_MV("mfhi", OP_FUNC_MFHI),
+    ID_MV("mflo", OP_FUNC_MFLO),
+    ID_MV("mthi", OP_FUNC_MTHI),
+    ID_MV("mtlo", OP_FUNC_MTLO),
 
     { { "nop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },
     { { "noop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },
