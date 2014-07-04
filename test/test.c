@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "test.h"
+#include "test/test.h"
 
 static int cur_test_count;
 static int total_test_count = 0;
