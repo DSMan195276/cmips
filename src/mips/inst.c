@@ -154,6 +154,19 @@
     .place = { REGP_RD }                      \
 }
 
+#define ID_MUL_DIV(str, funcop) {             \
+    {                                         \
+        .ident = str,                         \
+        .reg_count = 2,                       \
+        .rs = { REG_REGISTER, REG_REGISTER }, \
+    },                                        \
+    .format = R_FORMAT,                       \
+    .opcode = OP_SPECIAL,                     \
+    .func = funcop,                           \
+    .place = { REGP_RS, REGP_RT }             \
+}
+
+
 const struct inst_desc inst_ids[] = {
     ID_SHIFT("sll", OP_FUNC_SLL),
     ID_SHIFT("srl", OP_FUNC_SRL),
@@ -209,6 +222,11 @@ const struct inst_desc inst_ids[] = {
     ID_MV("mflo", OP_FUNC_MFLO),
     ID_MV("mthi", OP_FUNC_MTHI),
     ID_MV("mtlo", OP_FUNC_MTLO),
+
+    ID_MUL_DIV("mult", OP_FUNC_MULT),
+    ID_MUL_DIV("multu", OP_FUNC_MULTU),
+    ID_MUL_DIV("div", OP_FUNC_DIV),
+    ID_MUL_DIV("divu", OP_FUNC_DIVU),
 
     { { "nop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },
     { { "noop", 0, { 0 } }, R_FORMAT, 0, 0, { 0 } },

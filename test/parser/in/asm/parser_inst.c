@@ -66,6 +66,11 @@ static struct test_inst asm_inst[] = {
     DEF_R_FORMAT(OP_FUNC_SYSCALL, syscall, "syscall"),
     DEF_R_FORMAT(OP_FUNC_BREAK, break, "break"),
 
+    DEF_R_FORMAT(OP_FUNC_MFHI, mfhi, "mfhi $0"),
+    DEF_R_FORMAT(OP_FUNC_MFLO, mflo, "mflo $0"),
+    DEF_R_FORMAT(OP_FUNC_MTHI, mthi, "mthi $0"),
+    DEF_R_FORMAT(OP_FUNC_MTLO, mtlo, "mtlo $0"),
+
     DEF_J_FORMAT(OP_J, j, "j 0"),
     DEF_J_FORMAT(OP_JAL, jal, "jal 0"),
 

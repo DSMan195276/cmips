@@ -73,9 +73,24 @@ struct test_cmd {
 #define DEF_DATA_SEG 0x00000000
 
 static struct test_cmd cmd_tests[] = {
-    { "addi", "addi $t1, $0, 30\n" END_CODE, { { [REG_T1] = 30, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL, 0 },
-    { "addi", "addi $t1, $0, -1\n" END_CODE, { { [REG_T1] = -1, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL, 0 },
-    { "addiu", "addiu $t1, $0, 0xFFF0\n" END_CODE, { { [REG_T1] = 0xFFF0, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL, 0 },
+    { "addi",
+        "addi $t1, $0, 30\n"
+        END_CODE,
+        { { [REG_T1] = 30, END_REGS } },
+        { { [REG_T1] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "addi",
+        "addi $t1, $0, -1\n"
+        END_CODE,
+        { { [REG_T1] = -1, END_REGS } },
+        { { [REG_T1] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "addiu",
+        "addiu $t1, $0, 0xFFF0\n"
+        END_CODE,
+        { { [REG_T1] = 0xFFF0, END_REGS } },
+        { { [REG_T1] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
     { "andi",
         "addi $t1, $0, 0x0FF0\n"
         "andi $t2, $t1, 0xFF00\n"
@@ -344,6 +359,38 @@ static struct test_cmd cmd_tests[] = {
         END_CODE,
         { { [REG_T0] = 0xFFF00000, [REG_T1] = 0xFFFF0000, [REG_T2] = 4, END_REGS } },
         { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
+        NULL, 0, NULL, 0 },
+    { "mult",
+        "addi $t0, $0, -1\n"
+        "add $t1, $0, $t0\n"
+        "mult $t0, $t1\n"
+        END_CODE,
+        { { [REG_T0] = -1, [REG_T1] = -1, END_REGS }, .hi = 0, .lo = 1 },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS }, .hi = 1, .lo = 1 },
+        NULL, 0, NULL, 0 },
+    { "multu",
+        "addi $t0, $0, -1\n"
+        "add $t1, $0, $t0\n"
+        "multu $t0, $t1\n"
+        END_CODE,
+        { { [REG_T0] = -1, [REG_T1] = -1, END_REGS }, .hi = 0xFFFFFFFE, .lo = 1 },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS }, .hi = 1, .lo = 1 },
+        NULL, 0, NULL, 0 },
+    { "div",
+        "addi $t0, $0, -5\n"
+        "addi $t1, $0, 2\n"
+        "div $t0, $t1\n"
+        END_CODE,
+        { { [REG_T0] = -5, [REG_T1] = 2, END_REGS }, .hi = 0xFFFFFFFF, .lo = 0xFFFFFFFE },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS }, .hi = 1, .lo = 1 },
+        NULL, 0, NULL, 0 },
+    { "divu",
+        "addi $t0, $0, -5\n"
+        "addi $t1, $0, 2\n"
+        "divu $t0, $t1\n"
+        END_CODE,
+        { { [REG_T0] = -5, [REG_T1] = 2, END_REGS }, .hi = 1, .lo = 0x7FFFFFFD },
+        { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS }, .hi = 1, .lo = 1 },
         NULL, 0, NULL, 0 },
     { NULL, NULL, { { 0 } }, { { 0 } }, NULL, 0, NULL, 0 }
 };

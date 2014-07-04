@@ -123,6 +123,28 @@ static void op_func_mtlo(struct emulator *emu, int rs, int rt, int rd, int sa)
     emu->r.lo = emu->r.regs[rd];
 }
 
+static void op_func_mult(struct emulator *emu, int rs, int rt, int rd, int sa)
+{
+    emu->r.hilo = (int64_t)(int32_t)emu->r.regs[rs] * (int64_t)(int32_t)emu->r.regs[rt];
+}
+
+static void op_func_multu(struct emulator *emu, int rs, int rt, int rd, int sa)
+{
+    emu->r.hilo = (uint64_t)emu->r.regs[rs] * (uint64_t)emu->r.regs[rt];
+}
+
+static void op_func_div(struct emulator *emu, int rs, int rt, int rd, int sa)
+{
+    emu->r.lo = (int32_t)emu->r.regs[rs] / (int32_t)emu->r.regs[rt];
+    emu->r.hi = (int32_t)emu->r.regs[rs] % (int32_t)emu->r.regs[rt];
+}
+
+static void op_func_divu(struct emulator *emu, int rs, int rt, int rd, int sa)
+{
+    emu->r.lo = (uint32_t)emu->r.regs[rs] / (uint32_t)emu->r.regs[rt];
+    emu->r.hi = (uint32_t)emu->r.regs[rs] % (uint32_t)emu->r.regs[rt];
+}
+
 static void op_func_nop(struct emulator *emu, int rs, int rt, int rd, int sa)
 {
 
