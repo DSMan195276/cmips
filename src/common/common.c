@@ -79,7 +79,7 @@ void dump_mem(const void *buf, size_t len, uint32_t base_addr)
                 cur_b += sprintf(cur_b, "%c", b[j]);
             else
                 *(cur_b++) = '.';
-        cur_b += sprintf(cur_b, "|\n");
+        sprintf(cur_b, "|\n");
 
         to_print = start;
 
