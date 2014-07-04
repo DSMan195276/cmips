@@ -1,5 +1,4 @@
 
-TEST_OBJS :=
 TESTS :=
 
 CFLAGS += -I'./test'
@@ -25,15 +24,12 @@ parser.OBJ := ./src/common.o ./src/mips.o \
 				./test/parser/in/asm/parser_label.o \
 				./test/parser/in/asm/parser_dir.o \
 				./test/parser/in/asm/parser_args.o
-TEST_OBJS += ./test/parser.o \
-			 ./test/parser/in/asm/arser_inst.o \
-			 ./test/parser/in/asm/parser_label.o \
-			 ./test/parser/in/asm/parser_dir.o \
-			 ./test/parser/in/asm/parser_args.o
+
 emulator.OBJ := ./src/common.o ./src/mips.o \
 				./src/emu.o ./src/parsers.o \
 				./test/emulator.o
-TEST_OBJS += ./test/emulator.o
+
+TEST_OBJS := $(foreach test,$(TESTS),$(filter ./test/%,$($(test).OBJ)))
 
 
 # This template generates a list of the outputted test executables, as well as
