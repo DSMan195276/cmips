@@ -9,6 +9,8 @@
 #define INCLUDE_EMU
 #include "common.h"
 
+#include <stdio.h>
+
 #include "mips.h"
 #include "emu/mem.h"
 #include "parser.h"
@@ -24,6 +26,10 @@ struct emulator {
 
     struct parser_segment backup_text;
     struct parser_segment backup_data;
+
+    FILE *in, *out;
+
+    void (*err_disp) (const char *err, ...);
 };
 
 void emulator_init(struct emulator *);

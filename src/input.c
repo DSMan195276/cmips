@@ -45,10 +45,8 @@ static char **parse_line(char *line, int *argc)
          }
     }
 
-    if (sflag) {
+    if (sflag)
         lines[*argc - 1] = line + last;
-        sflag = 0;
-    }
 
     return lines;
 }

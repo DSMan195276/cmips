@@ -287,6 +287,7 @@ static int emulator_load_parser(struct emulator *emu, FILE *file, int (*parser_f
 
     parser.text.addr = 0x00400000;
     parser.data.addr = 0x00000000;
+    parser.err_disp = emu->err_disp;
 
     if ((parser_func) (&parser, file)) {
         ret = 1;
@@ -326,6 +327,9 @@ int emulator_load_from_file(struct emulator *emu, const char *filename)
 void emulator_init(struct emulator *emu)
 {
     memset(emu, 0, sizeof(struct emulator));
+
+    emu->in = stdin;
+    emu->out = stdout;
 
     mem_prog_init(&emu->mem);
 }

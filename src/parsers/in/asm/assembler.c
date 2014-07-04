@@ -184,7 +184,7 @@ static int handle_markers(struct assembler *a)
         l = find_label(a, m->label);
 
         if (l == NULL) {
-            printf("Error: Label '%s' on line %d can't be found\n", m->label, m->line);
+            (a->gen->err_disp) ("Error: Label '%s' on line %d can't be found\n", m->label, m->line);
             return 1;
         }
 
@@ -204,7 +204,7 @@ static int handle_markers(struct assembler *a)
             inst = NULL;
 
         if (!inst) {
-            printf("Error: Address 0x%08x of instruction on line %d can't be found allocated\n", m->addr, m->line);
+            (a->gen->err_disp) ("Error: Address 0x%08x of instruction on line %d can't be found allocated\n", m->addr, m->line);
             return 1;
         }
 
@@ -280,7 +280,7 @@ again:
 
 exit:
     if (ret == 1)
-        printf("Unexpected characters on line %d: '%s'\n", a.lexer.line, yytext);
+        (a.gen->err_disp) ("Unexpected characters on line %d: '%s'\n", a.lexer.line, yytext);
 
     gen->text.data = a.text.s.data;
     gen->text.len = a.text.s.len;;

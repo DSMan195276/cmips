@@ -15,8 +15,25 @@
 
 static void print_int(struct emulator *emu)
 {
-    printf("%d", emu->r.regs[REG_A0]);
-    fflush(stdout);
+    fprintf(emu->out, "%d", emu->r.regs[REG_A0]);
+    fflush(emu->out);
+}
+
+static void print_int_hex(struct emulator *emu)
+{
+    fprintf(emu->out, "%08x", emu->r.regs[REG_A0]);
+    fflush(emu->out);
+}
+
+static void print_int_binary(struct emulator *emu)
+{
+
+}
+
+static void print_int_unsigned(struct emulator *emu)
+{
+    fprintf(emu->out, "%u", emu->r.regs[REG_A0]);
+    fflush(emu->out);
 }
 
 static void print_string(struct emulator *emu)
@@ -26,15 +43,15 @@ static void print_string(struct emulator *emu)
 
     addr = emu->r.regs[REG_A0];
     while (mem_read_from_addr(&emu->mem, addr++, 1, &byte), byte != 0)
-        putchar(byte);
-    fflush(stdout);
+        fputc(byte, emu->out);
+    fflush(emu->out);
 }
 
 static void read_int(struct emulator *emu)
 {
     int32_t val = 0;
-    while (scanf("%d", &val) != 1)
-        scanf("%*s");
+    while (fscanf(emu->in, "%d", &val) != 1)
+        fscanf(emu->in, "%*s");
     emu->r.regs[REG_V0] = val;
 }
 
@@ -57,6 +74,9 @@ void (*handlers[]) (struct emulator *emu) = {
     [SYSCALL_READ_INT] = read_int,
     [SYSCALL_EXIT] = exit_prog,
     [SYSCALL_DELAY] = prog_delay,
+    [SYSCALL_PRINT_INT_HEX] = print_int_hex,
+    [SYSCALL_PRINT_INT_BINARY] = print_int_binary,
+    [SYSCALL_PRINT_INT_UNSIGNED] = print_int_unsigned,
 };
 
 void syscall_handler(struct emulator *emu, int rs, int rt, int rd, int sa)

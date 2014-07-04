@@ -29,7 +29,7 @@ enum internal_ret parse_label(struct assembler *a)
     strcpy(label->ident, a->lexer.ident);
 
     if (!rb_insert(&a->labels, &label->node)) {
-        printf("Error: Duplicate label '%s' on line %d\n", label->ident, a->lexer.line);
+        (a->gen->err_disp) ("Error: Duplicate label '%s' on line %d\n", label->ident, a->lexer.line);
         free(label);
         return RET_ERR;
     }

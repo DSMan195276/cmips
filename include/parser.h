@@ -24,6 +24,8 @@ struct parser {
     struct parser_segment data;
 
     uint32_t gp_addr;
+
+    void (*err_disp) (const char *err, ...);
 };
 
 void parser_init(struct parser *);

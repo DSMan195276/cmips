@@ -17,9 +17,18 @@
 struct emulator cmips_emu;
 struct arg_state cmips_arg_state;
 
+static void catch_errs(const char *err, ...)
+{
+    va_list args;
+    va_start(args, err);
+    vprintf(err, args);
+    va_end(args);
+}
+
 int main(int argc, char **argv)
 {
     emulator_init(&cmips_emu);
+    cmips_emu.err_disp = catch_errs;
 
     parse_args(argc, argv, &cmips_arg_state);
 
