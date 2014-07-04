@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-#include "test.h"
+#include "test/test.h"
 #include "mips.h"
 #include "parser.h"
 #include "emu.h"
@@ -182,7 +182,7 @@ static struct test_cmd cmd_tests[] = {
         { { [REG_T0] = 1, [REG_T1] = 1, END_FLAGS } },
         NULL, 0,
         "\x11\x22\x33\x44", 4 },
-    { "lb",
+    { "lb extend",
         ".data\n"
         "label: .word 0xF1223344\n"
         ".text\n"
@@ -246,6 +246,20 @@ static struct test_cmd cmd_tests[] = {
         { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
         NULL, 0,
         "\x44\x00\x00\x00\x11\x22\x33\x44", 8 },
+    { "mthi",
+        "addi $t0, $0, 20\n"
+        "mthi $t0\n"
+        END_CODE,
+        { { [REG_T0] = 20, END_REGS }, .hi = 20 },
+        { { [REG_T0] = 1, END_FLAGS }, .hi = 1 },
+        NULL, 0, NULL, 0 },
+    { "mtlo",
+        "addi $t0, $0, 20\n"
+        "mtlo $t0\n"
+        END_CODE,
+        { { [REG_T0] = 20, END_REGS }, .lo = 20 },
+        { { [REG_T0] = 1, END_FLAGS }, .lo = 1 },
+        NULL, 0, NULL, 0 },
     { "lui", "lui $t1, 0xFFFF\n" END_CODE, { { [REG_T1] = 0xFFFF0000, END_REGS } }, { { [REG_T1] = 1, END_FLAGS } }, NULL, 0, NULL,  },
     { NULL, NULL, { { 0 } }, { { 0 } }, NULL, 0, NULL, 0 }
 };
@@ -298,6 +312,30 @@ int run_cmd_tests(void)
                     ret++;
                     printf("   Found: 0x%08x - Expected: 0x%08x\n", emu.r.regs[i], test->r.regs[i]);
                 }
+            }
+        }
+
+        if (test->flags.hi) {
+            sprintf(buf, "%s: hi", test->name);
+            if (test_assert_with_name(buf, emu.r.hi == test->r.hi)) {
+                ret++;
+                printf("   Found: 0x%08x - Expected: 0x%08x\n", emu.r.hi, test->r.hi);
+            }
+        }
+
+        if (test->flags.lo) {
+            sprintf(buf, "%s: lo", test->name);
+            if (test_assert_with_name(buf, emu.r.lo == test->r.lo)) {
+                ret++;
+                printf("   Found: 0x%08x - Expected: 0x%08x\n", emu.r.lo, test->r.lo);
+            }
+        }
+
+        if (test->flags.pc) {
+            sprintf(buf, "%s: pc", test->name);
+            if (test_assert_with_name(buf, emu.r.pc == test->r.pc)) {
+                ret++;
+                printf("   Found: 0x%08x - Expected: 0x%08x\n", emu.r.pc, test->r.pc);
             }
         }
 

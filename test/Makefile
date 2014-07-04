@@ -1,8 +1,11 @@
 
 TEST_OBJS :=
 TESTS :=
+
+CFLAGS += -I'./test'
+
 # This defines the names of all the tests we should run
-TESTS += asm_parser
+TESTS += parser
 TESTS += emulator
 
 # Definitions of the tests listed above
@@ -16,9 +19,20 @@ TESTS += emulator
 # More complex tests may require the use of more then just one .c file from
 # ./src, in which case all of them should be listed. Also possible is having
 # more the one test program per ./src file.
-asm_parser.OBJ := ./src/common.o ./src/mips.o ./src/parsers.o ./test/asm_parser.o
-TEST_OBJS += ./test/asm_parser.o
-emulator.OBJ := ./src/common.o ./src/mips.o ./src/emu.o ./src/parsers.o ./test/emulator.o
+parser.OBJ := ./src/common.o ./src/mips.o \
+				./src/parsers.o ./test/parser.o \
+				./test/parser/in/asm/parser_inst.o \
+				./test/parser/in/asm/parser_label.o \
+				./test/parser/in/asm/parser_dir.o \
+				./test/parser/in/asm/parser_args.o
+TEST_OBJS += ./test/parser.o \
+			 ./test/parser/in/asm/arser_inst.o \
+			 ./test/parser/in/asm/parser_label.o \
+			 ./test/parser/in/asm/parser_dir.o \
+			 ./test/parser/in/asm/parser_args.o
+emulator.OBJ := ./src/common.o ./src/mips.o \
+				./src/emu.o ./src/parsers.o \
+				./test/emulator.o
 TEST_OBJS += ./test/emulator.o
 
 
@@ -45,7 +59,6 @@ CLEAN_LIST += $(TEST_TESTS) ./test/test.o ./test/bin
 run_tests: ./test/test.o $(TEST_TESTS)
 	$(Q)./test/run_tests.sh $(TESTS)
 
-PHONY += test
+PHONY += check
 check: run_tests
-
 
