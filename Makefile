@@ -112,9 +112,9 @@ $(objtree)/%.o: $(srctree)/%.c
 	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_$@) -c $< -o $@
 
 $(objtree)/.%.d: $(srctree)/%.c
-	$(Q)$(CC) -MM -MP -MF $@ $(CPPFLAGS) $< -MT $(objtree)/$*.o -MT $@
+	$(Q)$(CC) -MM -MP -MF $@ $(CFLAGS) $< -MT $(objtree)/$*.o -MT $@
 
-DEP_LIST := $(join $(foreach dir,$(DEPS),$(dir $(dir))),$(foreach file,$(DEPS),.$(notdir $(file))))
+DEP_LIST := $(foreach dep,$(DEPS),$(dir $(dep)).$(notdir $(dep)))
 DEP_LIST := $(DEP_LIST:.o=.d)
 
 ifneq ($(MAKECMDGOALS),clean)
