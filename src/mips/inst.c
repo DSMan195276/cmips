@@ -353,7 +353,7 @@ static void dis_reg_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
             break;
         case REG_IMMEDIATE:
         case REG_ADDRESS:
-            b += sprintf(b, "0x%04x", val);
+            b += sprintf(b, "0x%04x", val << (desc->addr_shift));
             break;
         case REG_DEREF_REG:
             if (!deref_flag) {
