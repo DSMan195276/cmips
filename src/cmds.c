@@ -81,12 +81,15 @@ static void dis_cur(int argc, char **argv)
 {
     char buf[20] = { 0 };
     int i = 0, val = 3;
+    uint32_t pc_addr = cmips_emu.r.pc;
     be32 inst;
 
-    if (argc == 1)
+    if (argc >= 1)
         val = strtol(argv[0], NULL, 0);
+    if (argc >= 2)
+        pc_addr = strtol(argv[1], NULL, 0);
 
-    uint32_t addr = cmips_emu.r.pc - val * 4;
+    uint32_t addr = pc_addr - val * 4;
 
     for (i = 0; i < val * 2 + 1; i++, addr += 4) {
         mem_read_from_addr(&cmips_emu.mem, addr, sizeof(be32), &inst);
