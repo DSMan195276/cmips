@@ -64,6 +64,7 @@ extern const struct inst_desc inst_ids[];
 
 uint32_t inst_gen(const struct inst_desc *id, struct inst_reg *regs);
 void mips_disp_inst(uint32_t inst);
+void mips_disassemble_inst(uint32_t inst, char *buf);
 
 extern const char *mips_opcode_names[64];
 

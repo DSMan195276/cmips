@@ -7,6 +7,8 @@
  */
 #include "common.h"
 
+#include <string.h>
+
 #include "mips.h"
 #include "mips/inst.h"
 
@@ -318,6 +320,96 @@ void mips_disp_inst(uint32_t inst)
         printf("J_FMT: Jmp Addr: 0x%08x(%d) - Aligned: 0x%08x(%d)\n"
                 , addr, addr
                 , addr << 2, addr << 2);
+    }
+}
+
+static void dis_reg_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
+{
+    char *b = buf;
+    int i, val;
+    int deref_flag = 0;
+
+    b += sprintf(b, "%s ", desc->g.ident);
+
+    for (i = 0; i < desc->g.reg_count; i++) {
+        switch (desc->place[i]) {
+        case REGP_RT:
+            val = INST_I_RT(inst);
+            break;
+        case REGP_RS:
+            val = INST_I_RS(inst);
+            break;
+        case REGP_IMMEDIATE:
+            val = INST_I_OFFSET(inst);
+            break;
+        default:
+            val = 0;
+            break;
+        }
+
+        switch (desc->g.rs[i]) {
+        case REG_REGISTER:
+            b += sprintf(b, "$%s", mips_reg_names_strs[val]);
+            break;
+        case REG_IMMEDIATE:
+        case REG_ADDRESS:
+            b += sprintf(b, "0x%04x", val);
+            break;
+        case REG_DEREF_REG:
+            if (!deref_flag) {
+                b += sprintf(b, "0x%04x", val);
+                deref_flag = 1;
+            } else {
+                b += sprintf(b, "($%s)", mips_reg_names_strs[val]);
+                deref_flag = 0;
+            }
+        default:
+            break;
+        }
+
+        if (i < desc->g.reg_count - 1 && !deref_flag)
+            b += sprintf(b, ", ");
+    }
+}
+
+static void dis_jmp_inst(uint32_t inst, const struct inst_desc *desc,  char *buf)
+{
+    sprintf(buf, "%s 0x%08x", desc->g.ident, INST_J_INDEX(inst) << 2);
+}
+
+void mips_disassemble_inst(uint32_t inst, char *buf)
+{
+    const struct inst_desc *desc;
+    int op = INST_OPCODE(inst);
+
+    if (inst == 0) {
+        strcpy(buf, "nop");
+        return ;
+    }
+
+    if (op == 0) {
+        int op = INST_R_FUNC(inst);
+        for (desc = inst_ids; desc->g.ident != NULL; desc++) {
+            if (op == desc->func) {
+                dis_reg_inst(inst, desc, buf);
+                return ;
+            }
+        }
+    }
+
+    for (desc = inst_ids; desc->g.ident != NULL; desc++) {
+        if (op == desc->opcode) {
+            switch (mips_opcode_to_type[op]) {
+            case I_FORMAT:
+                dis_reg_inst(inst, desc, buf);
+                return ;
+            case J_FORMAT:
+                dis_jmp_inst(inst, desc, buf);
+                return ;
+            default:
+                break;
+            }
+        }
     }
 }
 

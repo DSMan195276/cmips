@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "termcols.h"
 #include "cmips.h"
 #include "input.h"
 #include "mips.h"
@@ -76,6 +77,24 @@ static void step_inst(int argc, char **argv)
         emulator_run_next_inst(&cmips_emu);
 }
 
+static void dis_cur(int argc, char **argv)
+{
+    char buf[20] = { 0 };
+    int i = 0, val = 3;
+    be32 inst;
+
+    if (argc == 1)
+        val = strtol(argv[0], NULL, 0);
+
+    uint32_t addr = cmips_emu.r.pc - val * 4;
+
+    for (i = 0; i < val * 2 + 1; i++, addr += 4) {
+        mem_read_from_addr(&cmips_emu.mem, addr, sizeof(be32), &inst);
+        mips_disassemble_inst(be32_to_cpu(inst), buf);
+        printf("%s0x%08x %s%s\n", (i == val)? COLOR_GREEN:"", addr, buf, (i == val)? COLOR_RESET:"");
+    }
+}
+
 static void help(int argc, char **argv)
 {
     char buf[50];
@@ -97,7 +116,8 @@ struct cmips_cmd cmips_cmds[] = {
     { "run-inst", run_inst, "Run a single instruction given as an argument.", "<instruction>" },
     { "dump-mem", dump_seg_mem, "Dump the current contents of memory", "" },
     { "run-script", script, "Run a command script", "<filename>" },
-    { "step", step_inst, "Run the next instruction and then stop", "" },
+    { "step", step_inst, "Run the next instruction and then stop", "[step-count]" },
+    { "disassemble", dis_cur, "Disassemble the current running instructions", "[instruction count]" },
 
     { "help", help, "Display help information.", "" },
     { "quit", exit_cmd, "Exit the program.", "" },

@@ -67,6 +67,8 @@ void mem_write_to_addr(struct mem_prog *prog, uint32_t addr, int len, void *buf)
 void mem_read_from_addr(struct mem_prog *prog, uint32_t addr, int len, void *buf)
 {
     int i;
+    memset(buf, 0, len);
+
     for (i = 0; i < sizeof(prog->mem) / sizeof(prog->mem[0]); i++) {
         if (prog->mem[i].addr <= addr && prog->mem[i].addr + prog->mem[i].size >= addr) {
             if (len <= prog->mem[i].size - (addr - prog->mem[i].addr))
