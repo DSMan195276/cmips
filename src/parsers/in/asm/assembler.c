@@ -121,6 +121,53 @@ static enum rbcomp marker_cmp(const struct rbnode *c1, const struct rbnode *c2)
         return RB_EQ;
 }
 
+void clear_links(struct assembler *a)
+{
+    struct lexer_link *cur, *next;
+
+    for (cur = a->link; cur != NULL; cur = next) {
+        next = cur->next;
+        free(cur->lex.ident);
+        free(cur->yytex);
+        free(cur);
+    }
+}
+
+struct lexer_link *get_next_link(struct assembler *a, struct lexer_link *l)
+{
+    struct lexer_link **add;
+    if (l == NULL) {
+        add = &(a->link);
+    } else {
+        if (l->next != NULL)
+            return l->next;
+        else
+            add = &(l->next);
+    }
+
+    *add = malloc(sizeof(struct lexer_link));
+    memset(*add, 0, sizeof(struct lexer_link));
+
+    (*add)->tok = yylex(&a->curlex);
+
+    (*add)->lex = a->curlex;
+    if (a->curlex.ident)
+        a->curlex.ident = NULL;
+
+    (*add)->yytex = strdup(yytext);
+
+    return *add;
+}
+
+struct lexer_link *get_last_token(struct assembler *a)
+{
+    struct lexer_link *t;
+    for (t = a->link; t->next != NULL; t = t->next)
+        ;
+
+    return t;
+}
+
 static void assembler_init(struct assembler *a)
 {
     memset(a, 0, sizeof(struct assembler));
@@ -133,7 +180,7 @@ static void assembler_free(struct assembler *a)
     struct label_list *l;
     struct label_marker *m;
 
-    free(a->lexer.ident);
+    clear_links(a);
 
     rb_foreach_postorder(&a->labels, l, struct label_list, node)
         free(l);
@@ -221,6 +268,7 @@ static int handle_markers(struct assembler *a)
 int assemble_prog(struct parser *gen, FILE *file)
 {
     struct assembler a;
+    struct lexer_link *link;
     int ret = 0;
 
     assembler_init(&a);
@@ -231,7 +279,7 @@ int assemble_prog(struct parser *gen, FILE *file)
     a.text.last_addr = a.text.s.addr;
     a.data.last_addr = a.data.s.addr;
     a.cur_section = SECT_TEXT;
-    a.lexer.line = 1;
+    a.curlex.line = 1;
 
     yyin = file;
 
@@ -249,13 +297,15 @@ int assemble_prog(struct parser *gen, FILE *file)
         break;           \
     }
 
-    while ((a.tok = yylex(&a.lexer)) != TOK_EOF) {
+    while ((clear_links(&a),
+            link = get_next_link(&a, NULL),
+            link->tok != TOK_EOF)) {
 
         /* This label is here for the case that a token is read which an
          * internal function wants to pass off to the main parser. This label
          * jumps to the top of the loop and skips the yylex() read */
 again:
-        switch (a.tok) {
+        switch (link->tok) {
         case TOK_LABEL:
             call_parser(parse_label);
             break;
@@ -280,7 +330,8 @@ again:
 
 exit:
     if (ret == 1)
-        parser_disp_err(a.gen, "Unexpected characters on line %d: '%s'\n", a.lexer.line, yytext);
+        if (a.err_tok)
+            parser_disp_err(a.gen, "Unexpected characters on line %d: '%s'\n", a.err_tok->lex.line, a.err_tok->yytex);
 
     gen->text.data = a.text.s.data;
     gen->text.len = a.text.s.len;;

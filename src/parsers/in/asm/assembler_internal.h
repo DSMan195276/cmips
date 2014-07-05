@@ -55,11 +55,21 @@ enum section {
     SECT_DATA = 1<<1,
 };
 
+struct lexer_link {
+    struct lexer_link *next;
+    struct lexer lex;
+    enum asm_token tok;
+
+    char *yytex;
+};
+
 struct assembler {
     struct parser *gen;
-    struct lexer lexer;
+    struct lexer_link *link;
 
-    enum asm_token tok;
+    struct lexer curlex;
+
+    struct lexer_link *err_tok;
 
     struct asm_segment text;
     struct asm_segment data;
@@ -70,10 +80,12 @@ struct assembler {
     enum section cur_section;
 };
 
-#define expect_token(tok, val) \
+#define expect_token(a, link, val) \
     do { \
-        if ((tok) != (val)) \
+        if ((link->tok) != (val)) { \
+            a->err_tok = link; \
             return RET_UNEXPECTED; \
+        } \
     } while (0)
 
 void add_to_seg(struct asm_segment *seg, void *data, size_t len);
@@ -82,5 +94,8 @@ void add_halfword_to_seg(struct asm_segment *seg, uint16_t half);
 void align_seg(struct asm_segment *seg, int alignment);
 void create_marker(struct assembler *a, const char *ident, int line, int bits, int shift, int mask, int is_branch);
 const char *sect_to_str(enum section s);
+
+void clear_links(struct assembler *);
+struct lexer_link *get_next_link(struct assembler *, struct lexer_link *);
 
 #endif

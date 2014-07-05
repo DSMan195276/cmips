@@ -15,12 +15,6 @@
 #include "assembler_internal.h"
 #include "mips/inst.h"
 
-#define expect_token(tok, val) \
-    do { \
-        if ((tok) != (val)) \
-            return RET_UNEXPECTED; \
-    } while (0)
-
 static void handle_inst(struct assembler *a, const struct inst_generic *inst, struct inst_reg *r)
 {
     const struct inst_desc *desc = container_of(inst, const struct inst_desc, g);
@@ -29,7 +23,7 @@ static void handle_inst(struct assembler *a, const struct inst_generic *inst, st
 
     for (i = 0; i < 4; i++)
         if (r[i].ident)
-            create_marker(a, r[i].ident, a->lexer.line, desc->addr_bits,
+            create_marker(a, r[i].ident, a->curlex.line, desc->addr_bits,
                 desc->addr_shift, desc->addr_mask, desc->addr_is_branch == 2);
 
     op = inst_gen(desc, r);
@@ -41,62 +35,65 @@ enum internal_ret parse_instruction(struct assembler *a, const struct inst_gener
         void (*handler) (struct assembler *, const struct inst_generic *, struct inst_reg *))
 {
     int i;
+    struct lexer_link *link = a->link;
     struct inst_reg r[4];
 
     memset(r, 0, sizeof(struct inst_reg) * 4);
 
     for (i = 0; i < inst->reg_count; i++) {
-        a->tok = yylex(&a->lexer);
+        link = get_next_link(a, link);
 
         switch (inst->rs[i]) {
         case REG_REGISTER:
-            expect_token(a->tok, TOK_REGISTER);
+            expect_token(a, link, TOK_REGISTER);
 
-            r[i].val = a->lexer.val;
+            r[i].val = link->lex.val;
             break;
         case REG_IMMEDIATE:
-            if (a->tok == TOK_INTEGER) {
-                r[i].val = a->lexer.val;
-            } else if (a->tok == TOK_IDENT) {
+            if (link->tok == TOK_INTEGER) {
+                r[i].val = link->lex.val;
+            } else if (link->tok == TOK_IDENT) {
                 r[i].val = 0;
-                r[i].ident = strdup(a->lexer.ident);
+                r[i].ident = strdup(link->lex.ident);
             } else {
+                a->err_tok = link;
                 return RET_UNEXPECTED;
             }
             break;
         case REG_ADDRESS:
-            if (a->tok == TOK_INTEGER) {
-                r[i].val = a->lexer.val >> 2;
-            } else if (a->tok == TOK_IDENT) {
+            if (link->tok == TOK_INTEGER) {
+                r[i].val = link->lex.val >> 2;
+            } else if (link->tok == TOK_IDENT) {
                 r[i].val = 0;
-                r[i].ident = strdup(a->lexer.ident);
+                r[i].ident = strdup(link->lex.ident);
             } else {
+                a->err_tok = link;
                 return RET_UNEXPECTED;
             }
             break;
         case REG_DEREF_REG:
-            expect_token(a->tok, TOK_INTEGER);
+            expect_token(a, link, TOK_INTEGER);
 
-            r[i].val = a->lexer.val;
+            r[i].val = link->lex.val;
 
-            a->tok = yylex(&a->lexer);
-            expect_token(a->tok, TOK_LPAREN);
+            link = get_next_link(a, link);
+            expect_token(a, link, TOK_LPAREN);
 
-            a->tok = yylex(&a->lexer);
-            expect_token(a->tok, TOK_REGISTER);
+            link = get_next_link(a, link);
+            expect_token(a, link, TOK_REGISTER);
 
-            r[i + 1].val = a->lexer.val;
+            r[i + 1].val = link->lex.val;
             i++;
 
-            a->tok = yylex(&a->lexer);
-            expect_token(a->tok, TOK_RPAREN);
+            link = get_next_link(a, link);
+            expect_token(a, link, TOK_RPAREN);
 
             break;
         }
 
         if (i != inst->reg_count - 1) {
-            a->tok = yylex(&a->lexer);
-            expect_token(a->tok, TOK_COMMA);
+            link = get_next_link(a, link);
+            expect_token(a, link, TOK_COMMA);
         }
     }
 
@@ -111,11 +108,13 @@ enum internal_ret parse_instruction(struct assembler *a, const struct inst_gener
 enum internal_ret parse_command(struct assembler *a)
 {
     const struct inst_desc *i;
+    struct lexer_link *link = a->link;
 
     for (i = inst_ids; i->g.ident != NULL; i++)
-        if (stringcasecmp(a->lexer.ident, i->g.ident) == 0)
+        if (stringcasecmp(link->lex.ident, i->g.ident) == 0)
             return parse_instruction(a, &i->g, handle_inst);
 
+    a->err_tok = link;
     return RET_UNEXPECTED;
 }
 
