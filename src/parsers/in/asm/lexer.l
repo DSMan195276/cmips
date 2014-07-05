@@ -48,7 +48,7 @@ static void append_c(struct lexer *t, char ch);
 }
 
 
-[a-zA-Z][a-zA-Z0-9_]*: {
+[a-zA-Z][a-zA-Z0-9_.]*: {
     if (state->ident)
         free(state->ident);
     state->ident = strndup(yytext, strlen(yytext) - 1);
