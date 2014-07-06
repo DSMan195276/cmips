@@ -161,6 +161,7 @@ static struct test_cmd cmd_tests[] = {
         { { [REG_T0] = 1, [REG_T1] = 1, [REG_T2] = 1, END_FLAGS } },
         NULL, 0, NULL, 0 },
     { "lui",
+        "addi $t1, $0, 20\n"
         "lui $t1, 0xFFFF\n"
          END_CODE,
         { { [REG_T1] = 0xFFFF0000, END_REGS } },
