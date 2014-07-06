@@ -15,6 +15,7 @@
 #include "cmips.h"
 #include "parser.h"
 #include "emu.h"
+#include "common/arg_parser.h"
 #include "args.h"
 
 const char *version_text =
@@ -26,19 +27,11 @@ const char *version_text =
     "\n"
 ;
 
-struct arg {
-    const char *lng;
-    char shrt;
-    const char *help_txt;
-
-    int has_arg :1;
-};
-
 enum arg_list {
-    ARG_EXTRA = -4,
-    ARG_LNG = -3,
-    ARG_ERR = -2,
-    ARG_DONE = -1,
+    ARG_EXTRA = ARG_PARSER_EXTRA,
+    ARG_LNG = ARG_PARSER_LNG,
+    ARG_ERR = ARG_PARSER_ERR,
+    ARG_DONE = ARG_PARSER_DONE,
 #define X(enu, id, arg, op, help_text) ARG_##enu,
 # include "args.x"
 #undef X
@@ -52,128 +45,14 @@ static const struct arg cmips_args[] = {
     { 0 }
 };
 
-static const void *argarg;
-
-static int parser_argc, current_arg = 1;
-static char **parser_argv;
-static const char *shrt;
-static int parsing_done;
-
-enum arg_list arg_parser(void)
-{
-    const char *cur;
-    if (current_arg == parser_argc)
-        return ARG_DONE;
-
-    cur = parser_argv[current_arg];
-
-    if (parsing_done)
-        goto parsing_done;
-
-    if (cur[0] == '-' && !shrt) {
-        if (*(cur + 1) && cur[1] == '-') {
-            int i;
-
-            if (!cur[2]) {
-                parsing_done = 1;
-                current_arg++;
-                goto parsing_done;
-            }
-
-
-            for (i = 0; i < ARG_LAST; i++) {
-                if (strcmp(cmips_args[i].lng, cur + 2) == 0) {
-                    if (cmips_args[i].has_arg) {
-                        if (parser_argc == current_arg + 1) {
-                            printf("%s: Not enough arguments to '%s'\n", parser_argv[0], cur);
-                            return ARG_ERR;
-                        }
-                        argarg = parser_argv[current_arg + 1];
-                        current_arg++;
-                    }
-
-                    return i;
-                }
-            }
-
-            printf("%s: unreconized argument '%s'\n", parser_argv[0], cur);
-            current_arg++;
-            return ARG_ERR;
-        }
-
-        shrt = cur + 1;
-    }
-
-    if (shrt) {
-        int i;
-        for (i = 0; i < ARG_LAST; i++) {
-            if (cmips_args[i].shrt == *shrt) {
-                shrt++;
-                if (!*shrt) {
-                    shrt = NULL;
-                    current_arg++;
-                }
-                if (cmips_args[i].has_arg) {
-                    if (shrt) {
-                        argarg = shrt;
-                        shrt = NULL;
-                        current_arg++;
-                    } else {
-                        if (parser_argc == current_arg) {
-                            printf("%s: Not enough arguments to '-%c'\n", parser_argv[0], cmips_args[i].shrt);
-                            return ARG_ERR;
-                        }
-                        argarg = parser_argv[current_arg];
-                        current_arg++;
-                    }
-                }
-                return i;
-            }
-        }
-
-        printf("%s: unreconized argument '-%c'\n", parser_argv[0], *shrt);
-        return ARG_ERR;
-    }
-
-parsing_done:
-
-    argarg = parser_argv[current_arg];
-    current_arg++;
-    return ARG_EXTRA;
-}
-
-static void display_help_text(const char *prog)
-{
-    const struct arg *a;
-    printf("Usage: %s [Flags] [Files] \n"
-           "\n"
-           "Files: Assembly source files to load on startup\n"
-           "Flags:\n", prog);
-
-    for (a = cmips_args; a->lng != NULL; a++) {
-        printf("  ");
-        if (a->shrt != 0)
-            printf("-%c, ", a->shrt);
-        else
-            printf("     ");
-
-        printf("--%-15s %s\n", a->lng, a->help_txt);
-    }
-
-    printf("See the manpage for more information\n");
-}
-
 void parse_args(int argc, char **argv, struct arg_state *s)
 {
     enum arg_list ret;
 
-    parser_argc = argc;
-    parser_argv = argv;
-
-    while ((ret = arg_parser()) != ARG_DONE) {
+    while ((ret = arg_parser(argc, argv, cmips_args)) != ARG_DONE) {
         switch (ret) {
         case ARG_help:
-            display_help_text(argv[0]);
+            display_help_text(argv[0], cmips_args);
             exit(0);
             break;
         case ARG_version:

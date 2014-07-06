@@ -12,5 +12,5 @@ CMIPS_CFLAGS  += -DCMIPS_VERSION=$(CMIPS_VERSION)       \
 				 -DCMIPS_PATCH=$(CMIPS_PATCH)           \
 				 -DCMIPS_VERSION_N="$(CMIPS_VERSION_N)"
 
-CMIPS_OBJS += ./src.o ./cmips.o
+CMIPS_OBJS += ./src.o ./common/arg_parser.o ./cmips.o
 

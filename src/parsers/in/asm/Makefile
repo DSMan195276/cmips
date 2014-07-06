@@ -8,8 +8,3 @@ $(objtree)/lexer.c: $(srctree)/lexer.l
 	@echo " LEX     $@"
 	$(Q)$(LEX) $(LFLAGS) -o $@ $<
 
-$(objtree)/lexer.o: $(objtree)/lexer.c
-	@echo " CC      $@"
-	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
-
-

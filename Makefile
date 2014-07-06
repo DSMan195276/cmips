@@ -19,6 +19,7 @@ DEPS :=
 
 # Current project being compiled (Ex. cmips, ncmips, ...) - Blank for core
 PROJ :=
+EXES :=
 
 # Set configuration options
 ifdef V
@@ -45,6 +46,16 @@ $(1): $(2)
 	$$(Q)$$(LD) -r $(2) -o $$@
 endef
 
+define create_cc_rule
+ifneq ($(3),)
+ifneq ($$(wildcard $(2)),)
+$(1): $(2)
+	@echo " CC      $$@"
+	$$(Q)$$(CC) $$(CFLAGS) $$(CPPFLAGS) $(3) -c $$< -o $$@
+endif
+endif
+endef
+
 # Traverse into tree
 define subdir_inc
 objtree := $$(objtree)/$(1)
@@ -62,7 +73,7 @@ DEPS += $$(patsubst %,$$(objtree)/%,$$(objs-y))
 
 objs := $$(patsubst %,$$(objtree)/%,$$(objs-y)) $$(patsubst %,$$(objtree)/%.o,$$(subdir-y))
 
-$$(foreach obj,$$(patsubst %,$$(objtree)/%,$$(objs-y)),$$(eval CFLAGS_$$(obj) += CFLAGS_$$(PROJ)))
+$$(foreach obj,$$(patsubst %,$$(objtree)/%,$$(objs-y)),$$(eval $$(call create_cc_rule,$$(obj),$$(obj:.o=.c),$$($$(PROJ)_CFLAGS))))
 
 $$(eval $$(call create_link_rule,$$(objtree).o,$$(objs)))
 
@@ -75,6 +86,7 @@ endef
 
 # Include the base directories for source files - That is, the generic 'src'
 $(eval $(call subdir_inc,src))
+$(eval $(call subdir_inc,common))
 
 define proj_ccld_rule
 $(1): $(2) | $$(objtree)/bin
@@ -130,7 +142,7 @@ $(objtree)/%.o: $(srctree)/%.c
 	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_$@) -c $< -o $@
 
 $(objtree)/.%.d: $(srctree)/%.c
-	$(Q)$(CC) -MM -MP -MF $@ $(CFLAGS) $< -MT $(objtree)/$*.o -MT $@
+	$(Q)$(CC) -MM -MP -MF $@ $(CPPFLAGS) $(CFLAGS) $< -MT $(objtree)/$*.o -MT $@
 
 DEP_LIST := $(foreach dep,$(DEPS),$(dir $(dep)).$(notdir $(dep)))
 DEP_LIST := $(DEP_LIST:.o=.d)
