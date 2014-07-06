@@ -1,4 +1,3 @@
-
 include ./config.mk
 
 srctree := .
@@ -12,16 +11,14 @@ all: real-all
 
 PHONY += all install clean dist real-all
 
-# This variable defines any extra targets that should be build by 'all'
-EXTRA_TARGETS :=
-
-# This is the internal list of objects to compile into the file .o
-REAL_OBJS_y :=
-
 # Predefine this variable. It contains a list of extra files to clean. Ex.
 CLEAN_LIST :=
 
+# List of files that dependency files should be generated for
 DEPS :=
+
+# Current project being compiled (Ex. cmips, ncmips, ...) - Blank for core
+PROJ :=
 
 # Set configuration options
 ifdef V
@@ -30,8 +27,8 @@ else
 	Q := @
 endif
 
-ifdef $(EXEC)_DEBUG
-	CPPFLAGS += -D$(EXEC)_DEBUG
+ifdef CMIPS_DEBUG
+	CPPFLAGS += -DCMIPS_DEBUG
 	CFLAGS += -g
 	ASFLAGS += -g
 	LDFLAGS += -g
@@ -45,7 +42,7 @@ CPPFLAGS += -I'$(objtree)/include/'
 define create_link_rule
 $(1): $(2)
 	@echo " LD      $$@"
-	$(Q)$(LD) -r $(2) -o $$@
+	$$(Q)$$(LD) -r $(2) -o $$@
 endef
 
 # Traverse into tree
@@ -65,6 +62,8 @@ DEPS += $$(patsubst %,$$(objtree)/%,$$(objs-y))
 
 objs := $$(patsubst %,$$(objtree)/%,$$(objs-y)) $$(patsubst %,$$(objtree)/%.o,$$(subdir-y))
 
+$$(foreach obj,$$(patsubst %,$$(objtree)/%,$$(objs-y)),$$(eval CFLAGS_$$(obj) += CFLAGS_$$(PROJ)))
+
 $$(eval $$(call create_link_rule,$$(objtree).o,$$(objs)))
 
 $$(foreach subdir,$$(subdir-y),$$(eval $$(call subdir_inc,$$(subdir))))
@@ -76,7 +75,26 @@ endef
 
 # Include the base directories for source files - That is, the generic 'src'
 $(eval $(call subdir_inc,src))
-REAL_OBJS_y += src.o
+
+define proj_ccld_rule
+$(1): $(2) | $$(objtree)/bin
+	@echo " CCLD    $$@"
+	$$(Q)$$(CC) $(3) $(2) -o $$@ $(4)
+endef
+
+define proj_inc
+include $(1)/config.mk
+PROG := $$(objtree)/bin/$$(EXE)
+PROJ := $$(EXEC)
+EXES += $$(PROG)
+
+$$(eval $$(call proj_ccld_rule,$$(PROG),$$($$(EXEC)_OBJS),$$($$(EXEC)_CFLAGS),$$($$(EXEC)_LIBFLAGS)))
+$$(eval $$(call subdir_inc,$$(EXE)))
+CLEAN_LIST += $$(PROG)
+endef
+
+$(eval $(call proj_inc,cmips))
+CLEAN_LIST += $(objtree)/bin
 
 # Include tests
 ifneq (,$(filter $(MAKECMDGOALS),check clean))
@@ -85,7 +103,7 @@ endif
 
 
 # Actual entry
-real-all: $(EXECUTABLE)
+real-all: $(EXES)
 
 dist: clean
 	$(Q)mkdir -p $(EXE)-$(VERSION_N)
@@ -96,16 +114,16 @@ dist: clean
 	@echo " Created $(EXE)-$(VERSION_N).tar.gz"
 
 clean:
-	$(Q)for file in $(CLEAN_LIST) $(EXECUTABLE); do \
+	$(Q)for file in $(CLEAN_LIST); do \
 		if [ -e $$file ]; then \
 			echo " RM      $$file"; \
 			rm -rf $$file; \
 		fi \
 	done
 
-$(EXECUTABLE): $(REAL_OBJS_y)
-	@echo " CCLD    $@"
-	$(Q)$(CC) $(LDFLAGS) -o $@ $(REAL_OBJS_y) $(LIBFLAGS)
+$(objtree)/bin:
+	@echo " MKDIR   $@"
+	$(Q)$(MKDIR) $@
 
 $(objtree)/%.o: $(srctree)/%.c
 	@echo " CC      $@"
