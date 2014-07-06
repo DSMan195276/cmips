@@ -8,7 +8,9 @@
 #include "common.h"
 
 #include <time.h>
+#include <string.h>
 #include <unistd.h>
+#include <sys/select.h>
 
 #include "mips.h"
 #include "emu.h"
@@ -46,12 +48,26 @@ static void print_string(struct emulator *emu)
 
 static void read_int(struct emulator *emu)
 {
-    /*
-    int32_t val = 0;
-    while (fscanf(emu->infd, "%d", &val) != 1)
-        fscanf(emu->in, "%*s");
-    emu->r.regs[REG_V0] = val;
-    */
+    char *line;
+    int val, ret;
+    fd_set writ;
+
+    while (1) {
+        buf_handle_input(&emu->infd);
+        line = buf_read_line(&emu->infd);
+        if (line) {
+            ret = sscanf(line, "%d", &val);
+            free(line);
+
+            if (ret) {
+                emu->r.regs[REG_V0] = val;
+                return ;
+            }
+        }
+        FD_ZERO(&writ);
+        FD_SET(emu->infd.fd,  &writ);
+        select(1, NULL, &writ, NULL, NULL);
+    }
 }
 
 static void exit_prog(struct emulator *emu)

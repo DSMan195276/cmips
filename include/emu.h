@@ -14,6 +14,7 @@
 
 #include "mips.h"
 #include "emu/mem.h"
+#include "common/buf.h"
 #include "parser.h"
 
 /* This is an actual MIPS machine state. One of these should be created and
@@ -28,7 +29,8 @@ struct emulator {
     struct parser_segment backup_text;
     struct parser_segment backup_data;
 
-    int infd, outfd;
+    struct buf_fd infd;
+    int outfd;
 
     void (*err_disp) (const char *err, va_list args);
 };

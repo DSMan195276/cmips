@@ -16,6 +16,7 @@
 #include "emu/mem.h"
 #include "parser.h"
 #include "emu.h"
+#include "common/buf.h"
 #include "special.h"
 
 static struct emulator *cur_run_emu = NULL;
@@ -328,8 +329,9 @@ void emulator_init(struct emulator *emu)
 {
     memset(emu, 0, sizeof(struct emulator));
 
-    emu->infd = fileno(stdin);
-    emu->outfd = fileno(stdout);
+    buf_init(&emu->infd);
+    emu->infd.fd = STDIN_FILENO;
+    emu->outfd = STDOUT_FILENO;
 
     mem_prog_init(&emu->mem);
 }
@@ -337,6 +339,7 @@ void emulator_init(struct emulator *emu)
 void emulator_clear(struct emulator *emu)
 {
     mem_prog_clear(&emu->mem);
+    buf_free(&emu->infd);
     free(emu->backup_text.data);
     free(emu->backup_data.data);
 }
