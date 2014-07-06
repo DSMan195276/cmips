@@ -14,7 +14,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "asm.h"
-#include "rbtree.h"
+#include "common/rbtree.h"
 #include "mips/inst.h"
 
 struct label_list {

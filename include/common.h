@@ -9,7 +9,7 @@
 #define INCLUDE_COMMON_H
 
 #define _XOPEN_SOURCE 700
-#define _POSIX_C_SOURCE 199309L
+#define _POSIX_C_SOURCE 200809L
 
 #include <stddef.h>
 #include <stdarg.h>

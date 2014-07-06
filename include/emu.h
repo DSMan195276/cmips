@@ -28,7 +28,7 @@ struct emulator {
     struct parser_segment backup_text;
     struct parser_segment backup_data;
 
-    FILE *in, *out;
+    int infd, outfd;
 
     void (*err_disp) (const char *err, va_list args);
 };

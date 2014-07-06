@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "rbtree.h"
+#include "common/rbtree.h"
 
 static inline void rb_change_child(struct rbtree *tree, struct rbnode *old, struct rbnode *new, struct rbnode *parent)
 {

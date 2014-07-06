@@ -11,7 +11,7 @@
 #include <string.h>
 #include <stdint.h>
 
-#include "rbtree.h"
+#include "common/rbtree.h"
 #include "mips.h"
 #include "lexer.h"
 #include "asm.h"

@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "rbtree.h"
+#include "common/rbtree.h"
 #include "assembler_internal.h"
 #include "label_parse.h"
 

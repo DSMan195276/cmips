@@ -8,6 +8,7 @@
 #include "common.h"
 
 #include <time.h>
+#include <unistd.h>
 
 #include "mips.h"
 #include "emu.h"
@@ -15,14 +16,12 @@
 
 static void print_int(struct emulator *emu)
 {
-    fprintf(emu->out, "%d", emu->r.regs[REG_A0]);
-    fflush(emu->out);
+    dprintf(emu->outfd, "%d", emu->r.regs[REG_A0]);
 }
 
 static void print_int_hex(struct emulator *emu)
 {
-    fprintf(emu->out, "%08x", emu->r.regs[REG_A0]);
-    fflush(emu->out);
+    dprintf(emu->outfd, "%08x", emu->r.regs[REG_A0]);
 }
 
 static void print_int_binary(struct emulator *emu)
@@ -32,8 +31,7 @@ static void print_int_binary(struct emulator *emu)
 
 static void print_int_unsigned(struct emulator *emu)
 {
-    fprintf(emu->out, "%u", emu->r.regs[REG_A0]);
-    fflush(emu->out);
+    dprintf(emu->outfd, "%u", emu->r.regs[REG_A0]);
 }
 
 static void print_string(struct emulator *emu)
@@ -43,16 +41,17 @@ static void print_string(struct emulator *emu)
 
     addr = emu->r.regs[REG_A0];
     while (mem_read_from_addr(&emu->mem, addr++, 1, &byte), byte != 0)
-        fputc(byte, emu->out);
-    fflush(emu->out);
+        write(emu->outfd, &byte, 1);
 }
 
 static void read_int(struct emulator *emu)
 {
+    /*
     int32_t val = 0;
-    while (fscanf(emu->in, "%d", &val) != 1)
+    while (fscanf(emu->infd, "%d", &val) != 1)
         fscanf(emu->in, "%*s");
     emu->r.regs[REG_V0] = val;
+    */
 }
 
 static void exit_prog(struct emulator *emu)

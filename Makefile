@@ -3,8 +3,6 @@ include ./config.mk
 srctree := .
 objtree := .
 
-EXECUTABLE := ./$(EXE)
-
 # This is our default target - The default is the first target in the file so
 # we need to define this fairly high-up.
 all: real-all
@@ -20,6 +18,7 @@ DEPS :=
 # Current project being compiled (Ex. cmips, ncmips, ...) - Blank for core
 PROJ :=
 EXES :=
+SRC_OBJS :=
 
 # Set configuration options
 ifdef V
@@ -100,7 +99,9 @@ PROG := $$(objtree)/bin/$$(EXE)
 PROJ := $$(EXEC)
 EXES += $$(PROG)
 
-$$(eval $$(call proj_ccld_rule,$$(PROG),$$($$(EXEC)_OBJS),$$($$(EXEC)_CFLAGS),$$($$(EXEC)_LIBFLAGS)))
+objs := $$(sort $$($$(EXEC)_OBJS) $$(SRC_OBJS))
+
+$$(eval $$(call proj_ccld_rule,$$(PROG),$$(objs),$$($$(EXEC)_CFLAGS),$$($$(EXEC)_LIBFLAGS)))
 $$(eval $$(call subdir_inc,$$(EXE)))
 CLEAN_LIST += $$(PROG)
 endef
@@ -119,7 +120,7 @@ real-all: $(EXES)
 
 dist: clean
 	$(Q)mkdir -p $(EXE)-$(VERSION_N)
-	$(Q)cp -R Makefile README.md config.mk LICENSE ./doc ./include ./src ./test $(EXE)-$(VERSION_N)
+	$(Q)cp -R Makefile README.md config.mk LICENSE ./doc ./include ./src ./cmips ./test $(EXE)-$(VERSION_N)
 	$(Q)tar -cf $(EXE)-$(VERSION_N).tar $(EXE)-$(VERSION_N)
 	$(Q)gzip $(EXE)-$(VERSION_N).tar
 	$(Q)rm -fr $(EXE)-$(VERSION_N)
@@ -139,7 +140,7 @@ $(objtree)/bin:
 
 $(objtree)/%.o: $(srctree)/%.c
 	@echo " CC      $@"
-	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) $(CFLAGS_$@) -c $< -o $@
+	$(Q)$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
 $(objtree)/.%.d: $(srctree)/%.c
 	$(Q)$(CC) -MM -MP -MF $@ $(CPPFLAGS) $(CFLAGS) $< -MT $(objtree)/$*.o -MT $@

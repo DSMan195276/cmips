@@ -18,15 +18,17 @@ TESTS += emulator
 # More complex tests may require the use of more then just one .c file from
 # ./src, in which case all of them should be listed. Also possible is having
 # more the one test program per ./src file.
-parser.OBJ := ./src/common.o ./src/mips.o \
-				./src/parsers.o ./test/parser.o \
+parser.OBJ := ./src/mips.o \
+				./src/parsers.o \
+				./test/parser.o \
 				./test/parser/in/asm/parser_inst.o \
 				./test/parser/in/asm/parser_label.o \
 				./test/parser/in/asm/parser_dir.o \
 				./test/parser/in/asm/parser_args.o
 
-emulator.OBJ := ./src/common.o ./src/mips.o \
-				./src/emu.o ./src/parsers.o \
+emulator.OBJ := ./src/mips.o \
+				./src/emu.o \
+				./src/parsers.o \
 				./test/emulator.o
 
 TEST_OBJS := $(foreach test,$(TESTS),$(filter ./test/%,$($(test).OBJ)))
@@ -38,7 +40,7 @@ define TEST_template
 TEST_TESTS += ./test/bin/$(1)_test
 ./test/bin/$(1)_test: ./test/test.o $$($(1).OBJ) | ./test/bin
 	@echo " CCLD    test/bin/$(1)_test"
-	$(Q)$(CC) $(LDFLAGS) ./test/test.o -o $$@ $$($(1).OBJ)
+	$(Q)$(CC) $(LDFLAGS) ./test/test.o -o $$@ $$($(1).OBJ) $$(SRC_OBJS)
 endef
 
 # Run the template over all of our tests

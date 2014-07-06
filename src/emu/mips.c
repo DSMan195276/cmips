@@ -328,8 +328,8 @@ void emulator_init(struct emulator *emu)
 {
     memset(emu, 0, sizeof(struct emulator));
 
-    emu->in = stdin;
-    emu->out = stdout;
+    emu->infd = fileno(stdin);
+    emu->outfd = fileno(stdout);
 
     mem_prog_init(&emu->mem);
 }
