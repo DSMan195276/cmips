@@ -327,6 +327,49 @@ static void dis_reg_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
 {
     char *b = buf;
     int i, val;
+
+    b += sprintf(b, "%s ", desc->g.ident);
+
+    for (i = 0; i < desc->g.reg_count; i++) {
+        switch(desc->place[i]) {
+        case REGP_RT:
+            val = INST_R_RT(inst);
+            break;
+        case REGP_RS:
+            val = INST_R_RS(inst);
+            break;
+        case REGP_RD:
+            val = INST_R_RD(inst);
+            break;
+        case REGP_SA:
+            val = INST_R_SA(inst);
+            break;
+        default:
+            val = 0;
+            break;
+        }
+
+        switch(desc->g.rs[i]) {
+        case REG_REGISTER:
+            b += sprintf(b, "$%s", mips_reg_names_strs[val]);
+            break;
+        case REG_IMMEDIATE:
+        case REG_ADDRESS:
+            b += sprintf(b, "0x%04hx", (int16_t)val << (desc->addr_shift));
+            break;
+        default:
+            break;
+        }
+
+        if (i < desc->g.reg_count - 1)
+            b += sprintf(b, ", ");
+    }
+}
+
+static void dis_imm_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
+{
+    char *b = buf;
+    int i, val;
     int deref_flag = 0;
 
     b += sprintf(b, "%s ", desc->g.ident);
@@ -353,7 +396,7 @@ static void dis_reg_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
             break;
         case REG_IMMEDIATE:
         case REG_ADDRESS:
-            b += sprintf(b, "0x%04x", val << (desc->addr_shift));
+            b += sprintf(b, "0x%04hx", (int16_t)val << (desc->addr_shift));
             break;
         case REG_DEREF_REG:
             if (!deref_flag) {
@@ -366,6 +409,7 @@ static void dis_reg_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
         default:
             break;
         }
+
 
         if (i < desc->g.reg_count - 1 && !deref_flag)
             b += sprintf(b, ", ");
@@ -401,7 +445,7 @@ void mips_disassemble_inst(uint32_t inst, char *buf)
         if (op == desc->opcode) {
             switch (mips_opcode_to_type[op]) {
             case I_FORMAT:
-                dis_reg_inst(inst, desc, buf);
+                dis_imm_inst(inst, desc, buf);
                 return ;
             case J_FORMAT:
                 dis_jmp_inst(inst, desc, buf);
