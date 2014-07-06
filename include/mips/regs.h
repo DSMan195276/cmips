@@ -34,7 +34,7 @@ enum mips_reg_names {
 
 extern const char *mips_reg_names_strs[32];
 
-void mips_dump_regs(struct mips_regs *);
+char *mips_dump_regs(struct mips_regs *);
 
 
 #endif

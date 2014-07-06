@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "mips.h"
 
@@ -23,15 +24,19 @@ const char *mips_reg_names_strs[32] = {
     "fp", "ra"
 };
 
-void mips_dump_regs(struct mips_regs *regs)
+char *mips_dump_regs(struct mips_regs *regs)
 {
     int i;
+    char *buf = malloc(569);
+    char buf2[200], *b = buf2;
     for (i = 0; i < 32; i++) {
-        printf("%s: 0x%08x  ", mips_reg_names_strs[i], regs->regs[i]);
+        b += sprintf(b, "%s: 0x%08x  ", mips_reg_names_strs[i], regs->regs[i]);
         if ((i % 5) == 1)
-            printf("\n");
+            b += sprintf(b, "\n");
     }
-    printf("hi: 0x%08x  lo: 0x%08x  pc: 0x%08x\n",
+    b += sprintf(b, "hi: 0x%08x  lo: 0x%08x  pc: 0x%08x\n",
             regs->hi, regs->lo, regs->pc);
+    *b = '\0';
+    return buf;
 }
 

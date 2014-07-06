@@ -20,7 +20,10 @@
 
 static void dump_regs(int argc, char **argv)
 {
-    mips_dump_regs(&cmips_emu.r);
+    char *buf;
+    buf = mips_dump_regs(&cmips_emu.r);
+    printf("%s", buf);
+    free(buf);
 }
 
 static void dump_seg_mem(int argc, char **argv)
