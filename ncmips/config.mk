@@ -1,0 +1,16 @@
+# Program wide settings
+EXE       := ncmips
+EXEC      := NCMIPS
+NCMIPS_VERSION   := 0
+NCMIPS_SUBLEVEL  := 1
+NCMIPS_PATCH     := 0
+NCMIPS_VERSION_N := $(NCMIPS_VERSION).$(NCMIPS_SUBLEVEL).$(NCMIPS_PATCH)
+
+NCMIPS_LIBFLAGS := -lncurses -lpthread
+NCMIPS_CFLAGS  += -DNCMIPS_VERSION=$(NCMIPS_VERSION)      \
+				 -DNCMIPS_SUBLEVEL=$(NCMIPS_SUBLEVEL)     \
+				 -DNCMIPS_PATCH=$(NCMIPS_PATCH)           \
+				 -DNCMIPS_VERSION_N="$(NCMIPS_VERSION_N)"
+
+NCMIPS_OBJS += ./src.o ./ncmips.o
+

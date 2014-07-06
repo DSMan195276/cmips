@@ -107,6 +107,7 @@ CLEAN_LIST += $$(PROG)
 endef
 
 $(eval $(call proj_inc,cmips))
+$(eval $(call proj_inc,ncmips))
 CLEAN_LIST += $(objtree)/bin
 
 # Include tests
