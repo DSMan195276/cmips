@@ -31,7 +31,7 @@
 #include "common/buf.h"
 
 /* 4 meg max */
-#define BLK_EMPTY_BYTE_MAX (4 << 30)
+#define BLK_EMPTY_BYTE_MAX (4 << 20)
 
 static int empty_blocks_byte_count = 0;
 static struct buf_blk *empty_blocks_head = NULL;

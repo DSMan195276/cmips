@@ -355,7 +355,7 @@ static void dis_reg_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
             break;
         case REG_IMMEDIATE:
         case REG_ADDRESS:
-            b += sprintf(b, "0x%04hx", (int16_t)val << (desc->addr_shift));
+            b += sprintf(b, "0x%04hx", (uint16_t)((int16_t)val << (desc->addr_shift)));
             break;
         default:
             break;
@@ -396,7 +396,7 @@ static void dis_imm_inst(uint32_t inst, const struct inst_desc *desc, char *buf)
             break;
         case REG_IMMEDIATE:
         case REG_ADDRESS:
-            b += sprintf(b, "0x%04hx", (int16_t)val << (desc->addr_shift));
+            b += sprintf(b, "0x%04hx", (uint16_t)((int16_t)val << (desc->addr_shift)));
             break;
         case REG_DEREF_REG:
             if (!deref_flag) {
