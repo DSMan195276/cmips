@@ -1,4 +1,4 @@
-objs-y += asm.o assembler.o dir_parse.o inst_parse.o label_parse.o dir_types.o
+objs-y += asm.o assembler.o dir_parse.o inst_parse.o label_parse.o dir_types.o pseudoinst.o
 
 objs-y += lexer.o
 

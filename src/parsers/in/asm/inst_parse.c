@@ -13,6 +13,7 @@
 #include "lexer.h"
 #include "asm.h"
 #include "assembler_internal.h"
+#include "pseudoinst.h"
 #include "mips/inst.h"
 
 static void handle_inst(struct assembler *a, const struct inst_generic *inst, struct inst_reg *r)
@@ -108,11 +109,17 @@ enum internal_ret parse_instruction(struct assembler *a, const struct inst_gener
 enum internal_ret parse_command(struct assembler *a)
 {
     const struct inst_desc *i;
+    const struct pseudo_inst_desc *p;
+
     struct lexer_link *link = a->link;
 
     for (i = inst_ids; i->g.ident != NULL; i++)
         if (stringcasecmp(link->lex.ident, i->g.ident) == 0)
             return parse_instruction(a, &i->g, handle_inst);
+
+    for (p = inst_pseudo_ids; p->g.ident != NULL; p++)
+        if (stringcasecmp(link->lex.ident, p->g.ident) == 0)
+            return parse_instruction(a, &p->g, p->gen);
 
     a->err_tok = link;
     return RET_UNEXPECTED;

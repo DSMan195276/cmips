@@ -14,9 +14,9 @@
 struct pseudo_inst_desc {
     struct inst_generic g;
 
-    void (*gen) (struct assembler *, struct pseudo_inst_desc *, struct inst_reg *);
+    void (*gen) (struct assembler *, const struct inst_generic *, struct inst_reg *);
 };
 
-const struct pseudo_inst_desc *inst_pseudo_ids;
+extern const struct pseudo_inst_desc inst_pseudo_ids[];
 
 #endif
