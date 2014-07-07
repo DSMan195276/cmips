@@ -27,16 +27,18 @@ const char *mips_reg_names_strs[32] = {
 char *mips_dump_regs(struct mips_regs *regs)
 {
     int i;
-    char *buf = malloc(569);
-    char buf2[200], *b = buf2;
+    char *buf = malloc(569), *b = buf;
+
     for (i = 0; i < 32; i++) {
         b += sprintf(b, "%s: 0x%08x  ", mips_reg_names_strs[i], regs->regs[i]);
         if ((i % 5) == 1)
             b += sprintf(b, "\n");
     }
+
     b += sprintf(b, "hi: 0x%08x  lo: 0x%08x  pc: 0x%08x\n",
             regs->hi, regs->lo, regs->pc);
     *b = '\0';
+
     return buf;
 }
 
